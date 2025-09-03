@@ -30,6 +30,11 @@ class ValidationResponse(BaseModel):
     clause_id: str
     status: str  # "OK" or "NG"
     reasons: List[str]
+    standardized_reasons: List[str]
+    suggested_fixes: List[Dict[str, Any]]
+    total_issues: int
+    error_count: int
+    warning_count: int
 
 # Global rulebook data
 _rulebook_data = None
@@ -112,7 +117,12 @@ def evaluate(req: EvaluateRequest) -> ValidationResponse:
     return ValidationResponse(
         clause_id=result["clause_id"],
         status=result["status"],
-        reasons=result["reasons"]
+        reasons=result["reasons"],
+        standardized_reasons=result.get("standardized_reasons", []),
+        suggested_fixes=result.get("suggested_fixes", []),
+        total_issues=result.get("total_issues", 0),
+        error_count=result.get("error_count", 0),
+        warning_count=result.get("warning_count", 0)
     )
 
 @app.get("/validate-rulebook")
@@ -129,6 +139,32 @@ def validate_rulebook() -> Dict[str, Any]:
         "rule_count": len(rulebook.get("rules", [])),
         "schema_version": schema.get("$schema", "unknown")
     }
+
+@app.get("/reasons")
+def get_reasons_taxonomy() -> Dict[str, Any]:
+    """Get the complete reasons taxonomy with suggested fixes templates."""
+    try:
+        from output_schema.reason_processor import ReasonProcessor
+        processor = ReasonProcessor()
+        return {
+            "taxonomy": processor.get_all_reasons(),
+            "metadata": processor.reasons_data.get("metadata", {})
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load reasons taxonomy: {e}")
+
+@app.get("/reasons/{reason_code}")
+def get_reason_info(reason_code: str) -> Dict[str, Any]:
+    """Get information about a specific reason code."""
+    try:
+        from output_schema.reason_processor import ReasonProcessor
+        processor = ReasonProcessor()
+        reason_info = processor.get_reason_info(reason_code)
+        if not reason_info:
+            raise HTTPException(status_code=404, detail="Reason code not found")
+        return reason_info
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get reason info: {e}")
 
 # Demo Interface Endpoints
 

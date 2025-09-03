@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Expense Rule Validation Reasons Schema",
+  "description": "Schema for validating the structure of expense rule validation reasons",
+  "type": "object",
+  "properties": {
+    "reason_taxonomy": {
+      "type": "object",
+      "description": "Collection of all validation reasons",
+      "patternProperties": {
+        "^[a-z_]+$": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "Unique identifier for the reason"
+            },
+            "label": {
+              "type": "string",
+              "description": "Human-readable label for the reason"
+            },
+            "description": {
+              "type": "string",
+              "description": "Detailed description of what the reason means"
+            },
+            "suggested_fix": {
+              "type": "string",
+              "description": "Template for suggested fix with variable placeholders"
+            },
+            "variables": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of variable names used in the suggested_fix template"
+            },
+            "severity": {
+              "type": "string",
+              "enum": ["error", "warning"],
+              "description": "Severity level of the validation issue"
+            }
+          },
+          "required": ["code", "label", "description", "suggested_fix", "variables", "severity"],
+          "additionalProperties": false
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Semantic version of the schema"
+        },
+        "last_updated": {
+          "type": "string",
+          "format": "date",
+          "description": "Date when the schema was last updated"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the schema purpose"
+        },
+        "total_reasons": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total count of reasons in the taxonomy"
+        },
+        "severity_levels": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "type": "string",
+              "description": "Description of error severity level"
+            },
+            "warning": {
+              "type": "string",
+              "description": "Description of warning severity level"
+            }
+          },
+          "required": ["error", "warning"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["version", "last_updated", "description", "total_reasons", "severity_levels"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["reason_taxonomy", "metadata"],
+  "additionalProperties": false
+}

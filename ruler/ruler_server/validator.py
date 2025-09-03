@@ -1,9 +1,663 @@
 """
-Pure validation logic for expense rules.
-This module contains the core validation functions without any server/demo dependencies.
+Expense Rule Validator
+
+This module provides validation logic for expense rules based on rulebook definitions.
 """
 
-from typing import Dict, Any, List
+import json
+from typing import Dict, List, Any, Optional, Tuple
+import sys
+from pathlib import Path
+
+# Add the parent directory to the path to import output_schema
+# This allows us to import from the parent directory where output_schema is located
+current_file = Path(__file__)
+parent_dir = current_file.parent.parent
+sys.path.insert(0, str(parent_dir))
+
+from output_schema.reason_processor import ReasonProcessor
+
+# Centralized configuration for allowed values
+# This eliminates duplication and makes maintenance easier
+# 
+# Benefits:
+# - Single source of truth for all allowed values
+# - Easy to update values in one place
+# - Consistent across all validation logic
+# - No risk of different parts of the system having different values
+# - Easier to add new allowed values or modify existing ones
+ALLOWED_VALUES = {
+    "currencies": ["JPY", "USD", "EUR"],
+    "file_formats": ["JPEG", "PNG", "PDF"],
+    "receipt_types": ["receipt", "invoice", "credit_card"],
+    "approvers": ["manager", "director", "vp"],
+    "defaults": {
+        "threshold": 1000,
+        "limit": 1000000,
+        "minimum": 0,
+        "max_size": "10MB",
+        "submission_window": 30
+    }
+}
+
+# Global reason processor instance
+_reason_processor = None
+
+def get_reason_processor() -> ReasonProcessor:
+    """Get or create the reason processor instance."""
+    global _reason_processor
+    if _reason_processor is None:
+        _reason_processor = ReasonProcessor()
+    return _reason_processor
+
+
+def get_missing_field_reason(field_name: str, rule: Dict[str, Any]) -> tuple[str, str]:
+    """
+    Generic function to determine missing field reason and get field display info.
+    
+    Args:
+        field_name: The name of the missing field
+        rule: The rule definition for context
+        
+    Returns:
+        Tuple of (reason_code, field_display_name)
+    """
+    processor = get_reason_processor()
+    
+    # Get the field definition from the rule
+    field_def = None
+    for field in rule.get("required_fields", {}).get("inputs", []):
+        if field.get("key") == field_name:
+            field_def = field
+            break
+    
+    # Get field display name for better error messages
+    field_display_name = field_name
+    if field_def:
+        # Use field label, description, or purpose if available
+        field_display_name = (
+            field_def.get("label") or 
+            field_def.get("description") or 
+            field_def.get("purpose") or 
+            field_name
+        )
+    
+    # Check validation rules for field-specific requirements
+    validation_rules = rule.get("validation_rules", {})
+    
+    # Use field metadata to determine the reason
+    if field_def:
+        field_type = field_def.get("type", "")
+        field_purpose = field_def.get("purpose", "")
+        field_metadata = field_def.get("metadata", {})
+        
+        # Check if field has specific validation requirements from metadata
+        # No hardcoded field name fallbacks - everything comes from metadata
+        for metadata_key, reason_code in [
+            ("receipt_required", "missing_receipt_images"),
+            ("approval_required", "missing_pre_approval"),
+            ("invoice_required", "missing_invoice_number"),
+            ("project_required", "missing_project_code"),
+            ("route_required", "missing_route_info"),
+            ("destination_required", "missing_destination"),
+            ("purpose_required", "missing_purpose"),
+            ("payment_required", "missing_payment_details"),
+            ("nights_required", "missing_nights_count"),
+            ("people_required", "missing_people_count")
+        ]:
+            if field_metadata.get(metadata_key) and processor.validate_reason_code(reason_code):
+                return reason_code, field_display_name
+    
+    # Fallback to generic missing field reason
+    reason_code = "missing_field" if processor.validate_reason_code("missing_field") else "missing_field"
+    return reason_code, field_display_name
+
+
+def analyze_validation_rules(validation_rules: Dict[str, Any], rule: Dict[str, Any], given: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """
+    Generic validation rule analyzer that recursively processes all nested validation rules.
+    
+    Args:
+        validation_rules: The validation rules from the rule
+        rule: The complete rule definition
+        given: The input data to validate
+        
+    Returns:
+        List of validation checks with validity status and reason codes
+    """
+    processor = get_reason_processor()
+    checks = []
+    
+    # Recursively process all validation rules (including nested ones)
+    def process_validation_rules(rules: Dict[str, Any], path: str = "") -> None:
+        for rule_key, rule_value in rules.items():
+            current_path = f"{path}.{rule_key}" if path else rule_key
+            
+            if isinstance(rule_value, dict):
+                # Recursively process nested validation rules
+                process_validation_rules(rule_value, current_path)
+                
+                # Check if this is a validation rule with field_name and reason_code
+                if "field_name" in rule_value and "reason_code" in rule_value:
+                    field_name = rule_value["field_name"]
+                    reason_code = rule_value["reason_code"]
+                    validation_type = rule_value.get("type", "required")
+                    
+                    if processor.validate_reason_code(reason_code):
+                        if validation_type == "required":
+                            if not given.get(field_name):
+                                checks.append({
+                                    "valid": False,
+                                    "reason": reason_code
+                                })
+                            else:
+                                checks.append({"valid": True, "reason": None})
+                                
+                        elif validation_type == "format":
+                            if given.get(field_name):
+                                if not validate_field_format(given[field_name], rule_value):
+                                    checks.append({
+                                        "valid": False,
+                                        "reason": reason_code
+                                    })
+                                else:
+                                    checks.append({"valid": True, "reason": None})
+                                    
+                        elif validation_type == "range":
+                            if given.get(field_name):
+                                if not validate_field_range(given[field_name], rule_value):
+                                    checks.append({
+                                        "valid": False,
+                                        "reason": reason_code
+                                    })
+                                else:
+                                    checks.append({"valid": True, "reason": None})
+                                    
+                        elif validation_type == "date_validation":
+                            if given.get(field_name):
+                                date_checks = validate_date_field(given[field_name], rule_value, processor)
+                                checks.extend(date_checks)
+                                
+                        elif validation_type == "business_rule":
+                            if given.get(field_name):
+                                business_checks = validate_business_rules(given[field_name], rule_value, given, processor)
+                                checks.extend(business_checks)
+                                
+                        elif validation_type == "field_type":
+                            if given.get(field_name):
+                                type_checks = validate_field_type(given[field_name], rule_value, processor)
+                                checks.extend(type_checks)
+                                
+                        elif validation_type == "amount_constraint":
+                            if given.get(field_name):
+                                amount_checks = validate_amount_constraints(given[field_name], rule_value, processor)
+                                checks.extend(amount_checks)
+                
+                # Handle schema-defined validation rules
+                elif rule_key == "amount_constraints":
+                    # Process amount constraints from schema
+                    amount_checks = process_amount_constraints(rule_value, given, processor)
+                    checks.extend(amount_checks)
+                    
+                elif rule_key == "dynamic_amount_formula":
+                    # Process dynamic amount formulas
+                    formula_checks = process_dynamic_amount_formula(rule_value, given, processor)
+                    checks.extend(formula_checks)
+                    
+                elif rule_key == "frequency_constraints":
+                    # Process frequency constraints
+                    frequency_checks = process_frequency_constraints(rule_value, given, processor)
+                    checks.extend(frequency_checks)
+                    
+                elif rule_key == "special_thresholds":
+                    # Process special thresholds
+                    threshold_checks = process_special_thresholds(rule_value, given, processor)
+                    checks.extend(threshold_checks)
+            
+            elif isinstance(rule_value, bool) and rule_value:
+                # Simple boolean validation rules
+                boolean_checks = process_boolean_validation_rule(rule_key, rule_value, given, processor)
+                checks.extend(boolean_checks)
+                
+            elif isinstance(rule_value, (int, float)):
+                # Numeric validation rules (like max_amount)
+                numeric_checks = process_numeric_validation_rule(rule_key, rule_value, given, processor)
+                checks.extend(numeric_checks)
+                
+            elif isinstance(rule_value, str):
+                # String validation rules (like tax_rate)
+                string_checks = process_string_validation_rule(rule_key, rule_value, given, processor)
+                checks.extend(string_checks)
+    
+    # Start recursive processing
+    process_validation_rules(validation_rules)
+    return checks
+
+
+def process_amount_constraints(constraints: Dict[str, Any], given: Dict[str, Any], processor: ReasonProcessor) -> List[Dict[str, Any]]:
+    """Process amount constraints from schema."""
+    checks = []
+    amount = given.get("amount")
+    
+    if not isinstance(amount, (int, float)):
+        return checks
+    
+    # Max amount validation
+    max_amount = constraints.get("max_amount_jpy")
+    if max_amount is not None and amount > max_amount:
+        if processor.validate_reason_code("amount_exceeds_limit"):
+            checks.append({
+                "valid": False,
+                "reason": "amount_exceeds_limit"
+            })
+    
+    # Per-person max amount validation
+    per_person_max = constraints.get("per_person_max_amount_jpy")
+    if per_person_max is not None and amount > per_person_max:
+        if processor.validate_reason_code("amount_exceeds_limit"):
+            checks.append({
+                "valid": False,
+                "reason": "amount_exceeds_limit"
+            })
+    
+    # Per-person min amount validation
+    per_person_min = constraints.get("per_person_min_amount_jpy")
+    if per_person_min is not None:
+        min_exclusive = constraints.get("per_person_min_exclusive", False)
+        if min_exclusive and amount <= per_person_min:
+            if processor.validate_reason_code("amount_below_minimum"):
+                checks.append({
+                    "valid": False,
+                    "reason": "amount_below_minimum"
+                })
+        elif not min_exclusive and amount < per_person_min:
+            if processor.validate_reason_code("amount_below_minimum"):
+                checks.append({
+                    "valid": False,
+                    "reason": "amount_below_minimum"
+                })
+    
+    # Item unit validations
+    item_unit_max = constraints.get("item_unit_max_amount_jpy")
+    if item_unit_max is not None and amount > item_unit_max:
+        if processor.validate_reason_code("amount_exceeds_limit"):
+            checks.append({
+                "valid": False,
+                "reason": "amount_exceeds_limit"
+            })
+    
+    item_unit_min = constraints.get("item_unit_min_amount_jpy")
+    if item_unit_min is not None:
+        min_inclusive = constraints.get("item_unit_min_inclusive", True)
+        if min_inclusive and amount < item_unit_min:
+            if processor.validate_reason_code("amount_below_minimum"):
+                checks.append({
+                    "valid": False,
+                    "reason": "amount_below_minimum"
+                })
+        elif not min_inclusive and amount <= item_unit_min:
+            if processor.validate_reason_code("amount_below_minimum"):
+                checks.append({
+                    "valid": False,
+                    "reason": "amount_below_minimum"
+                })
+    
+    return checks
+
+
+def process_dynamic_amount_formula(formula: Dict[str, Any], given: Dict[str, Any], processor: ReasonProcessor) -> List[Dict[str, Any]]:
+    """Process dynamic amount formulas."""
+    checks = []
+    formula_type = formula.get("type")
+    unit_amount = formula.get("unit_amount_jpy")
+    variable = formula.get("variable")
+    
+    if not all([formula_type, unit_amount, variable]):
+        return checks
+    
+    # Get the variable value (e.g., num_nights, num_people)
+    variable_value = given.get(variable)
+    if variable_value is None:
+        return checks
+    
+    # Calculate expected amount based on formula
+    expected_amount = unit_amount * variable_value
+    actual_amount = given.get("amount")
+    
+    if actual_amount is not None and actual_amount > expected_amount:
+        if processor.validate_reason_code("amount_exceeds_limit"):
+            checks.append({
+                "valid": False,
+                "reason": "amount_exceeds_limit"
+            })
+    
+    return checks
+
+
+def process_frequency_constraints(constraints: Dict[str, Any], given: Dict[str, Any], processor: ReasonProcessor) -> List[Dict[str, Any]]:
+    """Process frequency constraints."""
+    checks = []
+    
+    max_occurrences = constraints.get("max_occurrences_per_period")
+    if not max_occurrences:
+        return checks
+    
+    scope = max_occurrences.get("scope")
+    count = max_occurrences.get("count")
+    period = max_occurrences.get("period")
+    
+    if scope == "person" and count is not None:
+        # In real implementation, you'd check against database for frequency
+        # For now, just a placeholder
+        pass
+    
+    return checks
+
+
+def process_special_thresholds(thresholds: Dict[str, Any], given: Dict[str, Any], processor: ReasonProcessor) -> List[Dict[str, Any]]:
+    """Process special thresholds."""
+    checks = []
+    
+    # Process any special threshold rules defined in the schema
+    # This is extensible for future threshold types
+    for threshold_key, threshold_value in thresholds.items():
+        if isinstance(threshold_value, dict) and "field_name" in threshold_value:
+            # Process as a validation rule
+            field_name = threshold_value["field_name"]
+            reason_code = threshold_value.get("reason_code", "amount_exceeds_limit")
+            
+            if processor.validate_reason_code(reason_code):
+                if not given.get(field_name):
+                    checks.append({
+                        "valid": False,
+                        "reason": reason_code
+                    })
+    
+    return checks
+
+
+def process_boolean_validation_rule(rule_key: str, rule_value: bool, given: Dict[str, Any], processor: ReasonProcessor) -> List[Dict[str, Any]]:
+    """Process boolean validation rules."""
+    checks = []
+    
+    # Map boolean rules to their corresponding validations
+    rule_mappings = {
+        "receipt_required": ("receipt_images", "missing_receipt_images"),
+        "invoice_number_required": ("invoice_registration_number", "missing_invoice_number"),
+        "project_code_required": ("project_code", "missing_project_code"),
+        "pre_approval_required": ("pre_approval_id", "missing_pre_approval")
+    }
+    
+    if rule_key in rule_mappings:
+        field_name, reason_code = rule_mappings[rule_key]
+        if not given.get(field_name):
+            if processor.validate_reason_code(reason_code):
+                checks.append({
+                    "valid": False,
+                    "reason": reason_code
+                })
+    
+    return checks
+
+
+def process_numeric_validation_rule(rule_key: str, rule_value: (int, float), given: Dict[str, Any], processor: ReasonProcessor) -> List[Dict[str, Any]]:
+    """Process numeric validation rules."""
+    checks = []
+    
+    if rule_key == "max_amount":
+        amount = given.get("amount")
+        if amount is not None and amount > rule_value:
+            if processor.validate_reason_code("amount_exceeds_limit"):
+                checks.append({
+                    "valid": False,
+                    "reason": "amount_exceeds_limit"
+                })
+    
+    return checks
+
+
+def process_string_validation_rule(rule_key: str, rule_value: str, given: Dict[str, Any], processor: ReasonProcessor) -> List[Dict[str, Any]]:
+    """Process string validation rules."""
+    checks = []
+    
+    if rule_key == "tax_rate":
+        # Tax rate validation could be implemented here
+        # For now, just a placeholder
+        pass
+    
+    return checks
+
+
+def validate_field_type(value: Any, rule: Dict[str, Any], processor: ReasonProcessor) -> List[Dict[str, Any]]:
+    """Generic field type validator."""
+    checks = []
+    field_type = rule.get("field_type")
+    
+    if field_type == "enum":
+        allowed_values = rule.get("allowed_values", [])
+        if allowed_values and value not in allowed_values:
+            if processor.validate_reason_code("invalid_enum_value"):
+                checks.append({
+                    "valid": False,
+                    "reason": "invalid_enum_value"
+                })
+    
+    elif field_type == "date":
+        try:
+            from datetime import datetime
+            datetime.strptime(str(value), "%Y-%m-%d")
+        except ValueError:
+            if processor.validate_reason_code("invalid_date"):
+                checks.append({
+                    "valid": False,
+                    "reason": "invalid_date"
+                })
+    
+    elif field_type == "money":
+        if not isinstance(value, (int, float)) or value <= 0:
+            if processor.validate_reason_code("amount_exceeds_limit"):
+                checks.append({
+                    "valid": False,
+                    "reason": "amount_exceeds_limit"
+                })
+    
+    elif field_type == "integer":
+        if not isinstance(value, (int, float)) or value <= 0:
+            if processor.validate_reason_code("amount_exceeds_limit"):
+                checks.append({
+                    "valid": False,
+                    "reason": "amount_exceeds_limit"
+                })
+    
+    return checks
+
+
+def validate_amount_constraints(value: Any, rule: Dict[str, Any], processor: ReasonProcessor) -> List[Dict[str, Any]]:
+    """Generic amount constraint validator."""
+    checks = []
+    
+    if not isinstance(value, (int, float)):
+        return checks
+    
+    # Max amount validation
+    max_amount = rule.get("max_amount")
+    if max_amount is not None and value > max_amount:
+        if processor.validate_reason_code("amount_exceeds_limit"):
+            checks.append({
+                "valid": False,
+                "reason": "amount_exceeds_limit"
+            })
+    
+    # Min amount validation
+    min_amount = rule.get("min_amount")
+    if min_amount is not None:
+        if rule.get("min_exclusive", False):
+            if value <= min_amount:
+                if processor.validate_reason_code("amount_below_minimum"):
+                    checks.append({
+                        "valid": False,
+                        "reason": "amount_below_minimum"
+                    })
+        else:
+            if value < min_amount:
+                if processor.validate_reason_code("amount_below_minimum"):
+                    checks.append({
+                        "valid": False,
+                        "reason": "amount_below_minimum"
+                    })
+    
+    # Per-person amount validations
+    per_person_max = rule.get("per_person_max_amount")
+    if per_person_max is not None and value > per_person_max:
+        if processor.validate_reason_code("amount_exceeds_limit"):
+            checks.append({
+                "valid": False,
+                "reason": "amount_exceeds_limit"
+            })
+    
+    per_person_min = rule.get("per_person_min_amount")
+    if per_person_min is not None:
+        if rule.get("per_person_min_exclusive", False):
+            if value <= per_person_min:
+                if processor.validate_reason_code("amount_below_minimum"):
+                    checks.append({
+                        "valid": False,
+                        "reason": "amount_below_minimum"
+                    })
+        else:
+            if value < per_person_min:
+                if processor.validate_reason_code("amount_below_minimum"):
+                    checks.append({
+                        "valid": False,
+                        "reason": "amount_below_minimum"
+                    })
+    
+    return checks
+
+
+def validate_field_format(value: Any, rule: Dict[str, Any]) -> bool:
+    """Generic field format validator."""
+    format_type = rule.get("format_type")
+    
+    if format_type == "date":
+        try:
+            from datetime import datetime
+            datetime.strptime(str(value), "%Y-%m-%d")
+            return True
+        except ValueError:
+            return False
+    elif format_type == "currency":
+        return str(value) in ALLOWED_VALUES["currencies"]
+    elif format_type == "enum":
+        allowed_values = rule.get("allowed_values", [])
+        return value in allowed_values
+    
+    return True
+
+
+def validate_field_range(value: Any, rule: Dict[str, Any]) -> bool:
+    """Generic field range validator."""
+    if isinstance(value, (int, float)):
+        min_val = rule.get("min_value")
+        max_val = rule.get("max_value")
+        
+        if min_val is not None and value < min_val:
+            return False
+        if max_val is not None and value > max_val:
+            return False
+    
+    return True
+
+
+def validate_date_field(value: Any, rule: Dict[str, Any], processor: ReasonProcessor) -> List[Dict[str, Any]]:
+    """Generic date field validator."""
+    checks = []
+    
+    try:
+        from datetime import datetime
+        expense_date = datetime.strptime(str(value), "%Y-%m-%d")
+        current_date = datetime.now()
+        
+        # Check for future dates
+        if rule.get("future_dates_not_allowed") and expense_date > current_date:
+            if processor.validate_reason_code("future_date_not_allowed"):
+                checks.append({
+                    "valid": False,
+                    "reason": "future_date_not_allowed"
+                })
+        
+        # Check for very old dates (beyond submission window)
+        submission_window = rule.get("submission_window_days", 30)
+        if (current_date - expense_date).days > submission_window:
+            if processor.validate_reason_code("date_too_old"):
+                checks.append({
+                    "valid": False,
+                    "reason": "date_too_old"
+                })
+        
+        # Check for weekend restrictions
+        if rule.get("weekend_expenses_not_allowed") and expense_date.weekday() >= 5:
+            if processor.validate_reason_code("weekend_expense_restriction"):
+                checks.append({
+                    "valid": False,
+                    "reason": "weekend_expense_restriction"
+                })
+        
+        # Check for holiday restrictions
+        if rule.get("holiday_expenses_not_allowed"):
+            # In real implementation, you'd check against holiday calendar
+            # For now, just a placeholder
+            pass
+            
+    except ValueError:
+        if processor.validate_reason_code("invalid_date"):
+            checks.append({
+                "valid": False,
+                "reason": "invalid_date"
+            })
+    
+    return checks
+
+
+def validate_business_rules(value: Any, rule: Dict[str, Any], given: Dict[str, Any], processor: ReasonProcessor) -> List[Dict[str, Any]]:
+    """Generic business rule validator."""
+    checks = []
+    
+    # Currency validation
+    if rule.get("currency_validation") and given.get("currency"):
+        allowed_currencies = rule.get("allowed_currencies", ALLOWED_VALUES["currencies"])
+        if given["currency"] not in allowed_currencies:
+            if processor.validate_reason_code("invalid_currency"):
+                checks.append({
+                    "valid": False,
+                    "reason": "invalid_currency"
+                })
+    
+    # Receipt type validation
+    if rule.get("receipt_type_validation") and given.get("receipt_type"):
+        allowed_types = rule.get("allowed_receipt_types", ALLOWED_VALUES["receipt_types"])
+        if allowed_types and given["receipt_type"] not in allowed_types:
+            if processor.validate_reason_code("invalid_receipt_type"):
+                checks.append({
+                    "valid": False,
+                    "reason": "invalid_receipt_type"
+                })
+    
+    # File format validation
+    if rule.get("file_format_validation") and given.get("receipt_images"):
+        allowed_formats = rule.get("allowed_file_formats", ALLOWED_VALUES["file_formats"])
+        if allowed_formats:
+            # In real implementation, you'd validate actual file formats
+            # For now, just a placeholder
+            pass
+    
+    # Duplicate expense check
+    if rule.get("duplicate_check") and given.get("amount") and given.get("recognized_at"):
+        # In real implementation, you'd check against database
+        # For now, just a placeholder
+        pass
+    
+    return checks
 
 
 def evaluate_rule(rule: Dict[str, Any], given: Dict[str, Any]) -> Dict[str, Any]:
@@ -15,12 +669,14 @@ def evaluate_rule(rule: Dict[str, Any], given: Dict[str, Any]) -> Dict[str, Any]
         given: The input data to validate
         
     Returns:
-        Dict with clause_id, status (OK/NG), and reasons list
+        Dict with clause_id, status (OK/NG), and standardized reasons list
     """
-    reasons: List[str] = []
+    standardized_reasons: List[str] = []
     ok = True
 
     # Check required fields
+    missing_field_names = {}  # Store field display names for better error messages
+    
     for i in rule.get("required_fields", {}).get("inputs", []):
         key = i.get("key")
         field_type = i.get("type", "string")
@@ -29,82 +685,167 @@ def evaluate_rule(rule: Dict[str, Any], given: Dict[str, Any]) -> Dict[str, Any]
         
         if required and (given.get(key) in (None, "")):
             ok = False
-            reasons.append(f"missing:{key}")
+            # Dynamically determine the appropriate missing field reason and display name
+            missing_reason, field_display_name = get_missing_field_reason(key, rule)
+            standardized_reasons.append(missing_reason)
+            # Store field display name for better error messages
+            missing_field_names[missing_reason] = field_display_name
             continue
             
-        # Validate field values based on type
-        if key in given and given[key] not in (None, ""):
-            value = given[key]
-            
-            # Validate enum fields
-            if field_type == "enum" and allowed_values and value not in allowed_values:
-                ok = False
-                reasons.append(f"invalid_enum:{key}={value}")
-            
-            # Validate currency
-            elif key == "currency" and value not in ["JPY", "USD", "EUR"]:
-                ok = False
-                reasons.append(f"invalid_currency:{value}")
-            
-            # Validate date format (basic check)
-            elif field_type == "date" and isinstance(value, str):
-                try:
-                    from datetime import datetime
-                    datetime.strptime(value, "%Y-%m-%d")
-                except ValueError:
-                    ok = False
-                    reasons.append(f"invalid_date_format:{key}={value}")
-            
-            # Validate amount ranges (reasonable limits)
-            elif field_type == "money" and isinstance(value, (int, float)):
-                if value <= 0:
-                    ok = False
-                    reasons.append(f"invalid_amount:{key}={value}_must_be_positive")
-                elif value > 1000000:  # 1M JPY reasonable limit
-                    ok = False
-                    reasons.append(f"amount_suspiciously_high:{key}={value}")
-            
-            # Validate integer fields
-            elif field_type == "integer" and isinstance(value, (int, float)):
-                if value <= 0:
-                    ok = False
-                    reasons.append(f"invalid_integer:{key}={value}_must_be_positive")
-                elif key in ["num_nights", "num_people"] and value > 100:
-                    ok = False
-                    reasons.append(f"integer_unreasonably_high:{key}={value}")
+        # Field validation is now handled by the generic analyze_validation_rules function
+        # No more hardcoded field type validation logic here
 
-    # Check validation rules
+    # Check validation rules using intelligent analysis
     vr = rule.get("validation_rules", {})
     
-    # Receipt validation
-    if vr.get("receipt_required") is True and not given.get("receipt_images"):
-        ok = False
-        reasons.append("missing:receipt_images")
-
-    # Invoice validation
-    inv = vr.get("invoice_number_required")
-    if inv is True and not given.get("invoice_registration_number"):
-        ok = False
-        reasons.append("missing:invoice_registration_number")
-
-    # Amount constraints
-    amt = vr.get("amount_constraints", {})
-    amount = given.get("amount")
-    if isinstance(amount, (int, float)):
-        if amt.get("max_amount_jpy") is not None and amount > amt["max_amount_jpy"]:
+    # Analyze validation rules to determine what should be validated
+    validation_checks = analyze_validation_rules(vr, rule, given)
+    
+    # Apply the determined validation checks
+    for check in validation_checks:
+        if not check["valid"]:
             ok = False
-            reasons.append("amount:exceeds_max")
-        if amt.get("per_person_max_amount_jpy") is not None and amount > amt["per_person_max_amount_jpy"]:
-            ok = False
-            reasons.append("amount:exceeds_per_person_max")
-        if amt.get("per_person_min_amount_jpy") is not None and amt.get("per_person_min_exclusive") and amount <= amt["per_person_min_amount_jpy"]:
-            ok = False
-            reasons.append("amount:below_min_exclusive")
+            standardized_reasons.append(check["reason"])
 
+    # Amount constraints are now handled by the generic analyze_validation_rules function
+    # No more hardcoded amount validation logic here
+    
+    # All validation logic is now handled by the generic analyze_validation_rules function
+    # No more hardcoded validation checks here
+
+    # Get the reason processor
+    reason_processor = get_reason_processor()
+    
+    # Get current date for dynamic date calculations
+    from datetime import datetime, timedelta
+    current_date = datetime.now()
+    
+    # Prepare variables for suggested fixes
+    variables = {
+        "amount": given.get("amount"),
+        "currency": given.get("currency", "JPY"),
+        "category": rule.get("expense_category", {}).get("en", "unknown"),
+        "field_name": "unknown",
+        "threshold": ALLOWED_VALUES["defaults"]["threshold"],
+        "limit": ALLOWED_VALUES["defaults"]["limit"],
+        "minimum": ALLOWED_VALUES["defaults"]["minimum"],
+        "date": given.get("recognized_at"),
+        "project_code": given.get("project_code"),
+        "approver_name": given.get("approver"),
+        "receipt_type": given.get("receipt_type"),
+        "format": "unknown",
+        "file_size": "unknown",
+        "max_size": ALLOWED_VALUES["defaults"]["max_size"],
+        "allowed_formats": ALLOWED_VALUES["file_formats"],
+        "allowed_currencies": ALLOWED_VALUES["currencies"],
+        "allowed_values": [],
+        "allowed_receipt_types": ALLOWED_VALUES["receipt_types"],
+        "allowed_approvers": ALLOWED_VALUES["approvers"],
+        "submission_window": ALLOWED_VALUES["defaults"]["submission_window"],
+        "current_date": current_date.strftime("%Y-%m-%d"),
+        "min_date": (current_date - timedelta(days=365*5)).strftime("%Y-%m-%d"),  # 5 years ago
+        "max_date": (current_date + timedelta(days=365)).strftime("%Y-%m-%d"),    # 1 year from now
+        "duplicate_date": "unknown",
+        "holiday_name": "unknown",
+        "receipt_amount": given.get("amount"),
+        "submitted_amount": given.get("amount"),
+        "route": given.get("route"),
+        "destination": given.get("destination"),
+        "purpose": given.get("purpose"),
+        "payment_details": given.get("payment_details"),
+        "num_nights": given.get("num_nights"),
+        "num_people": given.get("num_people")
+    }
+    
+    # Add missing field names for better suggested fixes
+    for reason_code, field_display_name in missing_field_names.items():
+        if reason_code == "missing_field":
+            variables["field_name"] = field_display_name
+        elif reason_code == "missing_receipt_images":
+            variables["field_name"] = field_display_name
+        elif reason_code == "missing_pre_approval":
+            variables["field_name"] = field_display_name
+        elif reason_code == "missing_invoice_number":
+            variables["field_name"] = field_display_name
+        elif reason_code == "missing_project_code":
+            variables["field_name"] = field_display_name
+        elif reason_code == "missing_route_info":
+            variables["field_name"] = field_display_name
+        elif reason_code == "missing_destination":
+            variables["field_name"] = field_display_name
+        elif reason_code == "missing_purpose":
+            variables["field_name"] = field_display_name
+        elif reason_code == "missing_payment_details":
+            variables["field_name"] = field_display_name
+        elif reason_code == "missing_nights_count":
+            variables["field_name"] = field_display_name
+        elif reason_code == "missing_people_count":
+            variables["field_name"] = field_display_name
+    
+    # Generic rule-specific variable override system
+    # Any rule-specific values automatically override defaults
+    validation_rules = rule.get("validation_rules", {})
+    
+    # Recursively find and apply all rule-specific values
+    def apply_rule_values(rules: Dict[str, Any], variables: Dict[str, Any]) -> None:
+        for key, value in rules.items():
+            if isinstance(value, dict):
+                # Recursively process nested objects
+                apply_rule_values(value, variables)
+            elif isinstance(value, (int, float, str)) and value is not None:
+                # Map rule keys to variable names
+                key_mapping = {
+                    # Amount constraints
+                    "max_amount_jpy": "limit",
+                    "per_person_max_amount_jpy": "threshold",
+                    "per_person_min_amount_jpy": "minimum",
+                    "item_unit_max_amount_jpy": "item_unit_limit",
+                    "item_unit_min_amount_jpy": "item_unit_minimum",
+                    
+                    # Other constraints
+                    "max_amount": "limit",
+                    "min_amount": "minimum",
+                    "submission_window_days": "submission_window",
+                    "max_file_size_mb": "max_size",
+                    
+                    # Dynamic formulas
+                    "unit_amount_jpy": "unit_amount",
+                    
+                    # Frequency constraints
+                    "max_occurrences_per_period": "max_frequency",
+                    
+                    # Custom thresholds
+                    "custom_threshold": "threshold"
+                }
+                
+                # Apply the value if there's a mapping
+                if key in key_mapping:
+                    variable_name = key_mapping[key]
+                    variables[variable_name] = value
+                    
+                    # Special handling for amount limits - use the most restrictive
+                    if key in ["max_amount_jpy", "per_person_max_amount_jpy", "max_amount"]:
+                        if "limit" not in variables or value < variables["limit"]:
+                            variables["limit"] = value
+    
+    # Apply all rule-specific values
+    apply_rule_values(validation_rules, variables)
+    
+    # Remove duplicates from standardized reasons to avoid duplicate suggested fixes
+    unique_standardized_reasons = list(dict.fromkeys(standardized_reasons))
+    
+    # Generate enhanced validation results with suggested fixes
+    enhanced_results = reason_processor.format_validation_result(unique_standardized_reasons, variables)
+    
     return {
         "clause_id": rule.get("clause_id"),
         "status": "OK" if ok else "NG", 
-        "reasons": reasons
+        "reasons": unique_standardized_reasons,  # Now using standardized reasons as the main reasons
+        "standardized_reasons": unique_standardized_reasons,
+        "suggested_fixes": enhanced_results.get("reasons", []),
+        "total_issues": enhanced_results.get("total_count", 0),
+        "error_count": enhanced_results.get("error_count", 0),
+        "warning_count": enhanced_results.get("warning_count", 0)
     }
 
 

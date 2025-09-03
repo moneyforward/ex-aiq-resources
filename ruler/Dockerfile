@@ -24,6 +24,7 @@ RUN poetry config virtualenvs.create false \
 
 # Copy application code
 COPY ruler_server ./ruler_server
+COPY output_schema ./output_schema
 COPY static ./static
 COPY expense_rulebook.json ./expense_rulebook.json
 COPY expense_rulebook.schema.json ./expense_rulebook.schema.json
