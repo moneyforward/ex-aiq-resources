@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: validate-expense-rulebook
+        name: Validate expense_rulebook.json
+        entry: ./ruler/validate_rulebook.py --schema ruler/expense_rulebook.schema.json --rulebook ruler/expense_rulebook.json
+        language: system
+        files: ^expense_rulebook\.json$
+        pass_filenames: false
