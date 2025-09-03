@@ -286,6 +286,12 @@ def analyze_validation_rules(validation_rules: Dict[str, Any], rule: Dict[str, A
                             if given.get(field_name):
                                 amount_checks = validate_amount_constraints(given[field_name], rule_value, processor)
                                 checks.extend(amount_checks)
+                                
+                        elif validation_type == "accommodation_dates":
+                            # Validate accommodation dates (check-in vs check-out)
+                            if given.get("check_in_date") and given.get("check_out_date"):
+                                accommodation_checks = validate_accommodation_dates(given, processor)
+                                checks.extend(accommodation_checks)
                 
                 # Handle schema-defined validation rules
                 elif rule_key == "amount_constraints":
@@ -754,6 +760,56 @@ def validate_business_rules(value: Any, rule: Dict[str, Any], given: Dict[str, A
     return checks
 
 
+def validate_accommodation_dates(given: Dict[str, Any], processor: ReasonProcessor) -> List[Dict[str, Any]]:
+    """
+    Validate accommodation dates (check-in vs check-out).
+    
+    Args:
+        given: The input data containing check-in and check-out dates
+        processor: The reason processor for validation
+        
+    Returns:
+        List of validation checks with validity status and reason codes
+    """
+    checks = []
+    
+    try:
+        from datetime import datetime
+        
+        check_in_str = given.get("check_in_date")
+        check_out_str = given.get("check_out_date")
+        
+        if check_in_str and check_out_str:
+            # Parse dates
+            check_in_date = datetime.strptime(check_in_str, "%Y-%m-%d")
+            check_out_date = datetime.strptime(check_out_str, "%Y-%m-%d")
+            
+            # Validate that check-out is on or after check-in
+            if check_out_date < check_in_date:
+                if processor.validate_reason_code("invalid_accommodation_period"):
+                    checks.append({
+                        "valid": False,
+                        "reason": "invalid_accommodation_period"
+                    })
+                else:
+                    checks.append({
+                        "valid": False,
+                        "reason": "invalid_date"
+                    })
+            else:
+                checks.append({"valid": True, "reason": None})
+                
+    except ValueError:
+        # If date parsing fails, add invalid date error
+        if processor.validate_reason_code("invalid_date"):
+            checks.append({
+                "valid": False,
+                "reason": "invalid_date"
+            })
+    
+    return checks
+
+
 def evaluate_rule(rule: Dict[str, Any], given: Dict[str, Any]) -> Dict[str, Any]:
     """
     Evaluate a rule against given input data.
@@ -870,7 +926,9 @@ def evaluate_rule(rule: Dict[str, Any], given: Dict[str, Any]) -> Dict[str, Any]
         "purpose": given.get("purpose"),
         "payment_details": given.get("payment_details"),
         "num_nights": given.get("num_nights"),
-        "num_people": given.get("num_people")
+        "num_people": given.get("num_people"),
+        "check_in_date": given.get("check_in_date"),
+        "check_out_date": given.get("check_out_date")
     }
     
     # Add missing field names and context for better suggested fixes
@@ -884,6 +942,8 @@ def evaluate_rule(rule: Dict[str, Any], given: Dict[str, Any]) -> Dict[str, Any]
         # Generate meaningful context for the missing field
         field_context = generate_field_context(field_display_name, rule, variables)
         variables["field_context"] = field_context if field_context else " This field is required for proper expense validation and processing."
+    
+
     
     # Generic rule-specific variable override system
     # Any rule-specific values automatically override defaults
@@ -937,77 +997,9 @@ def evaluate_rule(rule: Dict[str, Any], given: Dict[str, Any]) -> Dict[str, Any]
     # Remove duplicates from standardized reasons to avoid duplicate suggested fixes
     unique_standardized_reasons = list(dict.fromkeys(standardized_reasons))
     
-    # Generate enhanced validation results with suggested fixes
-    # For field-specific reason codes, we need to generate separate suggested fixes
-    processed_reasons = []
-    for reason_code in unique_standardized_reasons:
-        if ":" in reason_code:
-            # Field-specific reason code (e.g., "missing_field:receipt_images")
-            base_reason, field_name = reason_code.split(":", 1)
-            
-            # Get the base reason info
-            reason_info = reason_processor.get_reason_info(base_reason)
-            if reason_info:
-                # Create field-specific variables
-                field_variables = variables.copy()
-                field_variables["field_name"] = field_name
-                
-                # Generate field-specific context
-                field_context = generate_field_context(field_name, rule, field_variables)
-                field_variables["field_context"] = field_context if field_context else " This field is required for proper expense validation and processing."
-                
-                # Generate suggested fix with field-specific variables
-                suggested_fix = reason_processor.generate_suggested_fix(base_reason, field_variables)
-                
-                # Process description with field-specific variables
-                description = reason_info.get("description", "")
-                if description and field_variables:
-                    try:
-                        description = description.format(**field_variables)
-                    except (KeyError, ValueError):
-                        # If variable substitution fails, keep original description
-                        pass
-                
-                # Create field-specific result
-                processed_reasons.append({
-                    "code": reason_code,  # Use the unique reason code
-                    "label": reason_info.get("label", ""),
-                    "description": description,
-                    "severity": reason_info.get("severity", "error"),
-                    "suggested_fix": suggested_fix,
-                    "required_variables": reason_info.get("variables", [])
-                })
-        else:
-            # Regular reason code, process normally
-            reason_info = reason_processor.get_reason_info(reason_code)
-            if reason_info:
-                suggested_fix = reason_processor.generate_suggested_fix(reason_code, variables)
-                
-                # Process description with variables
-                description = reason_info.get("description", "")
-                if description and variables:
-                    try:
-                        description = description.format(**variables)
-                    except (KeyError, ValueError):
-                        # If variable substitution fails, keep original description
-                        pass
-                
-                processed_reasons.append({
-                    "code": reason_code,
-                    "label": reason_info.get("label", ""),
-                    "description": description,
-                    "severity": reason_info.get("severity", "error"),
-                    "suggested_fix": suggested_fix,
-                    "required_variables": reason_info.get("variables", [])
-                })
-    
-    # Create enhanced results with our processed reasons
-    enhanced_results = {
-        "reasons": processed_reasons,
-        "total_count": len(processed_reasons),
-        "error_count": len([r for r in processed_reasons if r["severity"] == "error"]),
-        "warning_count": len([r for r in processed_reasons if r["severity"] == "warning"])
-    }
+    # Generate enhanced validation results with suggested fixes - COMPLETELY GENERIC
+    # The enhanced reason processor now handles field-specific reasons automatically
+    enhanced_results = reason_processor.format_validation_result(unique_standardized_reasons, variables)
     
     print(f"DEBUG: Enhanced results: {enhanced_results}")
 

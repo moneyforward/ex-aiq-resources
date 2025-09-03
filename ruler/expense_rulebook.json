@@ -8737,6 +8737,11 @@
             "count": 10,
             "period": "month"
           }
+        },
+        "accommodation_dates": {
+          "type": "accommodation_dates",
+          "field_name": "check_in_date",
+          "reason_code": "invalid_accommodation_period"
         }
       },
       "usage_conditions": {
@@ -8956,6 +8961,11 @@
             "count": 8,
             "period": "month"
           }
+        },
+        "accommodation_dates": {
+          "type": "accommodation_dates",
+          "field_name": "check_in_date",
+          "reason_code": "invalid_accommodation_period"
         }
       },
       "usage_conditions": {

@@ -155,6 +155,7 @@ class ReasonProcessor:
                                 variables: Dict[str, Any]) -> Dict[str, Any]:
         """
         Format validation results with reasons and suggested fixes.
+        TRULY GENERIC - handles field-specific reasons automatically.
         
         Args:
             reason_codes: List of reason codes from validation
@@ -166,14 +167,32 @@ class ReasonProcessor:
         results = []
         
         for reason_code in reason_codes:
-            reason_info = self.get_reason_info(reason_code)
+            # Create variables specific to this reason
+            reason_variables = variables.copy()
+            
+            # Handle field-specific reasons by setting field-specific variables
+            if ":" in reason_code:
+                field_name = reason_code.split(":", 1)[1]
+                reason_variables["field_name"] = field_name
+                
+                # Generate field-specific context if not already provided
+                if "field_context" not in reason_variables:
+                    # Try to create a meaningful context
+                    reason_variables["field_context"] = f" This field is required for proper expense validation and processing."
+            
+            # Get the base reason info (handle field-specific codes)
+            base_reason = reason_code.split(":")[0] if ":" in reason_code else reason_code
+            reason_info = self.get_reason_info(base_reason)
+            
             if reason_info:
-                suggested_fix = self.generate_suggested_fix(reason_code, variables)
-                # Also process the description with variables
+                # Generate suggested fix with reason-specific variables
+                suggested_fix = self.generate_suggested_fix(base_reason, reason_variables)
+                
+                # Process description with reason-specific variables
                 description = reason_info.get("description", "")
-                if description and variables:
+                if description and reason_variables:
                     try:
-                        description = description.format(**variables)
+                        description = description.format(**reason_variables)
                     except (KeyError, ValueError):
                         # If variable substitution fails, keep original description
                         pass
