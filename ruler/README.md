@@ -205,43 +205,6 @@ ALLOWED_VALUES = {
 }
 ```
 
-## Team Responsibilities
-
-### AIQ (This Project)
-- ✅ **Generic validation engine** with metadata-driven logic
-- ✅ **Comprehensive reason taxonomy** with 35 standardized codes
-- ✅ **Centralized configuration system** eliminating duplication
-- ✅ **Smart variable override system** for rule-specific limits
-- ✅ **Recursive validation processing** for nested rules
-- ✅ **Master rulebook integration** with all constraint types
-- ✅ **API contract design** with detailed specifications
-- ✅ **Demo and testing interface** for validation scenarios
-
-### EAF (Production Implementation)
-- ✅ Production API deployment
-- ✅ Performance optimization
-- ✅ Security and authentication
-- ✅ Monitoring and observability
-- ✅ Caching and scaling
-
-## Recent Improvements
-
-### **v2.0 - Generic Validation System**
-- 🔄 **Complete Refactoring**: Removed all hardcoded validation logic
-- 🎯 **Metadata-Driven**: All validation rules defined in rule JSON
-- 🔍 **Recursive Processing**: Handles nested validation rules at any depth
-- 🧩 **Type Support**: `required`, `format`, `range`, `date_validation`, `business_rule`, `field_type`, `amount_constraint`
-
-### **v2.1 - Centralized Configuration**
-- 🎯 **Single Source of Truth**: All allowed values defined in one place
-- 🚫 **No Duplication**: Eliminated code duplication across the system
-- 🔧 **Easy Maintenance**: Change values once, updates everywhere
-
-### **v2.2 - Smart Variable Override**
-- 🧠 **Rule-Specific Limits**: Automatically uses rule constraints instead of defaults
-- 📊 **Most Restrictive**: Intelligently selects the most restrictive amount limits
-- 🔄 **Generic Mapping**: Works with any rule structure without hardcoding
-
 ## Contributing
 
 1. Follow the existing code structure
