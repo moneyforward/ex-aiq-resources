@@ -1,0 +1,145 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Expense Rulebook Schema",
+  "type": "object",
+  "required": ["version", "last_updated", "rules"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "string" },
+    "last_updated": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "clause_id",
+          "expense_category",
+          "account_code",
+          "validation_rules",
+          "usage_conditions",
+          "required_fields",
+          "restrictions",
+          "auto_approval_threshold",
+          "risk_level"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "clause_id": { "type": "string" },
+          "expense_category": {
+            "type": "object",
+            "required": ["ja", "en"],
+            "additionalProperties": false,
+            "properties": { "ja": {"type":"string"}, "en": {"type":"string"} }
+          },
+          "account_code": {
+            "type": "object",
+            "required": ["ja", "en"],
+            "additionalProperties": false,
+            "properties": { "ja": {"type":"string"}, "en": {"type":"string"} }
+          },
+          "validation_rules": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["pre_approval_required", "receipt_required", "invoice_number_required", "max_amount", "tax_rate"],
+            "properties": {
+              "pre_approval_required": { "type": ["boolean", "null"] },
+              "receipt_required": { "type": ["boolean", "null"] },
+              "invoice_number_required": {
+                "anyOf": [
+                  { "type": ["boolean", "null"] },
+                  { "type": "string", "enum": ["based_on_receipt", "alert"] }
+                ]
+              },
+              "max_amount": { "type": ["number", "null"] },
+              "tax_rate": { "type": ["string", "null"], "enum": ["10%", "8%", "EXEMPT", null] },
+              "amount_constraints": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "per_person_max_amount_jpy": { "type": "number" },
+                  "per_person_min_amount_jpy": { "type": "number" },
+                  "per_person_min_exclusive": { "type": "boolean" },
+                  "per_person_basis": { "type": "string", "enum": ["including_tax", "excluding_tax"] },
+                  "item_unit_max_amount_jpy": { "type": "number" },
+                  "item_unit_min_amount_jpy": { "type": "number" },
+                  "item_unit_min_inclusive": { "type": "boolean" },
+                  "item_unit_max_exclusive": { "type": "boolean" },
+                  "item_unit_basis": { "type": "string", "enum": ["including_tax", "excluding_tax"] },
+                  "max_amount_jpy": { "type": "number" },
+                  "notes": { "type": "object", "properties": {"ja": {"type":"string"}, "en": {"type":"string"}}, "additionalProperties": false }
+                }
+              },
+              "dynamic_amount_formula": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "type": { "type": "string", "enum": ["per_night_cap", "per_person_cap"] },
+                  "unit_amount_jpy": { "type": "number" },
+                  "variable": { "type": "string", "enum": ["num_nights", "num_people"] }
+                }
+              },
+              "frequency_constraints": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "max_occurrences_per_period": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "scope": { "type": "string", "enum": ["person"] },
+                      "count": { "type": "number" },
+                      "period": { "type": "string", "enum": ["month", "quarter", "year"] }
+                    }
+                  }
+                }
+              },
+              "special_thresholds": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          },
+          "usage_conditions": {
+            "type": "object",
+            "required": ["ja", "en"],
+            "additionalProperties": false,
+            "properties": { "ja": {"type":"string"}, "en": {"type":"string"} }
+          },
+          "required_fields": {
+            "type": "object",
+            "required": ["memo", "inputs"],
+            "additionalProperties": false,
+            "properties": {
+              "memo": { "type": "object", "required": ["ja", "en"], "additionalProperties": false, "properties": {"ja": {"type":["string","null"]}, "en": {"type":["string","null"]}} },
+              "inputs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["key", "label", "type", "required"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "key": { "type": "string" },
+                    "label": { "type": "object", "required": ["ja", "en"], "additionalProperties": false, "properties": {"ja": {"type":"string"}, "en": {"type":"string"}} },
+                    "type": { "type": "string", "enum": ["string","integer","money","date","enum","file","files","structured","note"] },
+                    "required": { "type": "boolean" },
+                    "required_if": { "type": ["string","null"] },
+                    "allowed_values": { "type": ["array","null"], "items": {"type":"string"} },
+                    "notes": { "type": ["object","null"], "properties": {"ja": {"type":"string"}, "en": {"type":"string"}}, "additionalProperties": false }
+                  }
+                }
+              }
+            }
+          },
+          "restrictions": {
+            "type": "object",
+            "required": ["ja", "en"],
+            "additionalProperties": false,
+            "properties": { "ja": {"type":["string","null"]}, "en": {"type":["string","null"]} }
+          },
+          "auto_approval_threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+          "risk_level": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,352 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Expense Rule Validator Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 text-gray-900">
+    <div class="max-w-6xl mx-auto p-6">
+      <h1 class="text-2xl font-semibold mb-4">Expense Rule Validator Demo</h1>
+      <div class="mb-4 flex gap-2 items-end">
+        <div>
+          <label class="block text-sm font-medium">Category</label>
+          <select id="category" class="border rounded px-3 py-2 min-w-[200px]">
+            <option value="">Select Category</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium">Clause</label>
+          <select id="clause" class="border rounded px-3 py-2 w-[400px]" disabled>
+            <option value="">Select Category First</option>
+          </select>
+        </div>
+        <button id="loadOptions" class="bg-blue-600 text-white px-4 py-2 rounded hidden" disabled>Load Inputs</button>
+        <button id="run" class="bg-green-600 text-white px-4 py-2 rounded" disabled>Validate</button>
+      </div>
+      
+      <!-- Usage Conditions Display -->
+      <div id="usageConditions" class="mb-6 hidden">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 class="text-sm font-semibold text-blue-800 mb-2">Usage Conditions:</h3>
+          <p id="usageText" class="text-sm text-blue-700"></p>
+        </div>
+      </div>
+      
+      <!-- Validation Result Display -->
+      <div id="result" class="mb-6 hidden"></div>
+      
+      <!-- Input Container -->
+      <div id="inputResultContainer">
+        <div id="inputs" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div>
+      </div>
+    </div>
+
+    <script>
+      async function fetchJSON(url, opts) {
+        const r = await fetch(url, opts);
+        if (!r.ok) throw new Error(await r.text());
+        return r.json();
+      }
+
+      // Get unique categories from clause_id (part before underscore)
+      function getUniqueCategories(rules) {
+        const categories = new Set();
+        rules.forEach(r => {
+          if (r.clause_id) {
+            const category = r.clause_id.split('_')[0];
+            categories.add(category);
+          }
+        });
+        return Array.from(categories).sort();
+      }
+
+      // Filter rules by category
+      function filterRulesByCategory(rules, category) {
+        return rules.filter(r => r.clause_id && r.clause_id.startsWith(category + '_'));
+      }
+
+      // Truncate text to max length
+      function truncateText(text, maxLength = 60) {
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength) + '...';
+      }
+
+      // Get default values for each field type
+      function getDefaultValue(key, type) {
+        switch (type) {
+          case 'integer':
+            return 1; // Reasonable default for integer fields
+          case 'money':
+            return 1000; // Reasonable default amount
+          case 'date':
+            return '2024-01-15'; // Valid date
+          case 'file':
+          case 'files':
+            return ''; // Empty file field
+          case 'enum':
+            // For enum fields, we'll use the first allowed value if available
+            return ''; // Will be handled in the calling code
+          case 'structured':
+            return '{}'; // Empty structure
+          case 'note':
+            return 'Sample note'; // Sample text
+          default:
+            // Fallback based on key name
+            switch (key) {
+              case 'amount':
+                return 1000;
+              case 'currency':
+                return 'JPY';
+              case 'recognized_at':
+                return '2024-01-15';
+              case 'receipt_images':
+                return '';
+              case 'invoice_registration_number':
+                return '';
+              case 'pre_approval_id':
+                return '';
+              case 'project_code':
+                return '';
+              case 'num_nights':
+              case 'num_people':
+                return 1; // Reasonable default for count fields
+              default:
+                return 'sample_value';
+            }
+        }
+      }
+
+      // Check if field is relevant for the category
+      function isFieldRelevantForCategory(key, category, rule) {
+        // If we have the rule data, check if the field is actually defined in the rule
+        if (rule && rule.required_fields && rule.required_fields.inputs) {
+          const fieldDef = rule.required_fields.inputs.find(f => f.key === key);
+          return fieldDef !== undefined; // Field is relevant if it's defined in the rule
+        }
+        
+        // Fallback to hardcoded logic if no rule data
+        const relevantFields = {
+          'TRAVEL': ['amount', 'currency', 'recognized_at', 'route', 'destination', 'purpose', 'receipt_images', 'payment_details', 'receipt_type'],
+          'SUPPLIES': ['amount', 'currency', 'recognized_at', 'receipt_images', 'invoice_registration_number', 'pre_approval_id'],
+          'MISC': ['amount', 'currency', 'recognized_at', 'receipt_images', 'invoice_registration_number', 'pre_approval_id'],
+          'COMMUNICATION': ['amount', 'currency', 'recognized_at', 'receipt_images', 'invoice_registration_number', 'pre_approval_id'],
+          'ADVERTISING': ['amount', 'currency', 'recognized_at', 'receipt_images', 'invoice_registration_number', 'pre_approval_id'],
+          'TAXES': ['amount', 'currency', 'recognized_at', 'receipt_images', 'invoice_registration_number'],
+          'WELFARE': ['amount', 'currency', 'recognized_at', 'receipt_images', 'invoice_registration_number', 'pre_approval_id'],
+          'FEES': ['amount', 'currency', 'recognized_at', 'receipt_images', 'invoice_registration_number'],
+          'OUTSOURCING': ['amount', 'currency', 'recognized_at', 'receipt_images', 'invoice_registration_number', 'pre_approval_id', 'project_code'],
+          'MEMBERSHIP': ['amount', 'currency', 'recognized_at', 'receipt_images', 'invoice_registration_number', 'pre_approval_id'],
+          'RECRUITMENT': ['amount', 'currency', 'recognized_at', 'receipt_images', 'invoice_registration_number', 'pre_approval_id'],
+          'BOOKS': ['amount', 'currency', 'recognized_at', 'receipt_images', 'invoice_registration_number', 'pre_approval_id']
+        };
+        return relevantFields[category] ? relevantFields[category].includes(key) : true;
+      }
+
+      async function loadRules() {
+        const rules = await fetchJSON('/rules');
+        window.allRules = rules; // Store for filtering
+        
+        // Populate category dropdown
+        const categories = getUniqueCategories(rules);
+        const categorySel = document.getElementById('category');
+        categorySel.innerHTML = '<option value="">Select Category</option>';
+        categories.forEach(cat => {
+          const opt = document.createElement('option');
+          opt.value = cat;
+          opt.textContent = cat;
+          categorySel.appendChild(opt);
+        });
+      }
+
+      function updateClauseDropdown() {
+        const category = document.getElementById('category').value;
+        const clauseSel = document.getElementById('clause');
+        const runBtn = document.getElementById('run');
+        
+        if (!category) {
+          clauseSel.innerHTML = '<option value="">Select Category First</option>';
+          clauseSel.disabled = true;
+          runBtn.disabled = true;
+          // Clear inputs when no category selected
+          document.getElementById('inputs').innerHTML = '';
+          document.getElementById('usageConditions').classList.add('hidden');
+          // Clear validation results
+          document.getElementById('result').innerHTML = '';
+          document.getElementById('result').classList.add('hidden');
+          return;
+        }
+
+        const filteredRules = filterRulesByCategory(window.allRules, category);
+        clauseSel.innerHTML = '<option value="">Select Clause</option>';
+        filteredRules.forEach(r => {
+          const opt = document.createElement('option');
+          opt.value = r.clause_id;
+          // Use English description and truncate if too long
+          const description = r.expense_category.en || r.expense_category.ja || 'No description';
+          opt.textContent = `${r.clause_id} — ${truncateText(description)}`;
+          clauseSel.appendChild(opt);
+        });
+        
+        clauseSel.disabled = false;
+        runBtn.disabled = false;
+        // Clear inputs when changing category
+        document.getElementById('inputs').innerHTML = '';
+        document.getElementById('usageConditions').classList.add('hidden');
+        // Clear validation results
+        document.getElementById('result').innerHTML = '';
+        document.getElementById('result').classList.add('hidden');
+      }
+
+      // Display usage conditions for selected clause
+      function displayUsageConditions() {
+        const clause = document.getElementById('clause').value;
+        const usageDiv = document.getElementById('usageConditions');
+        const usageText = document.getElementById('usageText');
+        
+        if (!clause) {
+          usageDiv.classList.add('hidden');
+          return;
+        }
+        
+        // Find the selected rule
+        const selectedRule = window.allRules.find(r => r.clause_id === clause);
+        if (selectedRule && selectedRule.usage_conditions && selectedRule.usage_conditions.en) {
+          usageText.textContent = selectedRule.usage_conditions.en;
+          usageDiv.classList.remove('hidden');
+        } else {
+          usageDiv.classList.add('hidden');
+        }
+      }
+
+      // Handle clause selection change - automatically load inputs
+      async function onClauseChange() {
+        const clause = document.getElementById('clause').value;
+        const runBtn = document.getElementById('run');
+        
+        if (clause) {
+          // Display usage conditions
+          displayUsageConditions();
+          // Automatically load inputs
+          await loadOptions();
+          // Enable validate button
+          runBtn.disabled = false;
+          // Clear any previous validation results
+          document.getElementById('result').innerHTML = '';
+          document.getElementById('result').classList.add('hidden');
+        } else {
+          // Clear inputs if no clause selected
+          document.getElementById('inputs').innerHTML = '';
+          document.getElementById('usageConditions').classList.add('hidden');
+          // Disable validate button
+          runBtn.disabled = true;
+          // Clear validation results
+          document.getElementById('result').innerHTML = '';
+          document.getElementById('result').classList.add('hidden');
+        }
+      }
+
+            async function loadOptions() {
+        const clause = document.getElementById('clause').value;
+        const category = document.getElementById('category').value;
+        if (!clause) return;
+        
+        const data = await fetchJSON(`/rules/${clause}/demo_options`);
+        const container = document.getElementById('inputs');
+        container.innerHTML = '';
+        
+        Object.entries(data.options).forEach(([key, opts]) => {
+          const wrap = document.createElement('div');
+          const isRelevant = isFieldRelevantForCategory(key, category, data.rule);
+          
+          if (isRelevant) {
+            wrap.className = 'p-4 border rounded bg-white';
+          } else {
+            wrap.className = 'p-4 border rounded bg-gray-100 opacity-50';
+          }
+          
+          const label = document.createElement('label');
+          label.className = 'block text-sm font-medium mb-1';
+          label.textContent = key;
+          if (!isRelevant) {
+            label.textContent += ' (Not relevant for this category)';
+            label.className += ' text-gray-500';
+          }
+          
+          const sel = document.createElement('select');
+          sel.className = 'border rounded px-3 py-2 w-full';
+          sel.dataset.key = key;
+          sel.disabled = !isRelevant;
+          
+          // Add default value as first option
+          let defaultValue = getDefaultValue(key, opts[0]?.type);
+          
+          // For enum fields, use the first allowed value if available
+          if (opts[0]?.type === 'enum' && opts.length > 0) {
+            defaultValue = opts[0].value; // Use the first valid option
+          }
+          
+          const defaultOpt = document.createElement('option');
+          defaultOpt.value = defaultValue;
+          defaultOpt.textContent = `${defaultValue} (Default)`;
+          defaultOpt.selected = true;
+          sel.appendChild(defaultOpt);
+          
+          // Add other options
+          opts.forEach(o => {
+            const opt = document.createElement('option');
+            opt.value = typeof o.value === 'object' ? JSON.stringify(o.value) : o.value;
+            opt.textContent = o.label;
+            sel.appendChild(opt);
+          });
+          
+          wrap.appendChild(label);
+          wrap.appendChild(sel);
+          container.appendChild(wrap);
+        });
+        
+
+      }
+
+      async function runValidation() {
+        const clause = document.getElementById('clause').value;
+        const selects = document.querySelectorAll('#inputs select');
+        const inputs = Array.from(selects).map(s => {
+          let v = s.value;
+          try { v = JSON.parse(v); } catch {}
+          if (!isNaN(v) && v !== '') v = Number(v);
+          return { key: s.dataset.key, value: v };
+        });
+        
+        const result = await fetchJSON('/rules/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clause_id: clause, inputs })
+        });
+        
+        const out = document.getElementById('result');
+        // Deduplicate reasons to avoid showing the same error multiple times
+        const uniqueReasons = [...new Set(result.reasons || [])];
+        out.innerHTML = `<div class="p-4 rounded ${result.status === 'OK' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'} border">`+
+          `<div class="font-semibold">Status: ${result.status}</div>`+
+          `<div class="text-sm mt-1">Clause ID: ${result.clause_id}</div>`+
+          `<div class="text-sm mt-1">Reasons: ${uniqueReasons.join(', ') || '—'}</div>`+
+          `</div>`;
+        
+        // Show the result div
+        out.classList.remove('hidden');
+      }
+
+      // Event listeners
+      document.getElementById('category').addEventListener('change', updateClauseDropdown);
+      document.getElementById('clause').addEventListener('change', onClauseChange);
+      document.getElementById('run').addEventListener('click', runValidation);
+      
+      // Initialize
+      loadRules();
+    </script>
+  </body>
+</html>
+
+
