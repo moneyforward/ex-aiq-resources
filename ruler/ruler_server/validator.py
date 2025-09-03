@@ -75,12 +75,17 @@ def get_missing_field_reason(field_name: str, rule: Dict[str, Any]) -> tuple[str
     field_display_name = field_name
     if field_def:
         # Use field label, description, or purpose if available
-        field_display_name = (
-            field_def.get("label") or 
-            field_def.get("description") or 
-            field_def.get("purpose") or 
-            field_name
-        )
+        label = field_def.get("label")
+        if isinstance(label, dict):
+            # If label is a dictionary with language keys, use English or fallback to first available
+            field_display_name = label.get("en") or label.get("ja") or next(iter(label.values()), field_name)
+        else:
+            field_display_name = (
+                label or 
+                field_def.get("description") or 
+                field_def.get("purpose") or 
+                field_name
+            )
     
     # Check validation rules for field-specific requirements
     validation_rules = rule.get("validation_rules", {})
@@ -111,6 +116,95 @@ def get_missing_field_reason(field_name: str, rule: Dict[str, Any]) -> tuple[str
     # Fallback to generic missing field reason
     reason_code = "missing_field" if processor.validate_reason_code("missing_field") else "missing_field"
     return reason_code, field_display_name
+
+
+def generate_field_context(field_name: str, rule: Dict[str, Any], variables: Dict[str, Any]) -> str:
+    """
+    Generate meaningful context for missing fields to improve user experience.
+    
+    Args:
+        field_name: The name of the missing field
+        rule: The rule definition for context
+        variables: Current validation variables
+        
+    Returns:
+        Context string explaining why the field is required
+    """
+    # Get the field definition from the rule
+    field_def = None
+    for field in rule.get("required_fields", {}).get("inputs", []):
+        if field.get("key") == field_name:
+            field_def = field
+            break
+    
+    # Generate context based on field type and purpose
+    if field_name in ["receipt_images", "receipt_image"]:
+        threshold = variables.get("threshold", 1000)
+        currency = variables.get("currency", "JPY")
+        return f"Receipts are required for all expenses above {threshold} {currency}."
+    
+    elif field_name in ["pre_approval_id", "pre_approval"]:
+        threshold = variables.get("threshold", 5000)
+        currency = variables.get("currency", "JPY")
+        return f"Pre-approval is required for expenses above {threshold} {currency}."
+    
+    elif field_name in ["invoice_registration_number", "invoice_number"]:
+        return "Invoice numbers are required for tracking and compliance."
+    
+    elif field_name in ["project_code", "project"]:
+        return "Project codes are required to ensure proper cost allocation."
+    
+    elif field_name in ["route", "route_info"]:
+        return "Route information is required for travel expense validation."
+    
+    elif field_name in ["destination"]:
+        return "Destination is required for travel expense validation."
+    
+    elif field_name in ["purpose"]:
+        return "Business purpose is required for expense validation."
+    
+    elif field_name in ["payment_details", "payment_method"]:
+        return "Payment details are required for expense tracking and reconciliation."
+    
+    elif field_name in ["num_nights", "nights_count"]:
+        return "Number of nights is required for accommodation expense validation."
+    
+    elif field_name in ["num_people", "num_guests", "people_count"]:
+        return "Number of people is required for expense validation."
+    
+    elif field_name in ["hotel_name"]:
+        return "Hotel name is required for proper expense tracking and validation."
+    
+    elif field_name in ["check_in_date", "check_in"]:
+        return "Check-in date is required to validate the accommodation period."
+    
+    elif field_name in ["check_out_date", "check_out"]:
+        return "Check-out date is required to validate the accommodation period."
+    
+    elif field_name in ["hotel_location", "location"]:
+        return "Hotel location is required for business trip validation and expense categorization."
+    
+    elif field_name in ["room_type"]:
+        return "Room type helps categorize the accommodation expense properly."
+    
+    elif field_name in ["confirmation_number", "booking_reference"]:
+        return "Booking confirmation number is required for expense verification."
+    
+    elif field_name in ["exchange_rate"]:
+        return "Exchange rate is required for overseas expense conversion."
+    
+    elif field_name in ["approver", "approver_name"]:
+        threshold = variables.get("threshold", 10000)
+        currency = variables.get("currency", "JPY")
+        return f"Approver is required for expenses above {threshold} {currency}."
+    
+    elif field_name in ["tax_information", "tax_details"]:
+        threshold = variables.get("threshold", 1000)
+        currency = variables.get("currency", "JPY")
+        return f"Tax details are required for expenses above {threshold} {currency}."
+    
+    # Default context for unknown fields
+    return "This field is required for proper expense validation and processing."
 
 
 def analyze_validation_rules(validation_rules: Dict[str, Any], rule: Dict[str, Any], given: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -677,19 +771,38 @@ def evaluate_rule(rule: Dict[str, Any], given: Dict[str, Any]) -> Dict[str, Any]
     # Check required fields
     missing_field_names = {}  # Store field display names for better error messages
     
+    print(f"DEBUG: Starting validation for rule {rule.get('clause_id')}")
+    print(f"DEBUG: Required fields: {rule.get('required_fields', {}).get('inputs', [])}")
+    print(f"DEBUG: Given inputs: {given}")
+    
     for i in rule.get("required_fields", {}).get("inputs", []):
         key = i.get("key")
         field_type = i.get("type", "string")
         required = i.get("required", False)
         allowed_values = i.get("allowed_values", [])
         
-        if required and (given.get(key) in (None, "")):
+        print(f"DEBUG: Processing field {key}, required: {required}, value: {repr(given.get(key))}")
+        
+        # Check if field is empty (None, empty string, or default placeholder)
+        field_value = given.get(key)
+        is_empty = (field_value is None or 
+                   field_value == "" or 
+                   field_value == "(Default)" or
+                   str(field_value).strip() == "")
+        
+        print(f"DEBUG: Field {key} is_empty: {is_empty}")
+        
+        if required and is_empty:
             ok = False
             # Dynamically determine the appropriate missing field reason and display name
             missing_reason, field_display_name = get_missing_field_reason(key, rule)
-            standardized_reasons.append(missing_reason)
+            print(f"DEBUG: Missing field {key} with reason {missing_reason}, display name: {field_display_name}")
+            # Create unique reason code for each field to avoid conflicts
+            unique_reason = f"{missing_reason}:{key}"
+            standardized_reasons.append(unique_reason)
+            
             # Store field display name for better error messages
-            missing_field_names[missing_reason] = field_display_name
+            missing_field_names[unique_reason] = field_display_name
             continue
             
         # Field validation is now handled by the generic analyze_validation_rules function
@@ -706,6 +819,9 @@ def evaluate_rule(rule: Dict[str, Any], given: Dict[str, Any]) -> Dict[str, Any]
         if not check["valid"]:
             ok = False
             standardized_reasons.append(check["reason"])
+    
+    print(f"DEBUG: After validation - ok: {ok}, standardized_reasons: {standardized_reasons}")
+    print(f"DEBUG: missing_field_names: {missing_field_names}")
 
     # Amount constraints are now handled by the generic analyze_validation_rules function
     # No more hardcoded amount validation logic here
@@ -757,30 +873,17 @@ def evaluate_rule(rule: Dict[str, Any], given: Dict[str, Any]) -> Dict[str, Any]
         "num_people": given.get("num_people")
     }
     
-    # Add missing field names for better suggested fixes
+    # Add missing field names and context for better suggested fixes
     for reason_code, field_display_name in missing_field_names.items():
-        if reason_code == "missing_field":
-            variables["field_name"] = field_display_name
-        elif reason_code == "missing_receipt_images":
-            variables["field_name"] = field_display_name
-        elif reason_code == "missing_pre_approval":
-            variables["field_name"] = field_display_name
-        elif reason_code == "missing_invoice_number":
-            variables["field_name"] = field_display_name
-        elif reason_code == "missing_project_code":
-            variables["field_name"] = field_display_name
-        elif reason_code == "missing_route_info":
-            variables["field_name"] = field_display_name
-        elif reason_code == "missing_destination":
-            variables["field_name"] = field_display_name
-        elif reason_code == "missing_purpose":
-            variables["field_name"] = field_display_name
-        elif reason_code == "missing_payment_details":
-            variables["field_name"] = field_display_name
-        elif reason_code == "missing_nights_count":
-            variables["field_name"] = field_display_name
-        elif reason_code == "missing_people_count":
-            variables["field_name"] = field_display_name
+        # Extract the base reason code (remove the field-specific suffix)
+        base_reason = reason_code.split(":")[0] if ":" in reason_code else reason_code
+        
+        # Set the field name variable
+        variables["field_name"] = field_display_name
+        
+        # Generate meaningful context for the missing field
+        field_context = generate_field_context(field_display_name, rule, variables)
+        variables["field_context"] = field_context if field_context else " This field is required for proper expense validation and processing."
     
     # Generic rule-specific variable override system
     # Any rule-specific values automatically override defaults
@@ -835,8 +938,79 @@ def evaluate_rule(rule: Dict[str, Any], given: Dict[str, Any]) -> Dict[str, Any]
     unique_standardized_reasons = list(dict.fromkeys(standardized_reasons))
     
     # Generate enhanced validation results with suggested fixes
-    enhanced_results = reason_processor.format_validation_result(unique_standardized_reasons, variables)
+    # For field-specific reason codes, we need to generate separate suggested fixes
+    processed_reasons = []
+    for reason_code in unique_standardized_reasons:
+        if ":" in reason_code:
+            # Field-specific reason code (e.g., "missing_field:receipt_images")
+            base_reason, field_name = reason_code.split(":", 1)
+            
+            # Get the base reason info
+            reason_info = reason_processor.get_reason_info(base_reason)
+            if reason_info:
+                # Create field-specific variables
+                field_variables = variables.copy()
+                field_variables["field_name"] = field_name
+                
+                # Generate field-specific context
+                field_context = generate_field_context(field_name, rule, field_variables)
+                field_variables["field_context"] = field_context if field_context else " This field is required for proper expense validation and processing."
+                
+                # Generate suggested fix with field-specific variables
+                suggested_fix = reason_processor.generate_suggested_fix(base_reason, field_variables)
+                
+                # Process description with field-specific variables
+                description = reason_info.get("description", "")
+                if description and field_variables:
+                    try:
+                        description = description.format(**field_variables)
+                    except (KeyError, ValueError):
+                        # If variable substitution fails, keep original description
+                        pass
+                
+                # Create field-specific result
+                processed_reasons.append({
+                    "code": reason_code,  # Use the unique reason code
+                    "label": reason_info.get("label", ""),
+                    "description": description,
+                    "severity": reason_info.get("severity", "error"),
+                    "suggested_fix": suggested_fix,
+                    "required_variables": reason_info.get("variables", [])
+                })
+        else:
+            # Regular reason code, process normally
+            reason_info = reason_processor.get_reason_info(reason_code)
+            if reason_info:
+                suggested_fix = reason_processor.generate_suggested_fix(reason_code, variables)
+                
+                # Process description with variables
+                description = reason_info.get("description", "")
+                if description and variables:
+                    try:
+                        description = description.format(**variables)
+                    except (KeyError, ValueError):
+                        # If variable substitution fails, keep original description
+                        pass
+                
+                processed_reasons.append({
+                    "code": reason_code,
+                    "label": reason_info.get("label", ""),
+                    "description": description,
+                    "severity": reason_info.get("severity", "error"),
+                    "suggested_fix": suggested_fix,
+                    "required_variables": reason_info.get("variables", [])
+                })
     
+    # Create enhanced results with our processed reasons
+    enhanced_results = {
+        "reasons": processed_reasons,
+        "total_count": len(processed_reasons),
+        "error_count": len([r for r in processed_reasons if r["severity"] == "error"]),
+        "warning_count": len([r for r in processed_reasons if r["severity"] == "warning"])
+    }
+    
+    print(f"DEBUG: Enhanced results: {enhanced_results}")
+
     return {
         "clause_id": rule.get("clause_id"),
         "status": "OK" if ok else "NG", 
@@ -845,7 +1019,8 @@ def evaluate_rule(rule: Dict[str, Any], given: Dict[str, Any]) -> Dict[str, Any]
         "suggested_fixes": enhanced_results.get("reasons", []),
         "total_issues": enhanced_results.get("total_count", 0),
         "error_count": enhanced_results.get("error_count", 0),
-        "warning_count": enhanced_results.get("warning_count", 0)
+        "warning_count": enhanced_results.get("warning_count", 0),
+        "variables": variables  # Include variables for frontend template processing
     }
 
 

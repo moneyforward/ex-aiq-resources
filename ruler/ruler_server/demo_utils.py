@@ -34,10 +34,11 @@ def build_demo_options(rule: Dict[str, Any]) -> Dict[str, Any]:
                 {"label": "JPY", "value": "JPY", "type": "string"},
                 {"label": "USD", "value": "USD", "type": "string"}
             ]
-        elif key in ("recognized_at"):
+        elif key in ("recognized_at", "check_in_date", "check_out_date"):
             opts = [
                 {"label": "2024-01-15", "value": "2024-01-15", "type": "date"},
-                {"label": "2024-01-20", "value": "2024-01-20", "type": "date"}
+                {"label": "2024-01-20", "value": "2024-01-20", "type": "date"},
+                {"label": "2024-02-01", "value": "2024-02-01", "type": "date"}
             ]
         elif key in ("remark"):
             opts = [
@@ -83,6 +84,39 @@ def build_demo_options(rule: Dict[str, Any]) -> Dict[str, Any]:
                 {"label": "Tokyo → Osaka", "value": "Tokyo → Osaka", "type": "string"},
                 {"label": "Shinjuku → Shibuya", "value": "Shinjuku → Shibuya", "type": "string"}
             ]
+        elif key in ("hotel_name"):
+            opts = [
+                {"label": "Tokyo Grand Hotel", "value": "Tokyo Grand Hotel", "type": "string"},
+                {"label": "Osaka Business Inn", "value": "Osaka Business Inn", "type": "string"},
+                {"label": "Kyoto Traditional Ryokan", "value": "Kyoto Traditional Ryokan", "type": "string"}
+            ]
+        elif key in ("hotel_location"):
+            opts = [
+                {"label": "Tokyo, Shibuya", "value": "Tokyo, Shibuya", "type": "string"},
+                {"label": "Osaka, Namba", "value": "Osaka, Namba", "type": "string"},
+                {"label": "Kyoto, Gion", "value": "Kyoto, Gion", "type": "string"}
+            ]
+        elif key in ("room_type"):
+            opts = [
+                {"label": "single", "value": "single", "type": "enum"},
+                {"label": "double", "value": "double", "type": "enum"},
+                {"label": "twin", "value": "twin", "type": "enum"},
+                {"label": "suite", "value": "suite", "type": "enum"},
+                {"label": "business", "value": "business", "type": "enum"},
+                {"label": "economy", "value": "economy", "type": "enum"}
+            ]
+        elif key in ("confirmation_number"):
+            opts = [
+                {"label": "BK123456789", "value": "BK123456789", "type": "string"},
+                {"label": "RES987654321", "value": "RES987654321", "type": "string"},
+                {"label": "No confirmation", "value": "", "type": "string"}
+            ]
+        elif key in ("exchange_rate"):
+            opts = [
+                {"label": "1.00 (JPY)", "value": 1.00, "type": "decimal"},
+                {"label": "0.0067 (USD to JPY)", "value": 0.0067, "type": "decimal"},
+                {"label": "0.0059 (EUR to JPY)", "value": 0.0059, "type": "decimal"}
+            ]
         elif key in ("purpose"):
             opts = [
                 {"label": "Client meeting", "value": "Client meeting", "type": "string"},
@@ -98,7 +132,7 @@ def build_demo_options(rule: Dict[str, Any]) -> Dict[str, Any]:
                 {"label": "Q1 Marketing Campaign", "value": "Q1 Marketing Campaign", "type": "string"},
                 {"label": "User Survey Incentive", "value": "User Survey Incentive", "type": "string"}
             ]
-        elif key in ("num_nights", "num_people"):
+        elif key in ("num_nights", "num_people", "num_guests"):
             # Integer fields for accommodation/personnel
             opts = [
                 {"label": "1", "value": 1, "type": "integer"},

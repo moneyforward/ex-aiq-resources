@@ -50,6 +50,11 @@ class ReasonProcessor:
         Returns:
             Dictionary containing reason information or None if not found
         """
+        # Handle field-specific reason codes (e.g., "missing_field:receipt_images")
+        if ":" in reason_code:
+            base_reason = reason_code.split(":")[0]
+            return self.reasons_data.get("reason_taxonomy", {}).get(base_reason)
+        
         return self.reasons_data.get("reason_taxonomy", {}).get(reason_code)
     
     def get_all_reasons(self) -> Dict[str, Any]:
@@ -126,6 +131,11 @@ class ReasonProcessor:
         Returns:
             True if the reason code exists, False otherwise
         """
+        # Handle field-specific reason codes (e.g., "missing_field:receipt_images")
+        if ":" in reason_code:
+            base_reason = reason_code.split(":")[0]
+            return base_reason in self.get_all_reasons()
+        
         return reason_code in self.get_all_reasons()
     
     def get_required_variables(self, reason_code: str) -> List[str]:
@@ -159,10 +169,19 @@ class ReasonProcessor:
             reason_info = self.get_reason_info(reason_code)
             if reason_info:
                 suggested_fix = self.generate_suggested_fix(reason_code, variables)
+                # Also process the description with variables
+                description = reason_info.get("description", "")
+                if description and variables:
+                    try:
+                        description = description.format(**variables)
+                    except (KeyError, ValueError):
+                        # If variable substitution fails, keep original description
+                        pass
+                
                 results.append({
                     "code": reason_code,
                     "label": reason_info.get("label", ""),
-                    "description": reason_info.get("description", ""),
+                    "description": description,
                     "severity": reason_info.get("severity", "error"),
                     "suggested_fix": suggested_fix,
                     "required_variables": reason_info.get("variables", [])

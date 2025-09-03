@@ -111,7 +111,21 @@
                 return '';
               case 'num_nights':
               case 'num_people':
+              case 'num_guests':
                 return 1; // Reasonable default for count fields
+              case 'hotel_name':
+                return 'Sample Hotel';
+              case 'hotel_location':
+                return 'Tokyo, Japan';
+              case 'room_type':
+                return 'single';
+              case 'confirmation_number':
+                return 'BK123456789';
+              case 'check_in_date':
+              case 'check_out_date':
+                return '2024-01-15';
+              case 'exchange_rate':
+                return 1.00;
               default:
                 return 'sample_value';
             }
@@ -129,6 +143,7 @@
         // Fallback to hardcoded logic if no rule data
         const relevantFields = {
           'TRAVEL': ['amount', 'currency', 'recognized_at', 'route', 'destination', 'purpose', 'receipt_images', 'payment_details', 'receipt_type'],
+          'HOTEL': ['amount', 'currency', 'recognized_at', 'hotel_name', 'check_in_date', 'check_out_date', 'num_nights', 'num_guests', 'hotel_location', 'room_type', 'confirmation_number', 'receipt_images', 'payment_details', 'receipt_type', 'pre_approval_id'],
           'SUPPLIES': ['amount', 'currency', 'recognized_at', 'receipt_images', 'invoice_registration_number', 'pre_approval_id'],
           'MISC': ['amount', 'currency', 'recognized_at', 'receipt_images', 'invoice_registration_number', 'pre_approval_id'],
           'COMMUNICATION': ['amount', 'currency', 'recognized_at', 'receipt_images', 'invoice_registration_number', 'pre_approval_id'],
@@ -325,6 +340,8 @@
           body: JSON.stringify({ clause_id: clause, inputs })
         });
         
+
+        
         const out = document.getElementById('result');
         
         if (result.status === 'OK') {
@@ -347,13 +364,23 @@
           if (uniqueReasons.length > 0) {
             html += `<div class="mt-3"><strong>Issues:</strong></div>`;
             uniqueReasons.forEach(reasonCode => {
-              // Find the corresponding fix info
+              // Find the corresponding fix info using the exact reason code
               const fixInfo = result.suggested_fixes?.find(fix => fix.code === reasonCode);
               if (fixInfo) {
                 const severityClass = fixInfo.severity === 'error' ? 'text-red-700' : 'text-orange-700';
                 const severityIcon = fixInfo.severity === 'error' ? '❌' : '⚠️';
+                
+                // Customize the display for field-specific reasons
+                let displayLabel = fixInfo.label;
+                
+                if (reasonCode.includes(':')) {
+                  // For field-specific reasons, customize the label
+                  const fieldName = reasonCode.split(':')[1];
+                  displayLabel = `${fixInfo.label}: ${fieldName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`;
+                }
+                
                 html += `<div class="mt-2 p-3 bg-white rounded border-l-4 border-l-${fixInfo.severity === 'error' ? 'red' : 'orange'}-500">`+
-                  `<div class="inline-block px-3 py-1 text-xs font-semibold rounded-full ${fixInfo.severity === 'error' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'} mb-2">${severityIcon} ${fixInfo.label}</div>`+
+                  `<div class="inline-block px-3 py-1 text-xs font-semibold rounded-full ${fixInfo.severity === 'error' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'} mb-2">${severityIcon} ${displayLabel}</div>`+
                   `<div class="text-sm text-gray-600 mb-2">${fixInfo.description}</div>`+
                   `<div class="text-sm text-blue-700 font-medium">💡 ${fixInfo.suggested_fix}</div>`+
                   `</div>`;
@@ -369,6 +396,15 @@
         out.classList.remove('hidden');
       }
 
+            // Helper function to process template strings with variables
+      function processTemplate(template, variables) {
+        if (!template || typeof template !== 'string') return template;
+        
+        return template.replace(/\{(\w+)\}/g, (match, variableName) => {
+          return variables[variableName] || match;
+        });
+      }
+      
       // Event listeners
       document.getElementById('category').addEventListener('change', updateClauseDropdown);
       document.getElementById('clause').addEventListener('change', onClauseChange);

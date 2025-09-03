@@ -3,47 +3,16 @@
     "missing_field": {
       "code": "missing_field",
       "label": "Missing Required Field",
-      "description": "A required field is missing from the expense submission",
-      "suggested_fix": "Please provide the {field_name} field. This field is required for {category} expenses.",
-      "variables": ["field_name", "category"],
+      "description": "A required field ({field_name}) is missing from the expense submission for category ({category}). Context: {field_context}",
+      "suggested_fix": "Please provide the {field_name} field. This field is required for {category} expenses. {field_context}",
+      "variables": ["field_name", "category", "field_context"],
       "severity": "error"
     },
-    "missing_receipt_images": {
-      "code": "missing_receipt_images",
-      "label": "Missing Receipt Images",
-      "description": "Receipt images are required but not provided",
-      "suggested_fix": "Please upload receipt images for the expense amount of {amount} {currency}. Receipts are required for all expenses above {threshold} {currency}.",
-      "variables": ["amount", "currency", "threshold"],
-      "severity": "error"
-    },
-    "missing_pre_approval": {
-      "code": "missing_pre_approval",
-      "label": "Missing Pre-Approval",
-      "description": "Pre-approval is required for this expense but not provided",
-      "suggested_fix": "This expense requires pre-approval. Please provide the pre-approval ID or obtain approval before submitting. Pre-approval is required for expenses above {threshold} {currency}.",
-      "variables": ["threshold", "currency"],
-      "severity": "error"
-    },
-    "missing_invoice_number": {
-      "code": "missing_invoice_number",
-      "label": "Missing Invoice Registration Number",
-      "description": "Invoice registration number is required but not provided",
-      "suggested_fix": "Please provide the invoice registration number for this {category} expense. Invoice numbers are required for tracking and compliance.",
-      "variables": ["category"],
-      "severity": "error"
-    },
-    "missing_project_code": {
-      "code": "missing_project_code",
-      "label": "Missing Project Code",
-      "description": "Project code is required for this expense category but not provided",
-      "suggested_fix": "Please provide the project code for this {category} expense. Project codes are required for {category} expenses to ensure proper cost allocation.",
-      "variables": ["category"],
-      "severity": "error"
-    },
+
     "amount_exceeds_limit": {
       "code": "amount_exceeds_limit",
       "label": "Amount Exceeds Limit",
-      "description": "The expense amount exceeds the allowed limit for this category",
+      "description": "The expense amount ({amount} {currency}) exceeds the allowed limit ({limit} {currency}) for this category ({category})",
       "suggested_fix": "The amount {amount} {currency} exceeds the limit of {limit} {currency} for {category} expenses. Please reduce the amount or obtain additional approval.",
       "variables": ["amount", "currency", "limit", "category"],
       "severity": "error"
@@ -51,15 +20,16 @@
     "amount_below_minimum": {
       "code": "amount_below_minimum",
       "label": "Amount Below Minimum",
-      "description": "The expense amount is below the minimum required for this category",
+      "description": "The expense amount ({amount} {currency}) is below the minimum ({minimum} {currency}) required for this category ({category})",
       "suggested_fix": "The amount {amount} {currency} is below the minimum of {minimum} {currency} for {category} expenses. Please ensure the amount meets the minimum requirement.",
       "variables": ["amount", "currency", "minimum", "category"],
       "severity": "warning"
     },
+
     "invalid_currency": {
       "code": "invalid_currency",
       "label": "Invalid Currency",
-      "description": "The specified currency is not allowed for this expense category",
+      "description": "The specified currency ({currency}) is not allowed for this expense category ({category}). Allowed currencies: {allowed_currencies}",
       "suggested_fix": "Currency {currency} is not allowed for {category} expenses. Please use one of the allowed currencies: {allowed_currencies}.",
       "variables": ["currency", "category", "allowed_currencies"],
       "severity": "error"
@@ -67,38 +37,23 @@
     "invalid_date": {
       "code": "invalid_date",
       "label": "Invalid Date",
-      "description": "The expense date is invalid or outside the allowed range",
+      "description": "The expense date ({date}) is invalid or outside the allowed range ({min_date} to {max_date})",
       "suggested_fix": "The date {date} is invalid. Please provide a valid date between {min_date} and {max_date}.",
       "variables": ["date", "min_date", "max_date"],
       "severity": "error"
     },
-    "future_date_not_allowed": {
-      "code": "future_date_not_allowed",
-      "label": "Future Date Not Allowed",
-      "description": "Future dates are not allowed for expense submissions",
-      "suggested_fix": "Future dates are not allowed for expense submissions. Please provide a date on or before {current_date}.",
-      "variables": ["current_date"],
-      "severity": "error"
-    },
-    "date_too_old": {
-      "code": "date_too_old",
-      "label": "Date Too Old",
-      "description": "The expense date is too old and outside the submission window",
-      "suggested_fix": "The date {date} is too old. Expenses must be submitted within {submission_window} days of the expense date.",
-      "variables": ["date", "submission_window"],
-      "severity": "error"
-    },
+
     "invalid_enum_value": {
       "code": "invalid_enum_value",
       "label": "Invalid Enum Value",
-      "description": "The provided value is not one of the allowed options for this field",
+      "description": "The provided value ({value}) is not one of the allowed options for this field ({field_name}). Allowed values: {allowed_values}",
       "suggested_fix": "The value '{value}' is not valid for {field_name}. Please select one of: {allowed_values}.",
       "variables": ["value", "field_name", "allowed_values"],
       "severity": "error"
     },
     "invalid_file_format": {
       "code": "invalid_file_format",
-      "description": "The uploaded file format is not supported",
+      "description": "The uploaded file format ({format}) is not supported. Allowed formats: {allowed_formats}",
       "label": "Invalid File Format",
       "suggested_fix": "File format {format} is not supported. Please upload files in one of these formats: {allowed_formats}.",
       "variables": ["format", "allowed_formats"],
@@ -107,71 +62,34 @@
     "file_size_exceeds_limit": {
       "code": "file_size_exceeds_limit",
       "label": "File Size Exceeds Limit",
-      "description": "The uploaded file size exceeds the maximum allowed size",
+      "description": "The uploaded file size ({file_size}) exceeds the maximum allowed size ({max_size})",
       "suggested_fix": "File size {file_size} exceeds the limit of {max_size}. Please compress the file or use a smaller file.",
       "variables": ["file_size", "max_size"],
       "severity": "error"
     },
-    "missing_route_info": {
-      "code": "missing_route_info",
-      "label": "Missing Route Information",
-      "description": "Route information is required for travel expenses but not provided",
-      "suggested_fix": "Please provide route information for this travel expense. Route details are required for travel expense validation.",
-      "variables": [],
-      "severity": "error"
-    },
-    "missing_destination": {
-      "code": "missing_destination",
-      "label": "Missing Destination",
-      "description": "Destination information is required for travel expenses but not provided",
-      "suggested_fix": "Please provide the destination for this travel expense. Destination is required for travel expense validation.",
-      "variables": [],
-      "severity": "error"
-    },
-    "missing_purpose": {
-      "code": "missing_purpose",
-      "label": "Missing Purpose",
-      "description": "Purpose information is required for this expense but not provided",
-      "suggested_fix": "Please provide the business purpose for this {category} expense. Purpose is required for expense validation.",
-      "variables": ["category"],
-      "severity": "error"
-    },
-    "missing_payment_details": {
-      "code": "missing_payment_details",
-      "label": "Missing Payment Details",
-      "description": "Payment details are required for this expense but not provided",
-      "suggested_fix": "Please provide payment details for this expense. Payment information is required for expense tracking and reconciliation.",
-      "variables": [],
-      "severity": "error"
-    },
+
     "invalid_receipt_type": {
       "code": "invalid_receipt_type",
       "label": "Invalid Receipt Type",
-      "description": "The specified receipt type is not valid for this expense category",
+      "description": "The specified receipt type ({receipt_type}) is not valid for this expense category ({category}). Allowed types: {allowed_receipt_types}",
       "suggested_fix": "Receipt type '{receipt_type}' is not valid for {category} expenses. Please use one of: {allowed_receipt_types}.",
       "variables": ["receipt_type", "category", "allowed_receipt_types"],
       "severity": "error"
     },
-    "missing_nights_count": {
-      "code": "missing_nights_count",
-      "label": "Missing Nights Count",
-      "description": "Number of nights is required for accommodation expenses but not provided",
-      "suggested_fix": "Please provide the number of nights for this accommodation expense. Nights count is required for accommodation expense validation.",
-      "variables": [],
-      "severity": "error"
-    },
-    "missing_people_count": {
-      "code": "missing_people_count",
-      "label": "Missing People Count",
-      "description": "Number of people is required for this expense but not provided",
-      "suggested_fix": "Please provide the number of people for this {category} expense. People count is required for expense validation.",
-      "variables": ["category"],
+
+
+    "invalid_accommodation_period": {
+      "code": "invalid_accommodation_period",
+      "label": "Invalid Accommodation Period",
+      "description": "The accommodation period is invalid: check-out date ({check_out_date}) must be after check-in date ({check_in_date})",
+      "suggested_fix": "The check-out date {check_out_date} must be after the check-in date {check_in_date}. Please provide valid accommodation dates.",
+      "variables": ["check_in_date", "check_out_date"],
       "severity": "error"
     },
     "amount_mismatch": {
       "code": "amount_mismatch",
       "label": "Amount Mismatch",
-      "description": "The amount in the receipt doesn't match the submitted amount",
+      "description": "The amount in the receipt ({receipt_amount} {currency}) doesn't match the submitted amount ({submitted_amount} {currency})",
       "suggested_fix": "The receipt amount {receipt_amount} {currency} doesn't match the submitted amount {submitted_amount} {currency}. Please verify and correct the amount.",
       "variables": ["receipt_amount", "currency", "submitted_amount"],
       "severity": "error"
@@ -179,7 +97,7 @@
     "duplicate_expense": {
       "code": "duplicate_expense",
       "label": "Duplicate Expense",
-      "description": "This expense appears to be a duplicate of a previously submitted expense",
+      "description": "This expense appears to be a duplicate of a previously submitted expense on {duplicate_date}",
       "suggested_fix": "This expense appears to be a duplicate. Please check if you've already submitted this expense on {duplicate_date}.",
       "variables": ["duplicate_date"],
       "severity": "warning"
@@ -187,7 +105,7 @@
     "weekend_expense_restriction": {
       "code": "weekend_expense_restriction",
       "label": "Weekend Expense Restriction",
-      "description": "This expense occurred on a weekend and may not be allowed",
+      "description": "This expense occurred on a weekend ({date}) and may not be allowed",
       "suggested_fix": "This expense occurred on a weekend ({date}). Weekend expenses may require additional justification. Please provide business justification if this is a legitimate business expense.",
       "variables": ["date"],
       "severity": "warning"
@@ -195,39 +113,25 @@
     "holiday_expense_restriction": {
       "code": "holiday_expense_restriction",
       "label": "Holiday Expense Restriction",
-      "description": "This expense occurred on a holiday and may not be allowed",
+      "description": "This expense occurred on a holiday ({holiday_name}) and may not be allowed",
       "suggested_fix": "This expense occurred on a holiday ({holiday_name}). Holiday expenses may require additional justification. Please provide business justification if this is a legitimate business expense.",
       "variables": ["holiday_name"],
       "severity": "warning"
     },
-    "missing_tax_information": {
-      "code": "missing_tax_information",
-      "label": "Missing Tax Information",
-      "description": "Tax-related information is required but not provided",
-      "suggested_fix": "Please provide tax information for this expense. Tax details are required for {category} expenses above {threshold} {currency}.",
-      "variables": ["category", "threshold", "currency"],
-      "severity": "error"
-    },
+
     "invalid_project_code": {
       "code": "invalid_project_code",
       "label": "Invalid Project Code",
-      "description": "The provided project code is not valid or active",
+      "description": "The provided project code ({project_code}) is not valid or active",
       "suggested_fix": "Project code '{project_code}' is not valid or active. Please verify the project code or contact the project manager for assistance.",
       "variables": ["project_code"],
       "severity": "error"
     },
-    "missing_approver": {
-      "code": "missing_approver",
-      "label": "Missing Approver",
-      "description": "Approver information is required but not provided",
-      "suggested_fix": "Please specify the approver for this expense. Approver is required for expenses above {threshold} {currency}.",
-      "variables": ["threshold", "currency"],
-      "severity": "error"
-    },
+
     "invalid_approver": {
       "code": "invalid_approver",
       "label": "Invalid Approver",
-      "description": "The specified approver is not authorized for this expense type or amount",
+      "description": "The specified approver ({approver_name}) is not authorized for this expense type ({category}) above threshold ({threshold} {currency})",
       "suggested_fix": "Approver '{approver_name}' is not authorized for {category} expenses above {threshold} {currency}. Please select an authorized approver.",
       "variables": ["approver_name", "category", "threshold", "currency"],
       "severity": "error"
@@ -237,7 +141,7 @@
     "version": "1.0.0",
     "last_updated": "2025-09-03",
     "description": "Comprehensive reason taxonomy for expense rule validation with suggested fixes templates. Dates in templates are dynamically replaced with current system dates at runtime.",
-    "total_reasons": 35,
+    "total_reasons": 16,
     "severity_levels": {
       "error": "Critical issues that prevent expense approval",
       "warning": "Issues that may affect approval but are not critical"

@@ -28,8 +28,8 @@
         }
       },
       "usage_conditions": {
-        "ja": "・国内で領収書が発行されない旅費交通費\n　→　通常の近隣距離の電車およびバス\n\n・新幹線の場合は、「旅費交通費：新幹線・飛行機・宿泊」を選択する\n・海外出張のためのワクチン接種費用\n※出勤交通費：カスタムルール参照",
-        "en": "Domestic travel expenses where receipts are not issued: regular local-distance trains and buses. For Shinkansen, select 'Travel & Transportation: Shinkansen, Airplane, Accommodation'. Vaccination fees for overseas business trips. See custom rules for commuting expenses."
+        "ja": "・国内で領収書が発行されない旅費交通費\n　→　通常の近隣距離の電車およびバス\n\n・新幹線の場合は、「旅費交通費：新幹線・飛行機」を選択する\n・海外出張のためのワクチン接種費用\n※出勤交通費：カスタムルール参照",
+        "en": "Domestic travel expenses where receipts are not issued: regular local-distance trains and buses. For Shinkansen, select 'Travel & Transportation: Shinkansen, Airplane'. Vaccination fees for overseas business trips. See custom rules for commuting expenses."
       },
       "required_fields": {
         "memo": {
@@ -160,8 +160,8 @@
     {
       "clause_id": "TRAVEL_002",
       "expense_category": {
-        "ja": "旅費交通費：(国内)新幹線・特急券・飛行機・宿泊",
-        "en": "Travel & Transportation: (Domestic) Shinkansen, Express, Airfare, Accommodation"
+        "ja": "旅費交通費：(国内)新幹線・特急券・飛行機",
+        "en": "Travel & Transportation: (Domestic) Shinkansen, Express, Airfare"
       },
       "account_code": {
         "ja": "旅費交通費",
@@ -176,8 +176,8 @@
         "amount_constraints": {}
       },
       "usage_conditions": {
-        "ja": "・国内で領収書が発行される旅費交通費\n　→　新幹線、飛行機、ホテル代、在来線の特急券、高速バス\n　　　※在来線の特急券や高速バスも事前申請必要\n\n・レンタカー代、レンタル自転車代、ガソリン代、駐車場代、高速代\n・出張時等一時利用のロッカー代\n\n・新幹線・特急券・飛行機・宿泊のキャンセル料は、「(海外_消費税対象外)特急券・飛行機・宿泊 」の経費科目を選択してください\n\n・（国内・海外問わず）新幹線・特急券・飛行機・宿泊 の各キャンセル料のうち消費税があるもの\n→　例：ANAの払戻手数料　など\n→　消費税が対象外の場合は、「旅費交通費：(海外_消費税対象外)特急券・飛行機・宿泊」の経費科目を選択してください。",
-        "en": "Domestic travel expenses for which receipts are issued: Shinkansen, airfare, hotel fees, express tickets on conventional lines, and express buses (pre-approval required for express tickets and express buses). Also includes rental car, rental bicycle, fuel, parking, tolls, and temporary locker fees during business trips. For cancellation fees of Shinkansen/express/airfare/hotel, select '(Overseas, Tax-Exempt) Express, Airfare, Accommodation'. If consumption tax applies to (domestic/overseas) cancellations, treat as domestic; if tax-exempt, select the overseas tax-exempt category."
+        "ja": "・国内で領収書が発行される旅費交通費\n　→　新幹線、飛行機、在来線の特急券、高速バス\n　　　※在来線の特急券や高速バスも事前申請必要\n\n・レンタカー代、レンタル自転車代、ガソリン代、駐車場代、高速代\n・出張時等一時利用のロッカー代\n\n・新幹線・特急券・飛行機のキャンセル料は、「(海外_消費税対象外)特急券・飛行機」の経費科目を選択してください\n\n・（国内・海外問わず）新幹線・特急券・飛行機の各キャンセル料のうち消費税があるもの\n→　例：ANAの払戻手数料　など\n→　消費税が対象外の場合は、「旅費交通費：(海外_消費税対象外)特急券・飛行機」の経費科目を選択してください。",
+        "en": "Domestic travel expenses for which receipts are issued: Shinkansen, airfare, express tickets on conventional lines, and express buses (pre-approval required for express tickets and express buses). Also includes rental car, rental bicycle, fuel, parking, tolls, and temporary locker fees during business trips. For cancellation fees of Shinkansen/express/airfare, select '(Overseas, Tax-Exempt) Express, Airfare'. If consumption tax applies to (domestic/overseas) cancellations, treat as domestic; if tax-exempt, select the overseas tax-exempt category."
       },
       "required_fields": {
         "memo": {
@@ -283,8 +283,8 @@
         ]
       },
       "restrictions": {
-        "ja": "・宿泊税：科目「宿泊税等消費税対象外」\n　※PayforBusinessカード連携かつ申請者に宿泊税であることが確認できた場合：経費科目は変更せずに税区分「対象外」（EX_BPO_08963421-630参照）\n\n・メモ欄に「〇〇円を自己負担します」「返金したい」等のコメントがある場合、QAに報告\n　※宿泊費上限による控除手続きが発生するため\n\n・【7/3更新】宿泊税・入湯税：科目「宿泊税等消費税対象外」にて明細分割\n（EX_BPO_08963421-421参照）\n\n※2023年10月以降の取引についてはインボイス制度が適用のため、適格事業者以外の事業者との取引については消費税負担額も加味して申請されてくる\n　・発注先が適格事業者の場合：「税抜き」金額で申請\n　・適格事業者ではない場合　：「税込み」　→　「+消費税負担額」がその意味\n基本は事前申請に記載されてくる金額を上限と判断し、承認を進める。(Backlog会話)\n\n・【10/1更新】カスタムルールの例外にも記載済み\n　海外事業者のホテル予約サイト（Agoda, Booking.com, Trip.com）決済の場合\n　・以下条件に該当する場合は証憑と明細金額が不一致でもそのまま承認する\n　・クレジットカード連携で金額変更のアラートがない\n　・領収書日付、事前申請の日付と明細の日付が同じと判断が出来る\n※ただし、ホテルの領収書が添付されていない場合でも提出依頼は不要。そのまま承認可。(Backlog会話)\n\n・【11/22更新】博多南線は例外的に在来線扱いなので、「旅費交通費：(国内)近隣の電車・バスのみ」で処理",
-        "en": "Accommodation tax: use 'Accommodation Tax (Non-Taxable)'. If PayforBusiness card linkage confirms it is accommodation tax, keep the category and set tax type to 'Exempt' (see EX_BPO_08963421-630). If the memo says 'I will personally bear XX yen' or 'I want a refund', report to QA (deduction due to lodging cap may apply). [7/3 update] Accommodation/bath taxes: split into 'Accommodation Tax (Non-Taxable)' (EX_BPO_08963421-421). From Oct 2023 the invoice system applies; include VAT burden for non-qualified issuers. If the issuer is qualified: apply net amount; if not qualified: apply gross plus VAT burden. Use the amount in pre-approval as the upper limit for approval (Backlog). [10/1 update] Exception for hotel booking sites by overseas businesses (Agoda, Booking.com, Trip.com): if no card-amount-change alert and dates align among receipt/pre-approval/expense, approve even if amounts mismatch; hotel receipt not required to request resubmission (approve as-is) (Backlog). [11/22 update] Hakata-Minami Line is exceptionally treated as a conventional line, so use 'Travel & Transportation: (Domestic) Local Trains & Buses Only'."
+        "ja": "・宿泊税：科目「宿泊税・入湯税等消費税対象外」\n　※PayforBusinessカード連携かつ申請者に宿泊税であることが確認できた場合：経費科目は変更せずに税区分「対象外」（EX_BPO_08963421-630参照）\n\n・メモ欄に「〇〇円を自己負担します」「返金したい」等のコメントがある場合、QAに報告\n　※宿泊費上限による控除手続きが発生するため\n\n・【7/3更新】宿泊税・入湯税：科目「宿泊税・入湯税等消費税対象外」にて明細分割\n（EX_BPO_08963421-421参照）\n\n※2023年10月以降の取引についてはインボイス制度が適用のため、適格事業者以外の事業者との取引については消費税負担額も加味して申請されてくる\n　・発注先が適格事業者の場合：「税抜き」金額で申請\n　・適格事業者ではない場合　：「税込み」　→　「+消費税負担額」がその意味\n基本は事前申請に記載されてくる金額を上限と判断し、承認を進める。(Backlog会話)\n\n・【11/22更新】博多南線は例外的に在来線扱いなので、「旅費交通費：(国内)近隣の電車・バスのみ」で処理",
+        "en": "Accommodation tax: use 'Accommodation Tax (Non-Taxable)'. If PayforBusiness card linkage confirms it is accommodation tax, keep the category and set tax type to 'Exempt' (see EX_BPO_08963421-630). If the memo says 'I will personally bear XX yen' or 'I want a refund', report to QA (deduction due to lodging cap may apply). [7/3 update] Accommodation/bath taxes: split into 'Accommodation Tax (Non-Taxable)' (EX_BPO_08963421-421). From Oct 2023 the invoice system applies; include VAT burden for non-qualified issuers. If the issuer is qualified: apply net amount; if not qualified: apply gross plus VAT burden. Use the amount in pre-approval as the upper limit for approval (Backlog). [10/1 update] Exception for  [11/22 update] Hakata-Minami Line is exceptionally treated as a conventional line, so use 'Travel & Transportation: (Domestic) Local Trains & Buses Only'."
       },
       "auto_approval_threshold": 0.6,
       "risk_level": "HIGH"
@@ -440,8 +440,8 @@
     {
       "clause_id": "MISC_002",
       "expense_category": {
-        "ja": "旅費交通費：(海外_消費税対象外)特急券・飛行機・宿泊",
-        "en": "Travel & Transportation: (Overseas, Tax-Exempt) Express, Airfare, Accommodation"
+        "ja": "旅費交通費：(海外_消費税対象外)特急券・飛行機",
+        "en": "Travel & Transportation: (Overseas, Tax-Exempt) Express, Airfare"
       },
       "account_code": {
         "ja": "旅費交通費\n(補助：国外)",
@@ -463,13 +463,13 @@
         }
       },
       "usage_conditions": {
-        "ja": "・海外で領収書が発行される旅費交通費\n　→　新幹線、飛行機、ホテル代、在来線の特急券、高速バス\n　　　※在来線の特急券や高速バスも事前申請必要\n\n・レンタカー代、ガソリン代、駐車場代、高速代\n・国内における、新幹線・特急券・飛行機・宿泊 のキャンセル料\n・海外における、特急券・飛行機・宿泊のキャンセル料\n\n・（国内・海外問わず）新幹線・特急券・飛行機・宿泊 の各キャンセル料のうち消費税が対象外のもの\n→　例：ANAの取消手数料\n→　消費税がある場合は、「旅費交通費：(国内)新幹線・特急券・飛行機・宿泊」の経費科目を選択してください。",
-        "en": "Overseas travel expenses for which receipts are issued: Shinkansen, airfare, hotel fees, express tickets on conventional lines, and express buses (pre-approval required for express tickets and express buses). Also includes rental car, fuel, parking, and tolls. Includes cancellation fees for (domestic) Shinkansen/express/airfare/hotel and (overseas) express/airfare/hotel. For cancellations that are tax-exempt, treat as overseas tax-exempt (e.g., ANA cancellation fees); if taxable, select the domestic category."
+        "ja": "・海外で領収書が発行される旅費交通費\n　→　新幹線、飛行機、在来線の特急券、高速バス\n　　　※在来線の特急券や高速バスも事前申請必要\n\n・レンタカー代、ガソリン代、駐車場代、高速代\n・国内における、新幹線・特急券・飛行機のキャンセル料\n・海外における、特急券・飛行機のキャンセル料\n\n・（国内・海外問わず）新幹線・特急券・飛行機の各キャンセル料のうち消費税が対象外のもの\n→　例：ANAの取消手数料\n→　消費税がある場合は、「旅費交通費：(国内)新幹線・特急券・飛行機」の経費科目を選択してください。",
+        "en": "Overseas travel expenses for which receipts are issued: Shinkansen, airfare, express tickets on conventional lines, and express buses (pre-approval required for express tickets and express buses). Also includes rental car, fuel, parking, and tolls. Includes cancellation fees for (domestic) Shinkansen/express/airfare and (overseas) express/airfare. For cancellations that are tax-exempt, treat as overseas tax-exempt (e.g., ANA cancellation fees); if taxable, select the domestic category."
       },
       "required_fields": {
         "memo": {
-          "ja": "・区間＋訪問先\n※事前申請でわかる場合は記載不要\n※宿泊代は訪問先のみでOK",
-          "en": "Route + destination (omit if evident from pre-approval). For hotel fees, destination only is fine."
+          "ja": "・区間＋訪問先\n※事前申請でわかる場合は記載不要",
+          "en": "Route + destination (omit if evident from pre-approval)."
         },
         "inputs": [
           {
@@ -1103,8 +1103,8 @@
         }
       },
       "usage_conditions": {
-        "ja": "・宿泊を伴う出張時の日当\n　※日当フォーム利用",
-        "en": "Per diem for business trips with overnight stays (use the per diem form)."
+        "ja": "・出張時の日当\n　※日当フォーム利用",
+        "en": "Per diem for business trips (use the per diem form)."
       },
       "required_fields": {
         "memo": {
@@ -1214,8 +1214,8 @@
           {
             "key": "num_nights",
             "label": {
-              "ja": "宿泊日数",
-              "en": "Number of Nights"
+              "ja": "出張日数",
+              "en": "Number of Days"
             },
             "type": "integer",
             "required": true
@@ -1223,8 +1223,8 @@
         ]
       },
       "restrictions": {
-        "ja": "・日当：2,000円(税込)x宿泊日数\n・月跨ぎの出張：出張開始日の月でまとめてOK\n　※開始日付が属する月に申請すること\n　　→11/29～12/5の日当は、11月に申請\n　　　12月に来ても承認はOKだが注意を促す",
-        "en": "Per diem: JPY 2,000 (incl. tax) × number of nights. For trips spanning months, submit in the month containing the trip start date (e.g., 11/29–12/5 per diem is filed in November). Approval in the subsequent month is acceptable but remind the filer."
+        "ja": "・日当：2,000円(税込)x出張日数\n・月跨ぎの出張：出張開始日の月でまとめてOK\n　※開始日付が属する月に申請すること\n　　→11/29～12/5の日当は、11月に申請\n　　　12月に来ても承認はOKだが注意を促す",
+        "en": "Per diem: JPY 2,000 (incl. tax) × number of days. For trips spanning months, submit in the month containing the trip start date (e.g., 11/29–12/5 per diem is filed in November). Approval in the subsequent month is acceptable but remind the filer."
       },
       "auto_approval_threshold": 0.85,
       "risk_level": "MEDIUM"
@@ -1253,8 +1253,8 @@
         }
       },
       "usage_conditions": {
-        "ja": "・宿泊を伴う出張時の日当\n　※日当フォーム利用",
-        "en": "Per diem for overseas business trips with overnight stays (use the per diem form)."
+        "ja": "・海外出張時の日当\n　※日当フォーム利用",
+        "en": "Per diem for overseas business trips (use the per diem form)."
       },
       "required_fields": {
         "memo": {
@@ -1364,8 +1364,8 @@
           {
             "key": "num_nights",
             "label": {
-              "ja": "宿泊日数",
-              "en": "Number of Nights"
+              "ja": "出張日数",
+              "en": "Number of Days"
             },
             "type": "integer",
             "required": true
@@ -1373,8 +1373,8 @@
         ]
       },
       "restrictions": {
-        "ja": "・日当：2,000円(税込)x宿泊日数\n・月跨ぎの出張：出張開始日の月でまとめてOK\n　※開始日付が属する月に申請すること\n　　→11/29～12/5の日当は、11月に申請\n　　　12月に来ても承認はOKだが注意を促す",
-        "en": "Per diem: JPY 2,000 (incl. tax) × number of nights. For trips spanning months, submit in the month containing the trip start date (e.g., 11/29–12/5 per diem is filed in November). Approval in the subsequent month is acceptable but remind the filer."
+        "ja": "・日当：2,000円(税込)x出張日数\n・月跨ぎの出張：出張開始日の月でまとめてOK\n　※開始日付が属する月に申請すること\n　　→11/29～12/5の日当は、11月に申請\n　　　12月に来ても承認はOKだが注意を促す",
+        "en": "Per diem: JPY 2,000 (incl. tax) × number of days. For trips spanning months, submit in the month containing the trip start date (e.g., 11/29–12/5 per diem is filed in November). Approval in the subsequent month is acceptable but remind the filer."
       },
       "auto_approval_threshold": 0.85,
       "risk_level": "MEDIUM"
@@ -1382,8 +1382,8 @@
     {
       "clause_id": "TRAVEL_005",
       "expense_category": {
-        "ja": "宿泊税等消費税対象外",
-        "en": "Accommodation Tax (Non-Taxable)"
+        "ja": "宿泊税・入湯税等消費税対象外",
+        "en": "Accommodation & Bath Tax (Non-Taxable)"
       },
       "account_code": {
         "ja": "旅費交通費",
@@ -8710,6 +8710,457 @@
       "restrictions": {
         "ja": null,
         "en": null
+      },
+      "auto_approval_threshold": 0.6,
+      "risk_level": "HIGH"
+    },
+    {
+      "clause_id": "HOTEL_001",
+      "expense_category": {
+        "ja": "宿泊費：国内",
+        "en": "Hotel Accommodation: Domestic"
+      },
+      "account_code": {
+        "ja": "旅費交通費",
+        "en": "Travel & Transportation"
+      },
+      "validation_rules": {
+        "pre_approval_required": true,
+        "receipt_required": true,
+        "invoice_number_required": "based_on_receipt",
+        "max_amount": null,
+        "tax_rate": null,
+        "amount_constraints": {},
+        "frequency_constraints": {
+          "max_occurrences_per_period": {
+            "scope": "person",
+            "count": 10,
+            "period": "month"
+          }
+        }
+      },
+      "usage_conditions": {
+        "ja": "・国内での宿泊費（ホテル、旅館、ゲストハウス等）\n・出張時の宿泊費\n・研修・セミナー参加時の宿泊費\n・社用での宿泊費",
+        "en": "Domestic accommodation expenses (hotels, ryokan, guesthouses, etc.). Business trip accommodation. Training/seminar accommodation. Company business accommodation."
+      },
+      "required_fields": {
+        "memo": {
+          "ja": "・宿泊目的・理由を記載\n・事前申請との整合性を確認",
+          "en": "Document accommodation purpose/reason. Verify consistency with pre-approval."
+        },
+        "inputs": [
+          {
+            "key": "amount",
+            "label": {
+              "ja": "金額",
+              "en": "Amount"
+            },
+            "type": "money",
+            "required": true
+          },
+          {
+            "key": "currency",
+            "label": {
+              "ja": "通貨",
+              "en": "Currency"
+            },
+            "type": "string",
+            "required": true
+          },
+          {
+            "key": "recognized_at",
+            "label": {
+              "ja": "利用日",
+              "en": "Transaction Date"
+            },
+            "type": "date",
+            "required": true
+          },
+          {
+            "key": "hotel_name",
+            "label": {
+              "ja": "ホテル名",
+              "en": "Hotel Name"
+            },
+            "type": "string",
+            "required": true
+          },
+          {
+            "key": "check_in_date",
+            "label": {
+              "ja": "チェックイン日",
+              "en": "Check-in Date"
+            },
+            "type": "date",
+            "required": true
+          },
+          {
+            "key": "check_out_date",
+            "label": {
+              "ja": "チェックアウト日",
+              "en": "Check-out Date"
+            },
+            "type": "date",
+            "required": true
+          },
+          {
+            "key": "num_nights",
+            "label": {
+              "ja": "宿泊日数",
+              "en": "Number of Nights"
+            },
+            "type": "integer",
+            "required": true
+          },
+          {
+            "key": "num_guests",
+            "label": {
+              "ja": "宿泊人数",
+              "en": "Number of Guests"
+            },
+            "type": "integer",
+            "required": true
+          },
+          {
+            "key": "hotel_location",
+            "label": {
+              "ja": "ホテル所在地",
+              "en": "Hotel Location"
+            },
+            "type": "string",
+            "required": true
+          },
+          {
+            "key": "room_type",
+            "label": {
+              "ja": "部屋タイプ",
+              "en": "Room Type"
+            },
+            "type": "enum",
+            "required": false,
+            "allowed_values": [
+              "single",
+              "double",
+              "twin",
+              "suite",
+              "business",
+              "economy"
+            ]
+          },
+          {
+            "key": "confirmation_number",
+            "label": {
+              "ja": "予約確認番号",
+              "en": "Confirmation Number"
+            },
+            "type": "string",
+            "required": false
+          },
+          {
+            "key": "remark",
+            "label": {
+              "ja": "説明",
+              "en": "Description"
+            },
+            "type": "string",
+            "required": false
+          },
+          {
+            "key": "payment_details",
+            "label": {
+              "ja": "支払方法",
+              "en": "Payment Method"
+            },
+            "type": "enum",
+            "required": true,
+            "allowed_values": [
+              "manual",
+              "corporate_card",
+              "route_import"
+            ]
+          },
+          {
+            "key": "receipt_type",
+            "label": {
+              "ja": "証憑種別",
+              "en": "Receipt Type"
+            },
+            "type": "enum",
+            "required": true,
+            "allowed_values": [
+              "e_doc",
+              "paper"
+            ]
+          },
+          {
+            "key": "receipt_images",
+            "label": {
+              "ja": "領収書画像",
+              "en": "Receipt Images"
+            },
+            "type": "files",
+            "required": true
+          },
+          {
+            "key": "invoice_registration_number",
+            "label": {
+              "ja": "適格番号",
+              "en": "Qualified Invoice Issuer Registration Number"
+            },
+            "type": "string",
+            "required": false,
+            "required_if": "if_receipt_shows_qualified_issuer",
+            "notes": {
+              "ja": "領収書が適格請求書発行事業者のものの場合",
+              "en": "When the receipt is issued by a qualified invoice issuer"
+            }
+          },
+          {
+            "key": "pre_approval_id",
+            "label": {
+              "ja": "事前申請ID",
+              "en": "Pre-Approval ID"
+            },
+            "type": "string",
+            "required": true
+          }
+        ]
+      },
+      "restrictions": {
+        "ja": "・宿泊税は別科目「宿泊税・入湯税等消費税対象外」で申請\n・個人旅行目的の宿泊は不可",
+        "en": "Accommodation tax must be applied under separate category 'Accommodation & Bath Tax (Non-Taxable)'. Personal travel accommodation not allowed."
+      },
+      "auto_approval_threshold": 0.7,
+      "risk_level": "HIGH"
+    },
+    {
+      "clause_id": "HOTEL_002",
+      "expense_category": {
+        "ja": "宿泊費：海外",
+        "en": "Hotel Accommodation: Overseas"
+      },
+      "account_code": {
+        "ja": "旅費交通費\n(補助：国外)",
+        "en": "Travel & Transportation (Subaccount: Overseas)"
+      },
+      "validation_rules": {
+        "pre_approval_required": true,
+        "receipt_required": true,
+        "invoice_number_required": "based_on_receipt",
+        "max_amount": null,
+        "tax_rate": "EXEMPT",
+        "amount_constraints": {},
+        "frequency_constraints": {
+          "max_occurrences_per_period": {
+            "scope": "person",
+            "count": 8,
+            "period": "month"
+          }
+        }
+      },
+      "usage_conditions": {
+        "ja": "・海外での宿泊費（ホテル、リゾート、ゲストハウス等）\n・海外出張時の宿泊費\n・海外研修・セミナー参加時の宿泊費\n・海外社用での宿泊費",
+        "en": "Overseas accommodation expenses (hotels, resorts, guesthouses, etc.). Overseas business trip accommodation. Overseas training/seminar accommodation. Overseas company business accommodation."
+      },
+      "required_fields": {
+        "memo": {
+          "ja": "・宿泊目的・理由を記載\n・事前申請との整合性を確認\n・為替レートの記載推奨",
+          "en": "Document accommodation purpose/reason. Verify consistency with pre-approval. Exchange rate documentation recommended."
+        },
+        "inputs": [
+          {
+            "key": "amount",
+            "label": {
+              "ja": "金額",
+              "en": "Amount"
+            },
+            "type": "money",
+            "required": true
+          },
+          {
+            "key": "currency",
+            "label": {
+              "ja": "通貨",
+              "en": "Currency"
+            },
+            "type": "string",
+            "required": true
+          },
+          {
+            "key": "recognized_at",
+            "label": {
+              "ja": "利用日",
+              "en": "Transaction Date"
+            },
+            "type": "date",
+            "required": true
+          },
+          {
+            "key": "hotel_name",
+            "label": {
+              "ja": "ホテル名",
+              "en": "Hotel Name"
+            },
+            "type": "string",
+            "required": true
+          },
+          {
+            "key": "check_in_date",
+            "label": {
+              "ja": "チェックイン日",
+              "en": "Check-in Date"
+            },
+            "type": "date",
+            "required": true
+          },
+          {
+            "key": "check_out_date",
+            "label": {
+              "ja": "チェックアウト日",
+              "en": "Check-out Date"
+            },
+            "type": "date",
+            "required": true
+          },
+          {
+            "key": "num_nights",
+            "label": {
+              "ja": "宿泊日数",
+              "en": "Number of Nights"
+            },
+            "type": "integer",
+            "required": true
+          },
+          {
+            "key": "num_guests",
+            "label": {
+              "ja": "宿泊人数",
+              "en": "Number of Guests"
+            },
+            "type": "integer",
+            "required": true
+          },
+          {
+            "key": "hotel_location",
+            "label": {
+              "ja": "ホテル所在地",
+              "en": "Hotel Location"
+            },
+            "type": "string",
+            "required": true
+          },
+          {
+            "key": "room_type",
+            "label": {
+              "ja": "部屋タイプ",
+              "en": "Room Type"
+            },
+            "type": "enum",
+            "required": false,
+            "allowed_values": [
+              "single",
+              "double",
+              "twin",
+              "suite",
+              "business",
+              "economy"
+            ]
+          },
+          {
+            "key": "confirmation_number",
+            "label": {
+              "ja": "予約確認番号",
+              "en": "Confirmation Number"
+            },
+            "type": "string",
+            "required": true
+          },
+          {
+            "key": "exchange_rate",
+            "label": {
+              "ja": "為替レート",
+              "en": "Exchange Rate"
+            },
+            "type": "decimal",
+            "required": false,
+            "notes": {
+              "ja": "現地通貨から円への換算レート",
+              "en": "Exchange rate from local currency to JPY"
+            }
+          },
+          {
+            "key": "remark",
+            "label": {
+              "ja": "説明",
+              "en": "Description"
+            },
+            "type": "string",
+            "required": false
+          },
+          {
+            "key": "payment_details",
+            "label": {
+              "ja": "支払方法",
+              "en": "Payment Method"
+            },
+            "type": "enum",
+            "required": true,
+            "allowed_values": [
+              "manual",
+              "corporate_card",
+              "route_import"
+            ]
+          },
+          {
+            "key": "receipt_type",
+            "label": {
+              "ja": "証憑種別",
+              "en": "Receipt Type"
+            },
+            "type": "enum",
+            "required": true,
+            "allowed_values": [
+              "e_doc",
+              "paper"
+            ]
+          },
+          {
+            "key": "receipt_images",
+            "label": {
+              "ja": "領収書画像",
+              "en": "Receipt Images"
+            },
+            "type": "files",
+            "required": true
+          },
+          {
+            "key": "invoice_registration_number",
+            "label": {
+              "ja": "適格番号",
+              "en": "Qualified Invoice Issuer Registration Number"
+            },
+            "type": "string",
+            "required": false,
+            "required_if": "if_receipt_shows_qualified_issuer",
+            "notes": {
+              "ja": "領収書が適格請求書発行事業者のものの場合",
+              "en": "When the receipt is issued by a qualified invoice issuer"
+            }
+          },
+          {
+            "key": "pre_approval_id",
+            "label": {
+              "ja": "事前申請ID",
+              "en": "Pre-Approval ID"
+            },
+            "type": "string",
+            "required": true
+          }
+        ]
+      },
+      "restrictions": {
+        "ja": "・宿泊税は別科目「宿泊税・入湯税等消費税対象外」で申請\n・個人旅行目的の宿泊は不可\n・為替レートの変動による超過分は自己負担",
+        "en": "Accommodation tax must be applied under separate category 'Accommodation & Bath Tax (Non-Taxable)'. Personal travel accommodation not allowed. Exchange rate fluctuations exceeding limits are personal responsibility."
       },
       "auto_approval_threshold": 0.6,
       "risk_level": "HIGH"
