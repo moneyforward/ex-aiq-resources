@@ -1,12 +1,14 @@
 # Ruler - Expense Rule Validator
 
-A FastAPI-based rule validation engine for expense submissions, implementing AIQ's validation logic against the Master rulebook.
+A FastAPI-based rule validation engine for expense submissions, implementing AIQ's validation logic against the Master rulebook with a comprehensive, generic validation system.
 
 ## Overview
 
 Ruler is the AIQ team's implementation of the expense rule validation engine. It provides:
 
-- **Rule Validation Logic**: Core validation rules based on the Master rulebook
+- **Generic Rule Validation Logic**: Metadata-driven validation system that automatically processes all rule types
+- **Comprehensive Reason Taxonomy**: 35 standardized reason codes with detailed descriptions and suggested fixes
+- **Dynamic Suggested Fixes**: Context-aware error messages with variable substitution
 - **Demo Interface**: Interactive web interface to test validation scenarios
 - **API Contract**: Clear specification for EAF to implement production APIs
 
@@ -15,8 +17,13 @@ Ruler is the AIQ team's implementation of the expense rule validation engine. It
 ```
 ruler/
 ├── ruler_server/          # FastAPI application
-│   ├── main.py           # Main server and validation logic
-│   └── __init__.py       # Package initialization
+│   ├── main.py           # Main server and API endpoints
+│   └── validator.py      # Generic validation engine
+├── output_schema/         # Validation output structure
+│   ├── reasons.json      # 35 standardized reason codes with taxonomy
+│   ├── reasons.schema.json # JSON schema for reason validation
+│   ├── reason_processor.py # Python module for processing reasons
+│   └── README.md         # Output schema documentation
 ├── static/                # Demo web interface
 │   └── index.html        # React + Tailwind demo page
 ├── expense_rulebook.json # Master rulebook (AIQ source of truth)
@@ -28,6 +35,29 @@ ruler/
 ├── API_CONTRACT.md       # Production API contract for EAF
 └── README.md             # This file
 ```
+
+## Key Features
+
+### 🎯 **Generic Validation System**
+- **Metadata-Driven**: All validation logic comes from rule definitions, no hardcoded conditions
+- **Recursive Processing**: Automatically handles nested validation rules at any depth
+- **Type-Agnostic**: Supports `required`, `format`, `range`, `date_validation`, `business_rule`, `field_type`, and `amount_constraint` types
+
+### 🔧 **Centralized Configuration**
+- **Single Source of Truth**: All allowed values defined in one place
+- **No Duplication**: Eliminates code duplication and maintenance issues
+- **Easy Updates**: Change values once, updates everywhere automatically
+
+### 📊 **Comprehensive Reason Taxonomy**
+- **35 Standardized Reasons**: Covers all validation scenarios
+- **Dynamic Suggested Fixes**: Context-aware error messages with variable substitution
+- **Severity Levels**: Error and warning classifications
+- **Variable Support**: Templates support dynamic values like amounts, dates, field names
+
+### 🚀 **Smart Variable Override System**
+- **Rule-Specific Limits**: Automatically uses rule-specific values instead of defaults
+- **Most Restrictive**: For amount limits, automatically selects the most restrictive value
+- **Generic Mapping**: Works with any rule structure without hardcoding
 
 ## Quick Start
 
@@ -73,6 +103,8 @@ ruler/
 - `GET /rules` - List all available rules
 - `GET /rules/{clause_id}/demo_options` - Get demo options for a rule
 - `POST /rules/evaluate` - Evaluate a rule against inputs
+- `GET /reasons` - Get full reason taxonomy
+- `GET /reasons/{reason_code}` - Get specific reason information
 
 ### Production API Contract
 
@@ -88,13 +120,52 @@ For production implementation, see **[API_CONTRACT.md](./API_CONTRACT.md)**. Thi
 
 ## Validation Logic
 
-The engine validates expense submissions against the Master rulebook using:
+The engine validates expense submissions against the Master rulebook using a completely generic, metadata-driven approach:
 
-1. **Required Field Validation**: Ensures all mandatory fields are present
-2. **Receipt Requirements**: Validates receipt image requirements
-3. **Invoice Validation**: Checks qualified invoice issuer numbers
-4. **Amount Constraints**: Enforces min/max amount limits
-5. **Per-Person Limits**: Validates per-person maximum amounts
+### **1. Required Field Validation**
+- Automatically detects missing required fields
+- Uses field metadata for intelligent error messages
+- Supports nested field structures
+
+### **2. Generic Rule Processing**
+- **Amount Constraints**: `max_amount_jpy`, `per_person_max_amount_jpy`, `per_person_min_amount_jpy`
+- **Dynamic Formulas**: `per_night_cap`, `per_person_cap` with variable calculations
+- **Frequency Constraints**: `max_occurrences_per_period` with scope and period
+- **Special Thresholds**: Custom validation rules with field mappings
+
+### **3. Smart Variable Override**
+```python
+# Rule-specific values automatically override defaults
+"validation_rules": {
+  "amount_constraints": {
+    "per_person_max_amount_jpy": 5000  # → variables["limit"] = 5000
+  }
+}
+```
+
+### **4. Recursive Validation**
+- Processes nested validation rules at any depth
+- Automatically discovers all constraint types
+- No hardcoded field names or special cases
+
+## Output Schema
+
+### **Reason Taxonomy Structure**
+```json
+{
+  "code": "amount_exceeds_limit",
+  "label": "Amount Exceeds Limit",
+  "description": "The expense amount exceeds the allowed limit for this category",
+  "suggested_fix": "The amount {amount} {currency} exceeds the limit of {limit} {currency} for {category} expenses. Please reduce the amount or obtain additional approval.",
+  "variables": ["amount", "currency", "limit", "category"],
+  "severity": "error"
+}
+```
+
+### **Variable Substitution**
+- **Dynamic Values**: System automatically populates variables
+- **Context-Aware**: Uses actual rule constraints and field values
+- **User-Friendly**: Shows specific amounts, field names, and limits
 
 ## Development
 
@@ -116,14 +187,35 @@ Server settings are configured in `config.toml`:
 - Default host: 0.0.0.0
 - Override with `HOST` and `PORT` environment variables
 
+### **Centralized Configuration**
+```python
+# All allowed values defined in one place
+ALLOWED_VALUES = {
+    "currencies": ["JPY", "USD", "EUR"],
+    "file_formats": ["JPEG", "PNG", "PDF"],
+    "receipt_types": ["receipt", "invoice", "credit_card"],
+    "approvers": ["manager", "director", "vp"],
+    "defaults": {
+        "threshold": 1000,
+        "limit": 1000000,
+        "minimum": 0,
+        "max_size": "10MB",
+        "submission_window": 30
+    }
+}
+```
+
 ## Team Responsibilities
 
 ### AIQ (This Project)
-- ✅ Rule validation logic and business rules
-- ✅ Master rulebook integration
-- ✅ API contract design
-- ✅ Reason codes taxonomy
-- ✅ Demo and testing interface
+- ✅ **Generic validation engine** with metadata-driven logic
+- ✅ **Comprehensive reason taxonomy** with 35 standardized codes
+- ✅ **Centralized configuration system** eliminating duplication
+- ✅ **Smart variable override system** for rule-specific limits
+- ✅ **Recursive validation processing** for nested rules
+- ✅ **Master rulebook integration** with all constraint types
+- ✅ **API contract design** with detailed specifications
+- ✅ **Demo and testing interface** for validation scenarios
 
 ### EAF (Production Implementation)
 - ✅ Production API deployment
@@ -132,12 +224,32 @@ Server settings are configured in `config.toml`:
 - ✅ Monitoring and observability
 - ✅ Caching and scaling
 
+## Recent Improvements
+
+### **v2.0 - Generic Validation System**
+- 🔄 **Complete Refactoring**: Removed all hardcoded validation logic
+- 🎯 **Metadata-Driven**: All validation rules defined in rule JSON
+- 🔍 **Recursive Processing**: Handles nested validation rules at any depth
+- 🧩 **Type Support**: `required`, `format`, `range`, `date_validation`, `business_rule`, `field_type`, `amount_constraint`
+
+### **v2.1 - Centralized Configuration**
+- 🎯 **Single Source of Truth**: All allowed values defined in one place
+- 🚫 **No Duplication**: Eliminated code duplication across the system
+- 🔧 **Easy Maintenance**: Change values once, updates everywhere
+
+### **v2.2 - Smart Variable Override**
+- 🧠 **Rule-Specific Limits**: Automatically uses rule constraints instead of defaults
+- 📊 **Most Restrictive**: Intelligently selects the most restrictive amount limits
+- 🔄 **Generic Mapping**: Works with any rule structure without hardcoding
+
 ## Contributing
 
 1. Follow the existing code structure
 2. Update the API contract if validation logic changes
 3. Ensure all changes pass validation (`make validate`)
 4. Test with the demo interface
+5. **Use centralized configuration** for any new allowed values
+6. **Follow the generic validation pattern** for new rule types
 
 ## License
 
