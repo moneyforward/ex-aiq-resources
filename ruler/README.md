@@ -20,9 +20,9 @@ ruler/
 │   ├── main.py           # Main server and API endpoints
 │   └── validator.py      # Generic validation engine
 ├── output_schema/         # Validation output structure
-│   ├── reasons.json      # 35 standardized reason codes with taxonomy
+│   ├── reasons.json      # 16 standardized reason codes with taxonomy
 │   ├── reasons.schema.json # JSON schema for reason validation
-│   ├── reason_processor.py # Python module for processing reasons
+│   ├── reason_processor.py # Enhanced reason processor (completely generic)
 │   └── README.md         # Output schema documentation
 ├── static/                # Demo web interface
 │   └── index.html        # React + Tailwind demo page
@@ -41,7 +41,8 @@ ruler/
 ### 🎯 **Generic Validation System**
 - **Metadata-Driven**: All validation logic comes from rule definitions, no hardcoded conditions
 - **Recursive Processing**: Automatically handles nested validation rules at any depth
-- **Type-Agnostic**: Supports `required`, `format`, `range`, `date_validation`, `business_rule`, `field_type`, and `amount_constraint` types
+- **Type-Agnostic**: Supports `required`, `format`, `range`, `date_validation`, `business_rule`, `field_type`, `amount_constraint`, and `accommodation_dates` types
+- **Completely Generic**: No manual reason processing - everything handled dynamically by the reason processor
 
 ### 🔧 **Centralized Configuration**
 - **Single Source of Truth**: All allowed values defined in one place
@@ -49,15 +50,22 @@ ruler/
 - **Easy Updates**: Change values once, updates everywhere automatically
 
 ### 📊 **Comprehensive Reason Taxonomy**
-- **35 Standardized Reasons**: Covers all validation scenarios
+- **16 Standardized Reasons**: Consolidated and optimized reason codes covering all validation scenarios
 - **Dynamic Suggested Fixes**: Context-aware error messages with variable substitution
 - **Severity Levels**: Error and warning classifications
-- **Variable Support**: Templates support dynamic values like amounts, dates, field names
+- **Variable Support**: Templates support dynamic values like amounts, dates, field names, and field contexts
+- **Field-Specific Processing**: Automatically handles field-specific reason codes (e.g., `missing_field:receipt_images`)
 
 ### 🚀 **Smart Variable Override System**
 - **Rule-Specific Limits**: Automatically uses rule-specific values instead of defaults
 - **Most Restrictive**: For amount limits, automatically selects the most restrictive value
 - **Generic Mapping**: Works with any rule structure without hardcoding
+
+### 🧠 **Enhanced Reason Processor**
+- **Completely Generic**: No manual reason processing - everything handled dynamically
+- **Field-Specific Handling**: Automatically processes field-specific reason codes (e.g., `missing_field:receipt_images`)
+- **Variable Substitution**: Processes both descriptions and suggested fixes with dynamic variables
+- **Unified Processing**: Single method handles all reason types uniformly
 
 ## Quick Start
 

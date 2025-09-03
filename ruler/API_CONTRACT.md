@@ -1,7 +1,7 @@
 # Expense Rule Validation API Contract
 
 **Version:** 1.0  
-**Last Updated:** 2024-01-XX  
+**Last Updated:** 2025-09-03  
 **Team:** AIQ (AI Quality Assurance)  
 **Purpose:** Production API contract for EAF implementation
 
@@ -57,7 +57,22 @@ POST /api/v1/expense/validate
 {
   "clause_id": "string",
   "status": "OK" | "NG",
-  "reasons": ["string"]
+  "reasons": ["string"],
+  "standardized_reasons": ["string"],
+  "suggested_fixes": [
+    {
+      "code": "string",
+      "label": "string",
+      "description": "string",
+      "severity": "error" | "warning",
+      "suggested_fix": "string",
+      "required_variables": ["string"]
+    }
+  ],
+  "total_issues": "number",
+  "error_count": "number",
+  "warning_count": "number",
+  "variables": "object"
 }
 ```
 
@@ -70,6 +85,12 @@ POST /api/v1/expense/validate
 - **`reasons`** (required): Array of reason codes explaining the result
   - Empty array `[]` for `"OK"` status
   - One or more reason codes for `"NG"` status
+- **`standardized_reasons`** (required): Array of standardized reason codes (same as reasons for now)
+- **`suggested_fixes`** (required): Array of detailed fix information with labels, descriptions, and suggested fixes
+- **`total_issues`** (required): Total number of validation issues found
+- **`error_count`** (required): Number of error-level issues
+- **`warning_count`** (required): Number of warning-level issues
+- **`variables`** (required): Context variables used for validation (amounts, dates, field names, etc.)
 
 ### Error Responses
 
@@ -96,7 +117,31 @@ POST /api/v1/expense/validate
 
 ## Reason Codes
 
-Reason codes follow the format `category:detail` to provide structured error information.
+The system uses 16 standardized reason codes that cover all validation scenarios. Reason codes can be:
+
+- **Base codes**: Direct reason codes (e.g., `missing_field`, `amount_exceeds_limit`)
+- **Field-specific codes**: Extended with field names (e.g., `missing_field:receipt_images`, `missing_field:pre_approval_id`)
+
+### Standardized Reason Codes
+
+| Code | Severity | Description |
+|------|----------|-------------|
+| `missing_field` | Error | Required field is missing |
+| `amount_exceeds_limit` | Error | Amount exceeds allowed limit |
+| `amount_below_minimum` | Error | Amount below required minimum |
+| `invalid_date` | Error | Date format or value is invalid |
+| `invalid_accommodation_period` | Error | Check-out date is before check-in date |
+| `duplicate_expense` | Warning | Duplicate expense detected |
+| `invalid_currency` | Error | Currency not allowed for this category |
+| `invalid_receipt_type` | Error | Receipt type not allowed |
+| `invalid_payment_method` | Error | Payment method not allowed |
+| `file_format_not_allowed` | Error | File format not supported |
+| `file_size_exceeds_limit` | Error | File size exceeds maximum allowed |
+| `invalid_business_rule` | Error | Business rule violation |
+| `frequency_limit_exceeded` | Warning | Frequency limit exceeded |
+| `invalid_field_format` | Error | Field format is invalid |
+| `invalid_field_value` | Error | Field value is not allowed |
+| `missing_approval` | Error | Required approval is missing |
 
 ### Missing Field Errors
 - `missing:{field_name}` - Required field is missing or empty
@@ -162,7 +207,26 @@ POST /api/v1/expense/validate
 {
   "clause_id": "TRAVEL_001",
   "status": "NG",
-  "reasons": ["missing:route"]
+  "reasons": ["missing_field:route"],
+  "standardized_reasons": ["missing_field:route"],
+  "suggested_fixes": [
+    {
+      "code": "missing_field:route",
+      "label": "Missing Required Field: Route",
+      "description": "A required field (route) is missing from the expense submission for category (Domestic Travel). Context: This field is required for proper expense validation and processing.",
+      "severity": "error",
+      "suggested_fix": "Please provide the route field. This field is required for Domestic Travel expenses. This field is required for proper expense validation and processing.",
+      "required_variables": ["field_name", "category", "field_context"]
+    }
+  ],
+  "total_issues": 1,
+  "error_count": 1,
+  "warning_count": 0,
+  "variables": {
+    "field_name": "route",
+    "category": "Domestic Travel",
+    "field_context": "This field is required for proper expense validation and processing."
+  }
 }
 ```
 
@@ -184,38 +248,71 @@ POST /api/v1/expense/validate
 {
   "clause_id": "TRAVEL_002",
   "status": "NG",
-  "reasons": ["amount:exceeds_max"]
+  "reasons": ["amount_exceeds_limit"],
+  "standardized_reasons": ["amount_exceeds_limit"],
+  "suggested_fixes": [
+    {
+      "code": "amount_exceeds_limit",
+      "label": "Amount Exceeds Limit",
+      "description": "The expense amount (50000 JPY) exceeds the allowed limit (30000 JPY) for this category (Domestic Travel)",
+      "severity": "error",
+      "suggested_fix": "The amount 50000 JPY exceeds the limit of 30000 JPY for Domestic Travel expenses. Please reduce the amount or obtain additional approval.",
+      "required_variables": ["amount", "currency", "limit", "category"]
+    }
+  ],
+  "total_issues": 1,
+  "error_count": 1,
+  "warning_count": 0,
+  "variables": {
+    "amount": 50000,
+    "currency": "JPY",
+    "limit": 30000,
+    "category": "Domestic Travel"
+  }
 }
 ```
 
-## Performance Requirements
+### Hotel Accommodation Validation
+```json
+POST /api/v1/expense/validate
+{
+  "clause_id": "HOTEL_001",
+  "inputs": [
+    {"key": "amount", "value": 15000},
+    {"key": "hotel_name", "value": "Tokyo Grand Hotel"},
+    {"key": "check_in_date", "value": "2025-01-20"},
+    {"key": "check_out_date", "value": "2025-01-15"},
+    {"key": "num_guests", "value": 2}
+  ]
+}
+```
 
-- **Latency**: P95 response time ≤ 150ms
-- **Throughput**: Handle concurrent requests efficiently
-- **Availability**: 99.9% uptime
-
-## Security Requirements
-
-- **Authentication**: JWT-based authentication required
-- **Authorization**: Validate user permissions for expense categories
-- **Input Validation**: Sanitize and validate all input fields
-- **Rate Limiting**: Implement appropriate rate limiting
-
-## Monitoring & Observability
-
-EAF should implement:
-- Request/response logging with `clause_id` tracking
-- Performance metrics (latency, throughput, error rates)
-- Audit logging for compliance requirements
-- Health check endpoints
-
-## Future Enhancements
-
-This contract will be extended in future phases to include:
-- Confidence scoring and selective abstention
-- Detailed reason codes with suggested fixes
-- Rule classification and risk assessment
-- Caching and optimization strategies
+**Response:**
+```json
+{
+  "clause_id": "HOTEL_001",
+  "status": "NG",
+  "reasons": ["invalid_accommodation_period"],
+  "standardized_reasons": ["invalid_accommodation_period"],
+  "suggested_fixes": [
+    {
+      "code": "invalid_accommodation_period",
+      "label": "Invalid Accommodation Period",
+      "description": "The accommodation period is invalid: check-out date (2025-01-15) must be after check-in date (2025-01-20)",
+      "severity": "error",
+      "suggested_fix": "The check-out date 2025-01-15 must be after the check-in date 2025-01-20. Please provide valid accommodation dates.",
+      "required_variables": ["check_out_date", "check_in_date"]
+    }
+  ],
+  "total_issues": 1,
+  "error_count": 1,
+  "warning_count": 0,
+  "variables": {
+    "check_in_date": "2025-01-20",
+    "check_out_date": "2025-01-15"
+  }
+}
+```
 
 ## Contact
 
