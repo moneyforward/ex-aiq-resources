@@ -8,11 +8,12 @@ packages = [{include = "ruler_server"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-fastapi = "^0.110"
+fastapi = "0.116.1"
 uvicorn = {extras = ["standard"], version = "^0.24"}
 pydantic = "^2.6"
 jsonschema = "^4.21"
 aiofiles = "^23.2"
+starlette = ">=0.47.2"
 
 [tool.poetry.scripts]
 ruler-server = "ruler_server.main:run"

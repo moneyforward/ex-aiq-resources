@@ -27,10 +27,11 @@ docker-build:
 	docker build -t ruler-demo .
 
 docker-run:
-	docker run -p 8810:8810 ruler-demo
+	docker run --name ruler-demo-container -p 8810:8810 ruler-demo
 
 # Cleanup
 clean:
 	rm -rf build/ dist/ *.egg-info/ __pycache__/ .pytest_cache/
 	find . -name "*.pyc" -delete
 	poetry env remove --all
+	docker container prune -f
