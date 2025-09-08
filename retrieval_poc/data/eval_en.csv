@@ -1,0 +1,1967 @@
+Rule,"Expense item name
+(Name registered in Cloud Expenses)",Account,CONCAT A&B,Advance application,Receipt attached,Eligibility number,Memo section (contents to be entered),When to use this expense item,"Check the contents, notes, and remarks",Example 1,Example 2,Distractor Rules
+RULE_001,Travel expenses: (Domestic) Local trains and buses only,Travel expenses and transportation expenses,Travel expenses: (Domestic) Local trains and buses onlyTravel expenses and transportation expenses,none,none,Unnecessary,・Manual input: Section + destination or purpose,"・Travel expenses for which no receipts are issued within Japan
+→ Regular train and bus trips for short distances
+
+・For Shinkansen (bullet trains), select ""Travel Expenses: Shinkansen, Airplanes, and Accommodations""
+・Vaccination expenses for overseas business trips
+*Commuting expenses: See Custom Rules","- In principle: Applications must be submitted via a linked service (no enforcement required)
+- Expenses for returning home for those working away from home (up to once a month)
+*No decision required by the BPO
+- Transportation expenses for health checkups on weekends: OK
+- Even if an item appears to be travel expenses for commuting to work, there is no need to interview the applicant (if it is clear, follow custom rules)
+- Transportation expenses for passport acquisition and vaccinations for accompanying family members on an overseas assignment are also OK.","``` json
+{
+""employee_id"": ""JP001"",
+""trip_start_date"": ""2025-09-07"",
+""trip_end_date"": ""2025-09-07"",
+""origin"": ""Tokyo"",
+""destination"": ""Shinjuku"",
+""transport_mode"": ""Train"",
+""fare_amount"": ""500"",
+""receipt_number"": ""not applicable""
+}
+
+```","``` json
+{
+""employee_id"": ""JP002"",
+""trip_start_date"": ""2025-09-08"",
+""trip_end_date"": ""2025-09-08"",
+""origin"": ""Osaka"",
+""destination"": ""Kyoto"",
+""transport_mode"": ""Bus"",
+""fare_amount"": ""800"",
+""receipt_number"": ""not applicable""
+}
+
+```","['RULE_003', 'RULE_002', 'RULE_005']"
+RULE_002,"Travel expenses: (Domestic) Shinkansen, express tickets, flights, accommodation",Travel expenses and transportation expenses,"Travel expenses: (Domestic) Shinkansen, express tickets, flights, accommodationTravel expenses and transportation expenses",error,error,Based on receipt,,"・Travel and transportation expenses for which receipts are issued within Japan
+→ Shinkansen, airplane, hotel, conventional line limited express ticket, highway bus
+　　　*Conventional line limited express ticket and highway bus tickets also require advance application.
+
+・Rental car, bicycle rental, gasoline, parking, highway tolls
+・Locker fees for temporary use during business trips, etc.
+
+・For cancellation fees for Shinkansen, limited express tickets, airplane, and accommodation, please select the expense category ""(Overseas_Not subject to consumption tax) Limited Express Tickets, Airplane, and Accommodation.""
+
+・Cancellation fees for Shinkansen, limited express tickets, airplane, and accommodation (both domestic and international) that are subject to consumption tax.
+→ Example: ANA refund fees, etc.
+→ If consumption tax is not applicable, please select the expense category ""Travel and Transportation Expenses: (Overseas_Not subject to consumption tax) Limited Express Tickets, Airplane, and Accommodation.""","・Accommodation Tax: Item ""Accommodation Tax, etc. Not Subject to Consumption Tax""
+　※If PayforBusiness card is linked and the applicant confirms that the tax is accommodation tax: Do not change the expense item, but change the tax category to ""Not Subject to Consumption Tax"" (see EX_BPO_08963421-630).
+
+・If there are comments in the memo field such as ""I will pay XX yen myself"" or ""I would like a refund,"" please report this to QA.
+　※This is because deduction procedures will be required due to the accommodation expense cap.
+
+・[Updated July 3] Accommodation Tax/Bathing Tax: Item ""Accommodation Tax, etc. Subject to Consumption Tax"" ""Excluding"" and ""Separate"" statements
+(See EX_BPO_08963421-421)
+
+*Since the invoice system will apply to transactions from October 2023 onward, transactions with non-qualified businesses will be submitted with the consumption tax amount taken into account.
+
+- If the supplier is a qualified business, submit the amount ""excluding tax.""
+
+- If the supplier is not a qualified business, submit the amount ""including tax"" - meaning ""+ consumption tax amount.""
+The default is to proceed with approval based on the amount listed in the pre-application. (Backlog conversation)
+
+- [Updated October 1st] Also listed in the Custom Rule Exceptions
+
+For payments made via overseas business hotel booking sites (Agoda, Booking.com, Trip.com)
+
+- If the following conditions are met, approval will be granted even if the supporting documentation and statement amount do not match.
+- There is no alert for a change in the amount due to credit card integration.
+- The receipt date, pre-application date, and statement date can be determined to be the same.
+*However, even if a hotel receipt is not attached, there is no need to request its submission. The transaction can be approved without any changes. (Backlog Conversation)
+
+・[Updated 11/22] The Hakata Minami Line is an exception and is treated as a conventional line, so it is treated as ""Travel and Transportation Expenses: (Domestic) Local Trains and Buses Only.""","``` json
+{
+""employee_id"": ""JP001"",
+""trip_start_date"": ""2025-09-07"",
+""trip_end_date"": ""2025-09-07"",
+""origin"": ""Tokyo"",
+""destination"": ""Osaka"",
+""transport_mode"": ""Shinkansen"",
+""ticket_type"": ""Ordinary"",
+""accommodation_name"": """",
+""accommodation_amount"": """",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""trip_start_date"": ""2025-09-09"",
+""trip_end_date"": ""2025-09-09"",
+""origin"": ""Nagoya"",
+""destination"": ""Fukuoka"",
+""transport_mode"": ""Flight"",
+""ticket_type"": ""First Class"",
+""accommodation_name"": ""Grand Hotel"",
+""accommodation_amount"": ""20000"",
+""receipt_number"": ""FLT67890""
+}
+
+```","['RULE_004', 'RULE_001', 'RULE_005']"
+RULE_003,Travel expenses: (overseas_not subject to consumption tax) Local trains and buses only,"Travel expenses and transportation expenses
+(Support: Overseas)","Travel expenses: (overseas_not subject to consumption tax) Local trains and buses onlyTravel expenses and transportation expenses
+(Support: Overseas)",none,none,Unnecessary,・Manual input: Section + destination or purpose,"- Overseas travel expenses for which receipts are not issued
+-> Regular train and bus trips within a short distance
+
+*Commuting expenses: See custom rules","Regular trains and buses overseas
+*Regular trains and buses do not issue receipts, so approval is OK even if there is no receipt and payment confirmation.","``` json
+{
+""employee_id"": ""JP002"",
+""trip_start_date"": ""2025-09-08"",
+""trip_end_date"": ""2025-09-08"",
+""origin"": ""Seoul"",
+""destination"": ""Busan"",
+""transport_mode"": ""Subway"",
+""fare_amount"": ""3000"",
+""receipt_number"": ""not applicable"",
+""overseas_flag"": true
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""trip_start_date"": ""2025-09-09"",
+""trip_end_date"": ""2025-09-09"",
+""origin"": ""London"",
+""destination"": ""Paris"",
+""transport_mode"": ""Bus"",
+""fare_amount"": ""20"",
+""receipt_number"": ""N/A"",
+""overseas_flag"": true
+}
+
+```","['RULE_006', 'RULE_010', 'RULE_001']"
+RULE_004,"Travel expenses: (overseas_excluding consumption tax) express train tickets, flights, accommodation","Travel expenses and transportation expenses
+(Support: Overseas)","Travel expenses: (overseas_excluding consumption tax) express train tickets, flights, accommodationTravel expenses and transportation expenses
+(Support: Overseas)",error,error,Based on receipt,"・Route + Destination
+*No need to enter if the destination is known in advance
+*Only lodging fees for destinations are required.","・Travel and transportation expenses for which receipts are issued overseas
+→ Shinkansen, airplane, hotel, conventional line limited express ticket, highway bus
+*Pre-application required for conventional line limited express ticket and highway bus tickets
+
+・Rental car, gasoline, parking, highway tolls
+・Domestic cancellation fees for Shinkansen, limited express ticket, airplane, and accommodation
+・Overseas cancellation fees for limited express ticket, airplane, and accommodation
+
+・Cancellation fees for Shinkansen, limited express ticket, airplane, and accommodation (both domestic and international) that are not subject to consumption tax
+→ Example: ANA cancellation fee
+→ If consumption tax is applicable, please select the expense category ""Travel and Transportation Expenses: (Domestic) Shinkansen, Limited Express Ticket, Airline, and Accommodation.""","・Expenses for returning home for work away from home (up to once a month)
+　*No decision required by the BPO
+
+*Since the invoice system will apply to transactions from October 2023 onward, transactions with non-qualified businesses will be submitted with the consumption tax amount taken into account.
+　・If the supplier is a qualified business, submit the amount ""excluding tax.""
+　・If the supplier is not a qualified business, submit the amount ""including tax"" - this means ""+ consumption tax amount.""
+Basically, the amount listed in the pre-application will be considered the upper limit and approval will proceed. (Backlog conversation)","``` json
+{
+""employee_id"": ""JP001"",
+""trip_start_date"": ""2025-09-07"",
+""trip_end_date"": ""2025-09-10"",
+""origin_country"": ""Japan"",
+""destination_country"": ""USA"",
+""transport_mode"": ""Flight"",
+""ticket_type"": ""Economy"",
+""accommodation_name"": ""Hotel XYZ"",
+""accommodation_amount"": ""not applicable"",
+""receipt_number"": ""R12345"",
+""overseas_flag"": true
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""trip_start_date"": ""2025-11-01"",
+""trip_end_date"": ""2025-11-05"",
+""origin_country"": ""USA"",
+""destination_country"": ""UK"",
+""transport_mode"": ""Train"",
+""ticket_type"": ""First Class"",
+""accommodation_name"": ""Grand Hotel"",
+""accommodation_amount"": ""not applicable"",
+""receipt_number"": ""TRP002"",
+""overseas_flag"": true
+}
+
+```","['RULE_002', 'RULE_003', 'RULE_006']"
+RULE_005,Taxi fares: (Domestic) Generally not permitted. Please state the reason for use and destination.,Travel expenses and transportation expenses,Taxi fares: (Domestic) Generally not permitted. Please state the reason for use and destination.Travel expenses and transportation expenses,none,error,Based on receipt,"Reason for using the taxi or destination
+*Any reason is acceptable",・Domestic taxi fares,"- Unpaid receipts are acceptable
+- Taxis are generally prohibited
+- Late-night commutes are also generally prohibited
+- Only available when necessary/emergency","``` json
+{
+""employee_id"": ""JP001"",
+""trip_date"": ""2025-09-07"",
+""taxi_reason"": ""Late-night work"",
+""taxi_destination"": ""Home"",
+""fare_amount"": ""3000"",
+""receipt_number"": ""TXI12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""trip_date"": ""2025-09-09"",
+""taxi_reason"": ""Emergency"",
+""taxi_destination"": ""Hospital"",
+""fare_amount"": ""4500"",
+""receipt_number"": ""TXI67890""
+}
+
+```","['RULE_006', 'RULE_007', 'RULE_008']"
+RULE_006,"Taxi fares (overseas, not subject to consumption tax): Not permitted in principle. Please state the reason for use and destination.","Travel expenses and transportation expenses
+ (Support: Overseas)","Taxi fares (overseas, not subject to consumption tax): Not permitted in principle. Please state the reason for use and destination.Travel expenses and transportation expenses
+ (Support: Overseas)",none,error,Based on receipt,"Reason for using the taxi or destination
+*Any reason is acceptable","・Taxi fares overseas
+・Grab","- Unpaid receipts are acceptable
+- Taxis are generally prohibited
+- Late-night commutes are also generally prohibited
+- Only available when necessary/emergency","``` json
+{
+""employee_id"": ""JP001"",
+""trip_date"": ""2025-09-07"",
+""overseas_flag"": true,
+""taxi_reason"": ""Business meeting"",
+""taxi_destination"": ""Tokyo Station"",
+""fare_amount"": ""2500"",
+""receipt_number"": ""TXI789""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""trip_date"": ""2025-09-07"",
+""overseas_flag"": true,
+""taxi_reason"": ""Airport transfer"",
+""taxi_destination"": ""Hotel"",
+""fare_amount"": ""5000"",
+""receipt_number"": ""TXI987""
+}
+
+```","['RULE_005', 'RULE_007', 'RULE_003']"
+RULE_007,Taxi fares (when entertaining guests): Generally not permitted. Please state the reason for use and the destination.,"Entertainment and social expenses
+(Subsidy: Other entertainment expenses)","Taxi fares (when entertaining guests): Generally not permitted. Please state the reason for use and the destination.Entertainment and social expenses
+(Subsidy: Other entertainment expenses)",none,error,Based on receipt,"Reason for using the taxi or destination
+*Any reason is acceptable","Taxi fares for business entertainment or dinners
+*Taxi fares to the recipient's home
+*Taxi fares from the business entertainment venue to your home, etc.","・Unpaid receipts are OK
+・It doesn't matter whether the event is held by the other party or our company","``` json
+{
+""employee_id"": ""JP001"",
+""trip_date"": ""2025-09-07"",
+""guest_names"": ""Mr. Tanaka"",
+""destination"": ""Shinjuku Station"",
+""taxi_reason"": ""Client entertainment"",
+""fare_amount"": ""3000"",
+""receipt_number"": ""R00123""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""trip_date"": ""2025-09-07"",
+""guest_names"": ""Ms. Sato, Mr. Endo"",
+""destination"": ""Ginza"",
+""taxi_reason"": ""Dinner with clients"",
+""fare_amount"": ""4500"",
+""receipt_number"": ""TXI456""
+}
+
+```","['RULE_005', 'RULE_006', 'RULE_018']"
+RULE_008,Domestic daily allowance: Enter the business trip WF No.,Travel expenses and transportation expenses,Domestic daily allowance: Enter the business trip WF No.Travel expenses and transportation expenses,error,none,Unnecessary,,"・Daily allowance for business trips involving overnight stays
+*Please use the daily allowance form","Daily allowance: 2,000 yen (tax included) x number of nights
+Business trips that cross months: You can apply for the same amount in the month in which the trip begins.
+*Please apply for the month in which the start date falls.
+→ For daily allowances from November 29th to December 5th, apply in November.
+Approvals in December are also accepted, but caution is advised.","``` json
+{
+""employee_id"": ""JP001"",
+""allowance_start_date"": ""2025-09-07"",
+""allowance_end_date"": ""2025-09-08"",
+""wf_number"": ""WF12345"",
+""domestic_daily_allowance_amount"": ""2000""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""allowance_start_date"": ""2025-10-01"",
+""allowance_end_date"": ""2025-10-03"",
+""wf_number"": ""WF67890"",
+""domestic_daily_allowance_amount"": ""2000""
+}
+
+```","['RULE_009', 'RULE_005', 'RULE_001']"
+RULE_009,Overseas daily allowance: Enter the travel WF No.,"Travel expenses and transportation expenses
+(Support: Overseas)","Overseas daily allowance: Enter the travel WF No.Travel expenses and transportation expenses
+(Support: Overseas)",error,none,Unnecessary,,"・Daily allowance for business trips involving overnight stays
+*Please use the daily allowance form","Daily allowance: 2,000 yen (tax included) x number of nights
+Business trips that cross months: You can apply for the same amount in the month in which the trip begins.
+*Please apply for the month in which the start date falls.
+→ For daily allowances from November 29th to December 5th, apply in November.
+Approvals in December are also accepted, but caution is advised.","``` json
+{
+""employee_id"": ""JP005"",
+""allowance_start_date"": ""2025-10-01"",
+""allowance_end_date"": ""2025-10-05"",
+""wf_number"": ""TRV-005"",
+""overseas_daily_allowance_amount"": ""not applicable"",
+""overseas_flag"": ""true""
+}
+
+```","``` json
+{
+""employee_id"": ""JP006"",
+""allowance_start_date"": ""2025-11-10"",
+""allowance_end_date"": ""2025-11-12"",
+""wf_number"": ""TRV-006"",
+""overseas_daily_allowance_amount"": ""not applicable"",
+""overseas_flag"": ""true""
+}
+
+```","['RULE_008', 'RULE_006', 'RULE_003']"
+RULE_010,Not subject to accommodation tax or other consumption tax,Travel expenses and transportation expenses,Not subject to accommodation tax or other consumption taxTravel expenses and transportation expenses,error,error,Based on receipt,,"・Accommodation tax (domestic), bathing tax",,"``` json
+{
+""employee_id"": ""JP001"",
+""stay_start_date"": ""2025-09-07"",
+""stay_end_date"": ""2025-09-08"",
+""accommodation_type"": ""Hotel"",
+""amount_excluding_tax"": ""5000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""stay_start_date"": ""2025-09-15"",
+""stay_end_date"": ""2025-09-16"",
+""accommodation_type"": ""Ryokan"",
+""amount_excluding_tax"": ""7500"",
+""receipt_number"": ""TX87654""
+}
+
+```","['RULE_003', 'RULE_006', 'RULE_004']"
+RULE_011,Travel expenses: Expressways using credit cards (ETC),Travel expenses and transportation expenses,Travel expenses: Expressways using credit cards (ETC)Travel expenses and transportation expenses,error,none,Unnecessary,,Expressways using credit cards (ETC),"*Attached evidence can be approved with a ""Certificate of Use.""","``` json
+{
+""employee_id"": ""JP001"",
+""trip_start_date"": ""2025-09-07"",
+""trip_end_date"": ""2025-09-07"",
+""expressway_name"": ""Tomei Expressway"",
+""etccard_number"": ""1234567890"",
+""amount"": ""2500"",
+""receipt_number"": ""EXPWY12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""trip_start_date"": ""2025-09-09"",
+""trip_end_date"": ""2025-09-09"",
+""expressway_name"": ""Chuo Expressway"",
+""etccard_number"": ""0987654321"",
+""amount"": ""1800"",
+""receipt_number"": ""EXPWY67890""
+}
+
+```","['RULE_001', 'RULE_002', 'RULE_003']"
+RULE_012,"Conference expenses (10%): Expenses required for conferences, food and beverage expenses associated with seminars, etc.",Conference fees,"Conference expenses (10%): Expenses required for conferences, food and beverage expenses associated with seminars, etc.Conference fees",error,error,Based on receipt,,"- General venue rental and food and beverage costs for meetings (including those subject to a 10% consumption tax rate)
+- Lunch and snacks (e.g., snacks and beverages) between meetings or seminars (training)
+- Food and beverage costs for networking events held at the same venue after a meeting or seminar (training), with a cost of 5,000 yen or less per person (tax included)*
+- PCR testing and antigen testing kits for the purpose of holding a meeting or seminar
+
+Examples: - Meetings held at cafes due to lack of meeting space
+- Using cafes to secure Zoom space, etc.
+- Lunch meetings
+- Lunch provided at seminars and snacks (under ¥5,000, regardless of whether the seminar is company-sponsored or not).
+
+*Reason for ¥5,000 per person
+- For tax purposes, the limit for meeting expenses is ""not more than a regular lunch,"" so our company policy is to limit it to ¥5,000 or less.
+
+<Other Examples Not Eligible for Meeting Expenses>
+- PCR testing costs for entry into Japan for purposes other than a meeting: Select ""Equipment and Consumables: Less than ¥100,000.""
+- Expenses for participation in externally sponsored seminars: Select ""Recruitment and Training Expenses (Education and Training Expenses).""
+- Social gatherings during departmental training camps: Select ""Company food and beverage expenses: Company members only (excluding Happy Hour and general meeting social gatherings).""",,"``` json
+{
+""employee_id"": ""JP001"",
+""conference_name"": ""Tech Conference 2025"",
+""conference_start_date"": ""2025-10-15"",
+""conference_end_date"": ""2025-10-17"",
+""conference_location"": ""Tokyo Big Sight"",
+""conference_fee"": ""50000"",
+""receipt_number"": ""CFC2025001""
+}
+
+```","``` json
+{
+""employee_id"": ""JP002"",
+""conference_name"": ""AI Summit"",
+""conference_start_date"": ""2025-11-01"",
+""conference_end_date"": ""2025-11-02"",
+""conference_location"": ""Kyoto"",
+""conference_fee"": ""30000"",
+""receipt_number"": ""AIS2025002""
+}
+
+```","['RULE_013', 'RULE_018', 'RULE_019']"
+RULE_013,"Meeting expenses (8%): ​​Expenses for meetings, food and beverages accompanying seminars, etc.",Conference fees,"Meeting expenses (8%): ​​Expenses for meetings, food and beverages accompanying seminars, etc.Conference fees",error,error,Based on receipt,,"""Meeting expenses (10%): expenses required for meetings, food and beverage expenses associated with seminars, etc."" Expenses subject to the reduced consumption tax rate of 8%",,"``` json
+{
+""employee_id"": ""JP001"",
+""meeting_name"": ""Team Meeting"",
+""meeting_date"": ""2025-09-07"",
+""meeting_location"": ""Tokyo Office"",
+""meeting_fee"": ""5000"",
+""meal_costs"": ""3000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""meeting_name"": ""Project Review"",
+""meeting_date"": ""2025-09-15"",
+""meeting_location"": ""Conference Room A"",
+""meeting_fee"": ""2000"",
+""meal_costs"": ""1500"",
+""receipt_number"": ""MRF678""
+}
+
+```","['RULE_012', 'RULE_016', 'RULE_017']"
+RULE_014,"Outside dining expenses (less than 10,000 yen per person excluding tax) (10%): Please list the company names and names of all participants","Meeting expenses
+(Subsidy: Entertainment meals (up to 10,000 yen per person))","Outside dining expenses (less than 10,000 yen per person excluding tax) (10%): Please list the company names and names of all participantsMeeting expenses
+(Subsidy: Entertainment meals (up to 10,000 yen per person))",error,error,Based on receipt,"・Attendees section: Company name + name + number of participants (required for both your own company and other companies)
+*Please include the company names and names of all participants.
+★Added 8/15 (Backlog)
+After inquiring about the names and company names of all participants,
+Only if you receive a response that it is difficult to list or keep track of the large number of participants.
+[List one representative from both your own company and other companies, and a number of other people is acceptable.]
+
+*For recruitment dinner expenses, the ""company name"" should be listed.
+List the name of your current employer (alma mater) or previous employer.
+
+→Check Backlog if you have any questions, such as if the company or school name is missing.
+
+If the application amount is only for our company, it is fine to only include our participant information. (Backlog)","Food and beverage expenses exceeding ¥10,000 (excluding tax) per person (¥11,000 (including tax))
+Food and beverage expenses at external events for information sharing and opinion exchange with external parties (※)
+- For details on determining whether something is ""external"" or ""internal,"" see below.
+■ Treated as internal
+- Full-time employees, part-timers, and other employees who have an employment relationship with the company
+- Employees who have received a job offer and have submitted a letter of acceptance to the company
+- Temporary employees and contract workers performing the same duties as full-time employees
+- Seconded employees whose primary responsibility is with the company
+■ Treated as external
+- Candidates for employment (those who have not submitted a letter of acceptance to the company)
+- Employees employed by group companies are treated as external
+Example: A social gathering including employees from MFIn (based in India) is considered an external food and beverage expense.
+- Employees seconded from MFW to a subsidiary whose primary responsibility is with the subsidiary are considered external.
+
+- Recruitment meal expenses
+The expense is borne by one of the following departments. If it's a group company, the department within that company.
+
+① The department where you plan to hire.
+
+② If it's undecided, the PF headquarters.
+
+- Purchasing a ticket to a political fundraising party, attending the party, and building relationships with the politician and other attendees, thereby contributing to the company's operations.
+→ If you will not be attending the party, select ""Donation *Receipt must be submitted to accounting.""","・For internal use only (internal dining expenses): Item ""Internal entertainment expenses""","``` json
+{
+""employee_id"": ""JP001"",
+""meeting_name"": ""Team Lunch"",
+""meeting_date"": ""2025-09-07"",
+""meeting_location"": ""Shinjuku Restaurant"",
+""participant_names"": ""Taro Yamada, Hanako Suzuki"",
+""participant_companies"": ""Money Forward, Inc."",
+""meal_costs"": ""9000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""meeting_name"": ""Client Dinner"",
+""meeting_date"": ""2025-09-06"",
+""meeting_location"": ""Ginza Restaurant"",
+""participant_names"": ""John Doe, Jane Smith"",
+""participant_companies"": ""Acme Corp, Beta Ltd"",
+""meal_costs"": ""8500"",
+""receipt_number"": ""R67890""
+}
+
+```","['RULE_051', 'RULE_015', 'RULE_017']"
+RULE_015,"Dining expenses outside the company (over 10,000 yen per person, excluding tax)
+","Entertainment expenses
+ (Subsidy: Entertainment and food expenses)","Dining expenses outside the company (over 10,000 yen per person, excluding tax)
+Entertainment expenses
+ (Subsidy: Entertainment and food expenses)",error,error,Based on receipt,"・Attendees or Memo Section: Name of the company receiving the entertainment
+*Number of people is not required (though it's OK if you include it)
+*No need to transcribe if it's already listed in the pre-submission application
+*For recruitment dinner expenses, enter the name of your current employer (alma mater) or previous employer in the ""Company Name"" field.
+
+→Check Backlog if you have any questions, such as if the company or school name is missing.","Food and beverage expenses exceeding ¥10,000 (excluding tax) per person (¥11,000 (including tax))
+Food and beverage expenses at external events for information sharing and opinion exchange with external parties (※)
+- For details on determining whether something is ""external"" or ""internal,"" see below.
+■ Treated as internal
+- Full-time employees, part-timers, and other employees who have an employment relationship with the company
+- Employees who have received a job offer and have submitted a letter of acceptance to the company
+- Temporary employees and contract workers performing the same duties as full-time employees
+- Seconded employees whose primary responsibility is with the company
+■ Treated as external
+- Candidates for employment (those who have not submitted a letter of acceptance to the company)
+- Employees employed by group companies are treated as external
+Example: A social gathering including employees from MFIn (based in India) is considered an external food and beverage expense.
+- Employees seconded from MFW to a subsidiary whose primary responsibility is with the subsidiary are considered external.
+
+- Recruitment meal expenses
+The expense is borne by one of the following departments. If it's a group company, the department within that company.
+
+① The department where you plan to hire.
+
+② If it's undecided, the PF headquarters.
+
+- Purchasing a ticket to a political fundraising party, attending the party, and building relationships with the politician and other attendees, thereby contributing to the company's operations.
+→ If you will not be attending the party, select ""Donation *Receipt must be submitted to accounting.""","・For internal use only (internal dining expenses): Item ""Internal entertainment expenses""","``` json
+{
+""employee_id"": ""JP001"",
+""dining_date"": ""2025-09-07"",
+""event_name"": ""Business Dinner"",
+""participant_names"": ""Mr. Tanaka, Ms. Sato"",
+""participant_companies"": ""ABC Corp., XYZ Ltd."",
+""meal_costs"": ""15000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""dining_date"": ""2025-08-15"",
+""event_name"": ""Client Appreciation"",
+""participant_names"": ""Ms. Green"",
+""participant_companies"": ""DEF Co."",
+""meal_costs"": ""12000"",
+""receipt_number"": ""REC987""
+}
+
+```","['RULE_014', 'RULE_051', 'RULE_017']"
+RULE_016,Company food and drink costs: Only company members participate (excluding Happy Hour and general meeting social gatherings),"Entertainment and social expenses
+(Subsidy: Internal entertainment and social expenses)","Company food and drink costs: Only company members participate (excluding Happy Hour and general meeting social gatherings)Entertainment and social expenses
+(Subsidy: Internal entertainment and social expenses)",error,error,Based on receipt,"・Attendees section: Company name + Name + Number of participants (required for all companies)
+*Please list the company names and names of all participants.
+★Added 8/15 (Backlog)
+After inquiring about the names and companies of all participants,
+Only if there is a response that it is difficult to list or keep track of the large number of participants.
+[List one representative and a specific number of other people is acceptable.]
+
+*For temporary employees and contract workers, the company name should be the name of the company they are dispatching to, such as ""Money Forward, Inc.""
+
+*For interns,
+As they are employed by our company, ""Current employer (alma mater), etc."" is not required.","・Meals and drinks consumed only by internal members
+・Park Session meals and drinks
+・Welcome lunch
+・Lunch with interns
+・Lunch with accepted candidates
+・Department social gatherings
+・Uber Eats service fee and delivery fee (10%)
+・Social gatherings during departmental training camps
+
+・Meals and drinks consumed by contractors and temporary employees in addition to company employees will also be considered ""internal"" meals and drinks.
+
+・Meals and drinks consumed with group companies* will be listed as ""external meals and drinks.""
+・For details on determining whether something is ""external"" or ""internal,"" see below.
+■Treatment as internal
+　　・Full-time employees, part-timers, and other individuals who have an employment relationship with our company
+　　・Received employment (those who have submitted a letter of acceptance to our company after receiving a job offer)
+　　・Temporary employees and contract workers who perform the same duties as full-time employees
+　　・Secondment employees whose primary responsibility is with our company
+　■Treatment as external
+　　・Employment candidates (those who have not submitted a letter of acceptance to our company)
+　　・Employees of group companies are treated as external.
+　　Example: A social gathering including employees from MFIn (India base) → The expense will be considered as an off-site meal and drink expense.
+　　・Employees seconded from MFW to a subsidiary are considered external if their primary responsibility is with the subsidiary.","
+*Events that everyone in the company can participate in are considered employee benefits.","``` json
+{
+""employee_id"": ""JP007"",
+""dining_date"": ""2025-09-07"",
+""event_name"": ""Department Social Gathering"",
+""participant_names"": ""Taro Yamada, Hanako Suzuki"",
+""meal_costs"": ""5000"",
+""receipt_number"": ""R00123""
+}
+
+```","``` json
+{
+""employee_id"": ""JP008"",
+""dining_date"": ""2025-09-07"",
+""event_name"": ""Team Building Lunch"",
+""participant_names"": ""John Doe, Jane Smith"",
+""meal_costs"": ""4500"",
+""receipt_number"": ""R00456""
+}
+
+```","['RULE_017', 'RULE_014', 'RULE_015']"
+RULE_017,Company food and drink expenses (reduced tax rate 8%): Only company members can participate (excluding Happy Hour and general meeting social gatherings),"Entertainment and social expenses
+(Subsidy: Internal entertainment and social expenses)","Company food and drink expenses (reduced tax rate 8%): Only company members can participate (excluding Happy Hour and general meeting social gatherings)Entertainment and social expenses
+(Subsidy: Internal entertainment and social expenses)",error,error,Based on receipt,"・Attendees section: Company name + Name + Number of participants (required for all companies)
+*Please list the company names and names of all participants.
+★Added 8/15 (Backlog)
+After inquiring about the names and companies of all participants,
+Only if there is a response that it is difficult to list or keep track of the large number of participants.
+[List one representative and a specific number of other people is acceptable.]
+
+*For temporary employees and contract workers, the company name should be the name of the company they are dispatching to, such as ""Money Forward, Inc.""
+
+*For interns,
+As they are employed by our company, ""Current employer (alma mater), etc."" is not required.","Food and drink orders placed by each department through catering services and consumed within the company
+- Social gatherings after kick-off meetings
+- Project and event wrap-up parties
+- Food and drink consumed only by internal members
+- Food and drink expenses for park sessions
+- Welcome lunch (takeout lunch)
+- Lunch with interns (takeout lunch)
+- Lunch with newly accepted employees (takeout lunch)
+- Departmental social gatherings
+- Social gatherings during departmental training camps
+
+- Food and drink expenses incurred by contractors and temporary employees in addition to company employees are also considered ""internal"" meals and drink.
+
+- Food and drink expenses with group companies* should be listed as ""external meals and drink.""
+・For details on determining whether something is ""external"" or ""internal,"" see below.
+■Treatment as internal
+　　・Full-time employees, part-timers, and other individuals who have an employment relationship with our company
+　　・Received employment (those who have submitted a letter of acceptance to our company after receiving a job offer)
+　　・Temporary employees and contract workers who perform the same duties as full-time employees
+　　・Secondment employees whose primary responsibility is with our company
+　■Treatment as external
+　　・Employment candidates (those who have not submitted a letter of acceptance to our company)
+　　・Employees of group companies are treated as external.
+　　Example: A social gathering including employees from MFIn (India base) → The expense will be considered as an off-site meal and drink expense.
+　　・Employees seconded from MFW to a subsidiary are considered external if their primary responsibility is with the subsidiary.",*Events that everyone in the company can participate in are considered employee benefits.,"``` json
+{
+""employee_id"": ""JP001"",
+""dining_date"": ""2025-09-07"",
+""event_name"": ""Department Lunch"",
+""participant_names"": ""Taro Yamada, Hanako Suzuki"",
+""meal_costs"": ""3000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP002"",
+""dining_date"": ""2025-09-08"",
+""event_name"": ""Project Celebration"",
+""participant_names"": ""John Doe, Jane Smith, Mike Johnson"",
+""meal_costs"": ""4500"",
+""receipt_number"": ""R67890""
+}
+
+```","['RULE_016', 'RULE_014', 'RULE_015']"
+RULE_018,"Other entertainment expenses: souvenirs, gifts, condolence money, etc. for business partners","Entertainment and social expenses
+(Subsidy: Other entertainment expenses)","Other entertainment expenses: souvenirs, gifts, condolence money, etc. for business partnersEntertainment and social expenses
+(Subsidy: Other entertainment expenses)",error,error,Based on receipt,,"Gifts, condolence money, and other entertainment expenses other than food and drink.
+Telegrams sent to outside parties.
+Golf course fees (10% taxable purchases).
+→Golf course usage tax (not applicable)
+Select ""Taxes and public charges: revenue stamps, seal certificates, passport renewal fees, etc.""
+Food and drink expenses incurred while playing golf (10% taxable purchases).
+Shipping costs for golf.","If the advance request for gift expenses is listed as a business trip expense request, please follow the instructions below and submit the advance request regardless of whether gift expenses are included.
+*
+Business trip requests cannot include any items other than the two listed below; any other items require a purchase order request.
+https://moneyforward.kibe.la/notes/53491
+""Business Trip Expense Details: Enter the information used to calculate the estimated cost.
+●Transportation expenses (Shinkansen and airfare)
+●Accommodation expenses""
+EX_BPO_08963421-1234","``` json
+{
+""employee_id"": ""JP001"",
+""gift_date"": ""2025-09-07"",
+""gift_type"": ""Souvenir"",
+""recipient_name"": ""Mr. Tanaka"",
+""recipient_company"": ""ABC Corp"",
+""gift_amount"": ""3000"",
+""receipt_number"": ""12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""gift_date"": ""2025-09-01"",
+""gift_type"": ""Gift"",
+""recipient_name"": ""Ms. Sato"",
+""recipient_company"": ""XYZ Ltd."",
+""gift_amount"": ""5000"",
+""receipt_number"": ""67890""
+}
+
+```","['RULE_019', 'RULE_007', 'RULE_016']"
+RULE_019,"Other entertainment expenses (reduced tax rate 8%): souvenirs, gifts, condolence money, etc. for business partners","Entertainment and social expenses
+(Subsidy: Other entertainment expenses)","Other entertainment expenses (reduced tax rate 8%): souvenirs, gifts, condolence money, etc. for business partnersEntertainment and social expenses
+(Subsidy: Other entertainment expenses)",error,error,Based on receipt,,"Gifts, condolence money, and other entertainment expenses other than food and drink.
+Food and drink expenses incurred while playing golf that are subject to the reduced 8% tax rate.
+→Golf course usage tax (not applicable)
+Select ""Taxes and public charges: revenue stamps, seal certificates, passport renewal fees, etc.""","If the advance request for gift expenses is listed as a business trip expense request, please follow the instructions below and submit the advance request regardless of whether gift expenses are included.
+*
+Business trip requests cannot include any items other than the two listed below; any other items require a purchase order request.
+https://moneyforward.kibe.la/notes/53491
+""Business Trip Expense Details: Enter the information used to calculate the estimated cost.
+●Transportation expenses (Shinkansen and airfare)
+●Accommodation expenses""
+EX_BPO_08963421-1234","``` json
+{
+""employee_id"": ""JP001"",
+""gift_date"": ""2025-09-07"",
+""gift_type"": ""Souvenir"",
+""recipient_name"": ""Taro Yamada"",
+""recipient_company"": ""ABC Corp"",
+""gift_amount"": ""5000"",
+""receipt_number"": ""R001""
+}
+
+```","``` json
+{
+""employee_id"": ""JP002"",
+""gift_date"": ""2025-09-08"",
+""gift_type"": ""Gift"",
+""recipient_name"": ""Hanako Suzuki"",
+""recipient_company"": ""XYZ Ltd."",
+""gift_amount"": ""3500"",
+""receipt_number"": ""R002""
+}
+
+```","['RULE_018', 'RULE_017', 'RULE_007']"
+RULE_020,Copy fee,Consumables cost,Copy feeConsumables cost,none,error,Based on receipt,,"・Printing and copying fees at convenience stores, etc.",,"``` json
+{
+""employee_id"": ""JP001"",
+""copy_date"": ""2025-09-07"",
+""copy_service_name"": ""Seven-Eleven"",
+""pages"": """",
+""amount"": """",
+""receipt_number"": """"
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""copy_date"": ""2025-09-07"",
+""copy_service_name"": ""FamilyMart"",
+""pages"": ""10"",
+""amount"": ""100"",
+""receipt_number"": ""CFM002""
+}
+
+```","['RULE_021', 'RULE_032', 'RULE_047']"
+RULE_021,"Equipment and consumables: Less than 100,000 yen",Consumables cost,"Equipment and consumables: Less than 100,000 yenConsumables cost",error,error,Based on receipt,,"Software, goods, etc. with a unit price of less than ¥100,000 (excluding tax)
+- PFU Direct
+- Items purchased at Park Session
+- PCR testing fees for entry into the country
+- Laundry fees at coin laundries
+- ID photos for incorporation, passports, etc.
+- PCR testing fees and antigen test kits for purposes other than meetings/seminars","- Before purchasing office supplies, etc., please first submit a purchase order application and have each business division make the purchase at their own discretion.
+- For large items such as office furniture, please consult with the CIO Office in advance.
+- If the expense is company-related, do not use personal points as there is a possibility that points may not be reimbursed.
+- PCR test costs for entering the country for a conference: subject to ""Conference fees (10%): including the cost of hosting a free seminar""","``` json
+{
+""employee_id"": ""JP001"",
+""purchase_date"": ""2025-09-07"",
+""item_name"": ""ペン"",
+""item_quantity"": ""1"",
+""item_amount"": ""100"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""purchase_date"": ""2025-09-06"",
+""item_name"": ""Paper"",
+""item_quantity"": ""10"",
+""item_amount"": ""500"",
+""receipt_number"": ""R98765""
+}
+
+```","['RULE_014', 'RULE_038', 'RULE_051']"
+RULE_022,"Equipment expenses (lump sum depreciation): 100,000 to 200,000 yen","Equipment expenses
+(Subsidy: lump-sum depreciation assets)","Equipment expenses (lump sum depreciation): 100,000 to 200,000 yenEquipment expenses
+(Subsidy: lump-sum depreciation assets)",error,error,Based on receipt,,"- Software, goods, etc. with a unit price of 100,000 yen or more (excluding tax) to 200,000 yen or more",,"``` json
+{
+""employee_id"": ""JP001"",
+""purchase_date"": ""2025-09-07"",
+""equipment_name"": ""Laptop"",
+""equipment_cost"": ""150000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""purchase_date"": ""2025-09-01"",
+""equipment_name"": ""Projector"",
+""equipment_cost"": ""120000"",
+""receipt_number"": ""EQP002""
+}
+
+```","['RULE_014', 'RULE_015', 'RULE_038']"
+RULE_023,Newspaper and book expenses,Newspaper and book expenses,Newspaper and book expensesNewspaper and book expenses,error,error,Based on receipt,,"Wall Street Journal (digital edition) subscription fee
+Diamond Online
+Purchase books using the library system
+Sendenkaigi Online (subscription fee)
+Books required for work",,"``` json
+{
+""employee_id"": ""JP001"",
+""newspaper_name"": ""Asahi Shimbun"",
+""subscription_start_date"": ""2025-01-01"",
+""subscription_end_date"": ""2025-12-31"",
+""amount"": ""4000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""newspaper_name"": ""New York Times"",
+""subscription_start_date"": ""2025-06-01"",
+""subscription_end_date"": ""2026-05-31"",
+""amount"": ""5000"",
+""receipt_number"": ""NYT67890""
+}
+
+```","['RULE_024', 'RULE_001', 'RULE_002']"
+RULE_024,Newspaper and book expenses (overseas),Newspaper and book expenses,Newspaper and book expenses (overseas)Newspaper and book expenses,error,error,Based on receipt,,・Books and subscription fees purchased from overseas websites,・If you do not have a receipt: Attach something that can verify your payment,"``` json
+{
+""employee_id"": ""JP001"",
+""newspaper_name"": ""Japan Times"",
+""subscription_start_date"": ""2024-01-01"",
+""subscription_end_date"": ""2024-12-31"",
+""amount"": ""3000"",
+""receipt_number"": ""R12345"",
+""overseas_flag"": ""true""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""newspaper_name"": ""The Guardian"",
+""subscription_start_date"": ""2025-03-01"",
+""subscription_end_date"": ""2025-03-31"",
+""amount"": ""20"",
+""receipt_number"": ""REC987"",
+""overseas_flag"": ""true""
+}
+
+```","['RULE_023', 'RULE_003', 'RULE_004']"
+RULE_025,"Communication costs: Internet costs such as SaaS usage fees, consumption tax included",communication costs,"Communication costs: Internet costs such as SaaS usage fees, consumption tax includedcommunication costs",error,error,Based on receipt,,"- THINKIFIC.COM application
+- Software such as accounting software requires ""Communication fees""
+*Note: Letter Pack exchange fees are incurred in addition to communication fees, so they are also required ""Communication fees""
+- When making a test charge for audit purposes using ME_Premium billing. (Previously, we used the expense category ""ME_Premium Billing Sales."")
+- Using a competitor's product to develop a new MFW service
+- Grapher Inc. (Purchase of a Certified Copy of Business Registration)
+- Tax Certificate Issuance Fee (Non-Taxable Purchases)
+- Google Reseller Console Fee for Store (Taxable Purchases 10%)
+- Cost of obtaining a graduation certificate for visa application, visa photo (Taxable purchases 10% for domestic purchases, QA590)
+
+■ Examples of ""Taxable Purchases 10%"" Tax Category
+- STUDIO.INC
+- Freee Accounting Software
+- Miroku Information Services * ¥16,500 per month * No receipts are issued, so a bank transfer receipt is sufficient
+- AMAZON WEB SERVICES * Tax Category: ""Taxable Purchases 10%""
+- TimeCloud * Tax Category: 10%
+- GSUITE * Tax Category: ""Taxable Purchases 10%""
+- Cybozu
+- Morisawa Fonts Tax: Taxable Purchases 10%",Select if consumption tax is listed,"``` json
+{
+""employee_id"": ""JP001"",
+""provider_name"": ""Freee Accounting Software"",
+""service_type"": ""SaaS"",
+""service_start_date"": ""2025-09-01"",
+""service_end_date"": ""2025-09-30"",
+""invoice_number"": ""INV001"",
+""amount_incl_tax"": 16500
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""provider_name"": ""Zoom"",
+""service_type"": ""Video Conferencing"",
+""service_start_date"": ""2025-08-15"",
+""service_end_date"": ""2025-09-14"",
+""invoice_number"": ""INV002"",
+""amount_incl_tax"": 2000
+}
+
+```","['RULE_026', 'RULE_027', 'RULE_050']"
+RULE_026,"Communication costs: Internet costs such as SaaS usage fees, consumption tax not included",communication costs,"Communication costs: Internet costs such as SaaS usage fees, consumption tax not includedcommunication costs",error,error,Based on receipt,,"・Receipts in English or other documents that appear to be from overseas tools
+
+■ Examples of ""Excluded"" Tax Categories
+・TestRail system usage fee (excluded)
+・DOCSEND *Excluded
+・SHOPIFY (excluded)
+・Adobe
+・EMS (International Mail) *Excluded
+・YOUCANBOOK.ME *Excluded
+・ST Scrapbox *Excluded
+(Note: Taxes can be as high as 10%)
+・Dropbox *Excluded
+・AIRSIM, SIM card purchases for overseas business trips
+・GENGO",Select if consumption tax is not listed,"``` json
+{
+""employee_id"": ""JP999"",
+""provider_name"": ""TestRail"",
+""service_type"": ""SaaS"",
+""service_start_date"": ""2025-09-01"",
+""service_end_date"": ""2025-09-30"",
+""invoice_number"": ""INV-202509-001"",
+""amount_excl_tax"": ""10000""
+}
+
+```","``` json
+{
+""employee_id"": ""JP100"",
+""provider_name"": ""Dropbox"",
+""service_type"": ""Cloud Storage"",
+""service_start_date"": ""2025-08-01"",
+""service_end_date"": ""2025-08-31"",
+""invoice_number"": ""DROP-202508-002"",
+""amount_excl_tax"": ""5000""
+}
+
+```","['RULE_025', 'RULE_027', 'RULE_003']"
+RULE_027,"Communication costs: postage (stamps, etc.), motorcycle courier, courier service - subject to consumption tax",communication costs,"Communication costs: postage (stamps, etc.), motorcycle courier, courier service - subject to consumption taxcommunication costs",,,Based on receipt,,"・Stamps, letter pack fees, motorcycle courier, courier service","No longer available after November 20, 2023.
+Please choose one of the following options from now on.
+Communication fees (domestic): Postage stamps, Letter Packs, postcards, etc.
+Communication fees (domestic): Motorcycle courier, parcel delivery","``` json
+{
+""employee_id"": ""JP001"",
+""courier_date"": ""2025-09-07"",
+""courier_type"": ""postage"",
+""destination"": ""Tokyo"",
+""amount"": ""84"",
+""receipt_number"": ""not applicable""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""courier_date"": ""2025-09-09"",
+""courier_type"": ""courier service"",
+""destination"": ""Osaka"",
+""amount"": ""1500"",
+""receipt_number"": ""CS98765""
+}
+
+```","['RULE_030', 'RULE_028', 'RULE_003']"
+RULE_028,"Communication costs (domestic): postage stamps, letter packs, postcards, etc.",communication costs,"Communication costs (domestic): postage stamps, letter packs, postcards, etc.communication costs",none,error,Unnecessary,,・Stamps and letter pack fees purchased domestically,"Postage charges are subject to the special provisions of the invoice system, so there is no need to enter the eligibility number (registration number).","``` json
+{
+""employee_id"": ""JP001"",
+""courier_date"": ""2025-09-07"",
+""courier_type"": ""Letter Pack"",
+""destination"": ""Tokyo"",
+""amount"": ""370"",
+""receipt_number"": ""not applicable""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""courier_date"": ""2025-09-08"",
+""courier_type"": ""Postcard"",
+""destination"": ""Osaka"",
+""amount"": ""85"",
+""receipt_number"": """"
+}
+
+```","['RULE_027', 'RULE_030', 'RULE_029']"
+RULE_029,"Communication costs (domestic): motorcycle courier, parcel delivery",communication costs,"Communication costs (domestic): motorcycle courier, parcel deliverycommunication costs",none,error,Based on receipt,,"Domestic motorcycle and courier services
+For shipping costs related to golf, select ""Other entertainment expenses: gifts, souvenirs, condolence money, etc. for business partners.""",,"``` json
+{
+""employee_id"": ""JP001"",
+""courier_date"": ""2025-09-07"",
+""courier_type"": ""Motorcycle"",
+""destination_country"": ""Japan"",
+""amount"": ""1500"",
+""receipt_number"": ""RECEIPT001"",
+""overseas_flag"": ""not applicable""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""courier_date"": ""2025-09-09"",
+""courier_type"": ""Parcel Delivery"",
+""destination_country"": ""Japan"",
+""amount"": ""800"",
+""receipt_number"": ""DELIVERY002"",
+""overseas_flag"": ""not applicable""
+}
+
+```","['RULE_027', 'RULE_030', 'RULE_028']"
+RULE_030,"Communication costs (overseas): Postage (stamps, etc.), motorcycle courier, courier service",communication costs,"Communication costs (overseas): Postage (stamps, etc.), motorcycle courier, courier servicecommunication costs",none,error,Based on receipt,,"・Stamps purchased overseas
+・Motorcycle courier or parcel delivery services used overseas
+・EMS (international mail sent from a Japanese post office)",,"``` json
+{
+""employee_id"": ""JP001"",
+""courier_date"": ""2025-09-07"",
+""courier_type"": ""EMS"",
+""domestic_flag"": ""not applicable"",
+""amount"": ""1500"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""courier_date"": ""2025-09-09"",
+""courier_type"": ""DHL"",
+""domestic_flag"": ""false"",
+""amount"": ""2000"",
+""receipt_number"": ""DHL98765""
+}
+
+```","['RULE_027', 'RULE_028', 'RULE_029']"
+RULE_031,Recruitment training costs (8%): ​​Costs related to recruitment events,Recruitment training costs,Recruitment training costs (8%): ​​Costs related to recruitment eventsRecruitment training costs,error,error,Based on receipt,,・Participation fees for external events,,"``` json
+{
+""employee_id"": ""JP001"",
+""courier_date"": ""2025-09-07"",
+""courier_type"": ""Document"",
+""domestic_flag"": true,
+""amount"": ""1000"",
+""receipt_number"": ""R001""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""courier_date"": ""2025-09-10"",
+""courier_type"": ""Package"",
+""domestic_flag"": false,
+""amount"": ""2500"",
+""receipt_number"": ""R002""
+}
+
+```","['RULE_032', 'RULE_033', 'RULE_034']"
+RULE_032,Recruitment training fee (10%): Costs related to recruitment events,Recruitment training costs,Recruitment training fee (10%): Costs related to recruitment eventsRecruitment training costs,error,error,Based on receipt,,・Participation fees for external events,,"``` json
+{
+""employee_id"": ""JP001"",
+""courier_date"": ""2025-09-07"",
+""courier_type"": """",
+""destination_country"": ""Japan"",
+""overseas_flag"": ""not applicable"",
+""amount"": """",
+""receipt_number"": """"
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""courier_date"": ""2025-09-08"",
+""courier_type"": ""Express"",
+""destination_country"": ""USA"",
+""overseas_flag"": true,
+""amount"": ""15000"",
+""receipt_number"": ""REC789""
+}
+
+```","['RULE_031', 'RULE_033', 'RULE_034']"
+RULE_033,Recruitment and training costs (education and training costs),"Recruitment training costs
+(Subsidy: Education and training expenses)","Recruitment and training costs (education and training costs)Recruitment training costs
+(Subsidy: Education and training expenses)",error,error,Based on receipt,,"- Tokyo Disaster Prevention and Emergency Preparedness Association - Fire and Disaster Prevention Manager Training
+Exam fees, textbook fees, etc.
+-External events you attended
+-Books purchased individually by multiple people
+-Book purchases for study groups with multiple people
+-Meal expenses (boxed lunches) for in-house training
+-Exam fees and exam fees for bookkeeping and other qualifications
+*Approval is accepted with supervisor approval
+-External instructor fees for in-house training","・If purchasing books for multiple people, click here.
+*If you are unsure whether it is a newspaper or book fee, click here.
+
+・Statement date: Exam date or payment date
+
+[For app purchases]
+・Google Play: No receipt
+・Apple: Receipts available","``` json
+{
+""employee_id"": ""JP001"",
+""event_name"": ""Fire Prevention Training"",
+""event_start_date"": ""2025-09-01"",
+""event_end_date"": ""2025-09-01"",
+""amount"": ""5000"",
+""receipt_number"": ""TRN001""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""event_name"": ""Leadership Seminar"",
+""event_start_date"": ""2025-11-10"",
+""event_end_date"": ""2025-11-12"",
+""amount"": ""15000"",
+""receipt_number"": ""LDR2025""
+}
+
+```","['RULE_034', 'RULE_016', 'RULE_036']"
+RULE_034,Recruitment and education expenses (overseas/education and training expenses),"Recruitment training costs
+(Subsidy: Education and training expenses)","Recruitment and education expenses (overseas/education and training expenses)Recruitment training costs
+(Subsidy: Education and training expenses)",error,error,Based on receipt,,・Took language training outside of Japan,"If you don't have a receipt, please attach a document that verifies payment.
+*Non-JP employees may receive English training at a training company in their home country.","``` json
+{
+""employee_id"": ""JP001"",
+""event_name"": ""Language Training"",
+""event_start_date"": ""2025-09-01"",
+""event_end_date"": ""2025-09-30"",
+""amount"": ""100000"",
+""receipt_number"": ""R7890""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""event_name"": ""Overseas Workshop"",
+""event_start_date"": ""2025-11-01"",
+""event_end_date"": ""2025-11-05"",
+""amount"": ""50000"",
+""receipt_number"": ""WSK123""
+}
+
+```","['RULE_033', 'RULE_016', 'RULE_036']"
+RULE_035,Recruitment training costs (media costs),Recruitment training costs (subsidies: media costs),Recruitment training costs (media costs)Recruitment training costs (subsidies: media costs),error,error,Based on receipt,,"・Recruitment scouting fees
+・LinkedIn
+・Wantedly
+・BizReach, etc.
+・Job posting fees
+・Recruitment website creation, maintenance, and other management fees",,"``` json
+{
+""employee_id"": ""JP001"",
+""training_name"": ""New Hire Onboarding"",
+""training_start_date"": ""2025-09-01"",
+""training_end_date"": ""2025-09-05"",
+""provider"": ""ABC Training"",
+""amount"": ""50000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""training_name"": ""Interview Skills"",
+""training_start_date"": ""2025-10-20"",
+""training_end_date"": ""2025-10-20"",
+""provider"": ""Recruit Co."",
+""amount"": ""20000"",
+""receipt_number"": ""R67890""
+}
+
+```","['RULE_031', 'RULE_032', 'RULE_033']"
+RULE_036,Recruitment fees,"Recruitment and training costs
+(Subsidized: Agent fees)","Recruitment feesRecruitment and training costs
+(Subsidized: Agent fees)",error,error,Based on receipt,,,,"``` json
+{
+""employee_id"": ""JP001"",
+""training_name"": ""New Hire Orientation"",
+""training_start_date"": ""2025-09-08"",
+""training_end_date"": ""2025-09-08"",
+""provider"": ""ABC Training Co."",
+""amount"": ""50000"",
+""receipt_number"": ""R7890"",
+""overseas_flag"": ""not applicable""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""training_name"": ""Leadership Training"",
+""training_start_date"": ""2025-11-01"",
+""training_end_date"": ""2025-11-03"",
+""provider"": ""Global Ed"",
+""amount"": ""120000"",
+""receipt_number"": ""GE2025-001"",
+""overseas_flag"": ""true""
+}
+
+```","['RULE_033', 'RULE_034', 'RULE_031']"
+RULE_037,"Advertising activities: advertising video production, advertising fees, flyers, etc.",Advertising expenses,"Advertising activities: advertising video production, advertising fees, flyers, etc.Advertising expenses",error,error,Based on receipt,,"The following expenses are required for advertising and promotion aimed at an unspecified number of people to promote a company or product name:
+- Purchase of equipment and consumables used at promotional events
+- Remuneration for survey responses and user interviews (e.g., Amazon gift certificates)
+- Payments to event management companies such as Peatix Japan
+- Event expenses for events that do not promote a specific product but promote the company's overall image (e.g., Forward Day, held in 2021)
+- Digital Bank Exhibition-related expenses
+- SEMRUSH (not applicable)
+- Yahoo! Ads (Yahoo! Business Services)
+- A series of expenses related to the Good Design Award, such as judging fees and award package fees","Note: Please note that Amazon gift certificates and other items are classified into four expense categories depending on their intended use.
+
+- Outsourcing Expenses
+- Advertising Activities: Advertising Video Creation, Advertising Fees, Flyers, etc.
+- Refunds Using Amazon Gift Certificates, etc.
+- Campaigns
+*If recruitment advertising expenses, etc. are mentioned, use the ""Recruitment Training Expenses (Media Expenses)"" category.
+- Outsourcing for advertising and promotional activities: use the ""Advertising and Promotional Expenses"" category.
+
+*If Yahoo! Business Services is listed in the ""Payee"" field, we will approve the request even if it is submitted as follows:
+1. The requested amount has been manually adjusted from the linked amount.
+2. Since Yahoo! Business Services does not issue receipts, attach a admin screen capture in the ""Attach Receipt"" field and a CSV of the transaction details in the ""Attachments Other Than Invoice"" field.
+3. The memo field states, ""The accounting department has approved the manual adjustment of the amount and the attachment of the zip receipt.""","``` json
+{
+""employee_id"": ""JP001"",
+""training_media"": """",
+""publication_name"": """",
+""amount"": ""10000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""training_media"": ""Online Ad"",
+""publication_name"": ""Tech Blog"",
+""amount"": ""7500"",
+""receipt_number"": ""AD7890""
+}
+
+```","['RULE_012', 'RULE_013', 'RULE_011']"
+RULE_038,"Campaign: There are conditions such as introductions and surveys, and there is sales to the recipient (the payment amount is less than the sales amount) *Amounts over 10,000 yen are subject to a refund invoice",Advertising expenses,"Campaign: There are conditions such as introductions and surveys, and there is sales to the recipient (the payment amount is less than the sales amount) *Amounts over 10,000 yen are subject to a refund invoiceAdvertising expenses",none,Alerts,Unnecessary,,"Used when providing cash equivalents such as Amazon gift certificates for campaigns, etc.
+
+Example: Providing Amazon gift certificates to those who respond to a survey
+Providing Amazon gift certificates to those who make referrals
+As a thank you for interviews, etc.
+
+For details on how to determine the subject, see kibela below.
+[Accounting/Taxation] Transactions involving cash back or Amazon gift certificates
+https://moneyforward.kibe.la/notes/275620","・The details of the campaign item will be confirmed by the accounting department at the end of each month, so if this expense item is selected, please approve it as is.","``` json
+{
+""employee_id"": ""JP001"",
+""recruitment_service_name"": """",
+""agent_name"": """",
+""amount"": ""5000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""recruitment_service_name"": ""Survey Campaign"",
+""agent_name"": ""SurveyMonkey"",
+""amount"": ""2000"",
+""receipt_number"": ""SURVEY001""
+}
+
+```","['RULE_039', 'RULE_040', 'RULE_041']"
+RULE_039,"Campaign: There are conditions such as introductions and surveys, and no sales to the recipient and no lottery. *Subject to payment notification",Advertising expenses,"Campaign: There are conditions such as introductions and surveys, and no sales to the recipient and no lottery. *Subject to payment notificationAdvertising expenses",none,Alerts,Based on receipt,,"Used when providing cash equivalents such as Amazon gift certificates for campaigns, etc.
+
+Example: Providing Amazon gift certificates to those who respond to a survey
+Providing Amazon gift certificates to those who make referrals
+As a thank you for interviews, etc.
+
+For details on how to determine the subject, see kibela below.
+[Accounting/Taxation] Transactions involving cash back or Amazon gift certificates
+https://moneyforward.kibe.la/notes/275620","・The details of the campaign item will be confirmed by the accounting department at the end of each month, so if this expense item is selected, please approve it as is.","``` json
+{
+""employee_id"": ""JP001"",
+""advertising_type"": ""Online Survey"",
+""media_name"": ""Google Ads"",
+""campaign_name"": ""Autumn Survey 2025"",
+""campaign_start_date"": ""2025-09-01"",
+""campaign_end_date"": ""2025-09-30"",
+""amount"": ""10000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""advertising_type"": ""Referral Program"",
+""media_name"": ""Website"",
+""campaign_name"": ""Spring Referrals"",
+""campaign_start_date"": ""2025-04-01"",
+""campaign_end_date"": ""2025-06-30"",
+""amount"": ""5000"",
+""receipt_number"": ""N/A""
+}
+
+```","['RULE_038', 'RULE_040', 'RULE_041']"
+RULE_040,"Campaign: There are conditions such as introductions and surveys, and no sales to the recipient, and there is a lottery",Advertising expenses,"Campaign: There are conditions such as introductions and surveys, and no sales to the recipient, and there is a lotteryAdvertising expenses",none,Alerts,Unnecessary,,"Used when providing cash equivalents such as Amazon gift certificates for campaigns, etc.
+
+Example: Providing Amazon gift certificates to those who respond to a survey
+Providing Amazon gift certificates to those who make referrals
+As a thank you for interviews, etc.
+
+For details on how to determine the subject, see kibela below.
+[Accounting/Taxation] Transactions involving cash back or Amazon gift certificates
+https://moneyforward.kibe.la/notes/275620","・The details of the campaign item will be confirmed by the accounting department at the end of each month, so if this expense item is selected, please approve it as is.","``` json
+{
+""employee_id"": ""JP007"",
+""campaign_name"": ""Autumn Survey"",
+""campaign_start_date"": ""2025-10-01"",
+""campaign_end_date"": ""2025-10-31"",
+""survey_required"": true,
+""recipient_name"": ""Taro Yamada"",
+""amount"": ""1000"",
+""receipt_number"": ""not applicable""
+}
+
+```","``` json
+{
+""employee_id"": ""JP008"",
+""campaign_name"": ""Winter Raffle"",
+""campaign_start_date"": ""2025-12-01"",
+""campaign_end_date"": ""2025-12-25"",
+""survey_required"": false,
+""recipient_name"": ""Hanako Sato"",
+""amount"": ""5000"",
+""receipt_number"": """"
+}
+
+```","['RULE_038', 'RULE_039', 'RULE_041']"
+RULE_041,"Campaign: No conditions such as introductions or surveys, and no sales to recipients",Advertising expenses,"Campaign: No conditions such as introductions or surveys, and no sales to recipientsAdvertising expenses",none,Alerts,Unnecessary,,"Used when providing cash equivalents such as Amazon gift certificates for campaigns, etc.
+
+Example: Providing Amazon gift certificates to those who respond to a survey
+Providing Amazon gift certificates to those who make referrals
+As a thank you for interviews, etc.
+
+For details on how to determine the subject, see kibela below.
+[Accounting/Taxation] Transactions involving cash back or Amazon gift certificates
+https://moneyforward.kibe.la/notes/275620","・The details of the campaign item will be confirmed by the accounting department at the end of each month, so if this expense item is selected, please approve it as is.","``` json
+{
+""employee_id"": ""JP041"",
+""campaign_name"": ""Autumn Sale"",
+""campaign_start_date"": ""2025-10-01"",
+""campaign_end_date"": ""2025-10-31"",
+""survey_required"": ""no"",
+""lottery_flag"": ""no"",
+""amount"": ""1000"",
+""receipt_number"": ""not applicable""
+}
+
+```","``` json
+{
+""employee_id"": ""JP042"",
+""campaign_name"": ""Winter Campaign"",
+""campaign_start_date"": ""2025-12-01"",
+""campaign_end_date"": ""2025-12-25"",
+""survey_required"": ""yes"",
+""lottery_flag"": ""yes"",
+""amount"": ""5000"",
+""receipt_number"": ""CMP2025002""
+}
+
+```","['RULE_039', 'RULE_040', 'RULE_038']"
+RULE_042,"Taxes and public dues: revenue stamps, seal certificates, passport renewal fees, etc.",taxes and public charges,"Taxes and public dues: revenue stamps, seal certificates, passport renewal fees, etc.taxes and public charges",none,error,Based on receipt,・Purpose (brief is fine),"・Certified copy of real estate registration
+・Seal certificate
+・Revenue stamps
+・Postal money order
+・Resident registration card
+・Customs duties
+・Notary public certification fees
+・Revenue stamps required for passport acquisition and renewal (including revenue stamps required for passport acquisition for accompanying family members on overseas assignment)
+・Revenue stamps required for Visa acquisition and e-Visa
+・Golf course usage tax
+・Sports promotion fund
+・Registration and license tax for patent attorneys, etc.","・ For ""fixed-amount postal money orders,"" the receipt amount includes the following two items, so you need to separate the details.
+　① Payment (What did you buy? What is it paying for?) For example, obtaining a certified copy of your family register.
+　② Fee*: Expense item ""Payment Fee""
+　※The fee amount varies depending on the amount sent.
+
+・Regarding receipts for ""revenue stamp fees required for passport acquisition and renewal""
+If a receipt is not issued, you can use a ""general passport receipt"" or ""passport receipt,"" which lists the payment amount, instead.","``` json
+{
+""employee_id"": ""JP001"",
+""campaign_name"": ""Revenue Stamp Purchase"",
+""campaign_start_date"": ""2025-09-07"",
+""campaign_end_date"": ""2025-09-07"",
+""amount"": ""200"",
+""receipt_number"": ""RS001""
+}
+
+```","``` json
+{
+""employee_id"": ""JP002"",
+""campaign_name"": ""Passport Renewal"",
+""campaign_start_date"": ""2025-10-01"",
+""campaign_end_date"": ""2025-10-01"",
+""amount"": ""16000"",
+""receipt_number"": ""PSPRT-001""
+}
+
+```","['RULE_012', 'RULE_013', 'RULE_011']"
+RULE_043,"Welfare expenses: Happyhour, health checkup, etc.",Employee benefits expenses,"Welfare expenses: Happyhour, health checkup, etc.Employee benefits expenses",error,error,Based on receipt,,"The following event expenses are systematically covered for all employees:
+・Lunch between new employees and executives
+・Expenses related to company-wide social gatherings, etc.
+・Congratulatory telegram arrangements
+・Thank-you parties
+・MVP prizes and incentives
+・Manepho T-shirts (UT)
+・Purchase of T-shirts for the General Employee Meeting
+・Trophies for company events
+・Health checkups
+・Relocation expenses associated with transfers (moving expenses)
+・Flowers and condolence money for employees' families
+・Connect drinks and Connect drinks (alcoholic beverages)","- Confirm application number with HR in advance if necessary (BPO?)
+- Medical examination: No need to check whether it is within the upper limit","``` json
+{
+""employee_id"": ""JP001"",
+""campaign_name"": ""Health Checkup"",
+""campaign_start_date"": ""2025-09-01"",
+""campaign_end_date"": ""2025-09-01"",
+""amount"": ""10000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP002"",
+""campaign_name"": ""Happy Hour"",
+""campaign_start_date"": ""2025-09-15"",
+""campaign_end_date"": ""2025-09-15"",
+""amount"": ""2500"",
+""receipt_number"": ""HH9876""
+}
+
+```","['RULE_044', 'RULE_045', 'RULE_011']"
+RULE_044,"Welfare expenses (reduced tax rate 8%): Happy hour, health checkups, etc.",Employee benefits expenses,"Welfare expenses (reduced tax rate 8%): Happy hour, health checkups, etc.Employee benefits expenses",error,error,Based on receipt,,"Expenses for the following events that are covered by the system for all employees:
+・Lunch between new employees and executives
+・Expenses related to company-wide social gatherings, condolence gifts, etc.
+・Connect drinks (non-alcoholic)",・Confirm application number in advance with HR if necessary (BPO?),"``` json
+{
+""employee_id"": ""JP001"",
+""purchase_date"": ""2025-09-07"",
+""stamp_type"": """",
+""stamp_value"": """",
+""receipt_number"": ""not applicable""
+}
+
+```","``` json
+{
+""employee_id"": ""JP002"",
+""purchase_date"": ""2025-09-08"",
+""stamp_type"": ""Health Checkup"",
+""stamp_value"": ""5000"",
+""receipt_number"": ""HC20250908""
+}
+
+```","['RULE_017', 'RULE_043', 'RULE_019']"
+RULE_045,Influenza vaccination,Employee benefits expenses,Influenza vaccinationEmployee benefits expenses,error,error,Based on receipt,,"- Influenza vaccinations at designated institutions
+*Maximum price: ¥2,060","The maximum amount that can be claimed as an expense is 2,060 yen. Therefore, the amount received may not match the amount claimed.
+
+*For applicants: https://moneyforward.kibe.la/notes/79186#How do I claim expenses for influenza vaccinations?","``` json
+{
+""employee_id"": ""JP001"",
+""event_name"": ""Influenza Vaccination"",
+""event_start_date"": ""2025-09-07"",
+""event_end_date"": ""2025-09-07"",
+""participant_names"": ""Employee"",
+""health_item"": ""Influenza Vaccination"",
+""amount"": ""2060"",
+""receipt_number"": ""ABC12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""event_name"": ""Flu Shot"",
+""event_start_date"": ""2025-10-01"",
+""event_end_date"": ""2025-10-01"",
+""participant_names"": ""All Employees"",
+""health_item"": ""Vaccination"",
+""amount"": ""1900"",
+""receipt_number"": ""XYZ98765""
+}
+
+```","['RULE_043', 'RULE_044', 'RULE_059']"
+RULE_046,Advertising expenses (overseas businesses such as Facebook),Advertising expenses,Advertising expenses (overseas businesses such as Facebook)Advertising expenses,error,error,Based on receipt,,"・Advertising expenses using services provided by overseas businesses
+・If the term ""reverse charge"" appears, click here
+[Examples]
+・Facebook (FACEBK)
+・Twitter Online Ads
+・MICROSOFT* ADVERTISING
+・SEARCHADS/APPLE","*Tax Category: ""Specific Taxable Purchases""
+
+If ""Payee"" includes Facebook, Microsoft, Twitter Online Ads, or Searchads/Apple, the request will be approved even if it is submitted as follows:
+
+1. The requested amount has been manually adjusted from the linked amount.
+2. One receipt has been attached to the invoice, and the remaining receipts have been zipped into a single file and attached to the other details.
+3. The memo field states, ""The accounting department has approved the manual adjustment of the amount and the attachment of the zip receipts.""","``` json
+{
+""employee_id"": ""JP001"",
+""event_name"": ""Facebook Ad Campaign"",
+""event_start_date"": ""2025-09-01"",
+""event_end_date"": ""2025-09-07"",
+""participant_names"": ""not applicable"",
+""health_item"": ""not applicable"",
+""amount"": ""100000"",
+""receipt_number"": ""FB12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""event_name"": ""Twitter Ad"",
+""event_start_date"": ""2025-08-15"",
+""event_end_date"": ""2025-08-30"",
+""participant_names"": """",
+""health_item"": """",
+""amount"": ""50000"",
+""receipt_number"": ""TWIT67890""
+}
+
+```","['RULE_038', 'RULE_039', 'RULE_040']"
+RULE_047,Payment fee: Bank transfer fee,Payment fee,Payment fee: Bank transfer feePayment fee,none,error,Based on receipt,,"Fixed-amount postal money order issuance fee (10% of taxable purchases)
+Bank transfer fee",,"``` json
+{
+""employee_id"": ""JP001"",
+""vaccination_date"": """",
+""vaccine_name"": """",
+""amount"": """",
+""receipt_number"": ""not applicable""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""vaccination_date"": ""2025-09-15"",
+""vaccine_name"": ""Flu Vaccine"",
+""amount"": ""3000"",
+""receipt_number"": ""TXR001""
+}
+
+```","['RULE_020', 'RULE_032', 'RULE_038']"
+RULE_048,Outsourcing costs,Outsourcing costs,Outsourcing costsOutsourcing costs,error,error,Based on receipt,,"・Expenses incurred when outsourcing part of your company's operations
+・Gift certificates issued as a reward for user testing (not eligible)","- When applying for outsourcing expenses, you must also register the project.
+*No judgment or confirmation by the BPO is required.
+- For applicants: For details, please refer to Kivera below.
+
+""Entering Projects When Applying for Outsourcing Expenses""
+*Please note that Amazon gift certificates and other items are classified into three expense categories depending on their intended use.
+- Outsourcing Expenses
+- Advertising Activities: Advertising Video Creation, Advertising Fees, Flyers, etc.
+- Refunds Using Amazon Gift Certificates, etc.","``` json
+{
+""employee_id"": ""JP001"",
+""advertising_platform"": """",
+""campaign_name"": """",
+""campaign_start_date"": """",
+""campaign_end_date"": """",
+""amount"": """",
+""receipt_number"": """",
+""overseas_flag"": ""not applicable""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""advertising_platform"": ""Google Ads"",
+""campaign_name"": ""Summer Sale"",
+""campaign_start_date"": ""2025-07-01"",
+""campaign_end_date"": ""2025-07-31"",
+""amount"": ""10000"",
+""receipt_number"": ""AD202507"",
+""overseas_flag"": false
+}
+
+```","['RULE_016', 'RULE_025', 'RULE_026']"
+RULE_049,dues,dues,duesdues,error,error,Based on receipt,,"Bar Association fees
+Certified Public Accountant Association membership fees
+Patent Attorney Association registration fees and membership fees","- It is acceptable if the tax classification is ""tax-exempt purchases"" (no need to change ""tax-exempt purchases"" to ""tax classification"").
+Approval is granted with the attachment of a ""Certificate of Bar Association Payment."" OKEX_BPO_08963421-1214","``` json
+{
+""employee_id"": ""JP001"",
+""bank_name"": ""Japan Bank"",
+""transfer_date"": ""2025-09-07"",
+""transfer_reason"": ""Membership Fee"",
+""amount"": ""10000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""bank_name"": ""Tokyo Bank"",
+""transfer_date"": ""2025-08-01"",
+""transfer_reason"": ""Registration Fee"",
+""amount"": ""15000"",
+""receipt_number"": ""R67890""
+}
+
+```","['RULE_042', 'RULE_050', 'RULE_001']"
+RULE_050,Membership fees (including consumption tax),dues,Membership fees (including consumption tax)dues,,,Based on receipt,,"Bar Association fees
+Certified Public Accountant Association membership fees
+Patent Attorney Association registration fees and membership fees",,"``` json
+{
+""employee_id"": ""JP001"",
+""outsourcing_service_name"": ""Bar Association"",
+""provider"": ""Japan Bar Association"",
+""service_start_date"": ""2025-04-01"",
+""service_end_date"": ""2026-03-31"",
+""amount"": ""60000"",
+""receipt_number"": ""R000001""
+}
+
+```","``` json
+{
+""employee_id"": ""JP002"",
+""outsourcing_service_name"": ""CPA Association"",
+""provider"": ""American Institute of CPAs"",
+""service_start_date"": ""2025-01-01"",
+""service_end_date"": ""2025-12-31"",
+""amount"": ""300"",
+""receipt_number"": ""CPA002""
+}
+
+```","['RULE_025', 'RULE_026', 'RULE_003']"
+RULE_051,"Outside dining expenses (less than 10,000 yen per person excluding tax) (8% discount): Please list the company names and names of all participants",,"Outside dining expenses (less than 10,000 yen per person excluding tax) (8% discount): Please list the company names and names of all participants",error,error,Based on receipt,"・Attendees section: Company name + name + number of participants (required for both your own company and other companies)
+*Please list the company names and names of all participants.
+★Added 8/15 (Backlog)
+After inquiring about the company names and names of all participants,
+Only if you receive a response that it is difficult to list or keep track of the large number of participants.
+[List one representative from both your own company and other companies, and a number of other people is acceptable.]
+
+*For recruitment dinner expenses, the ""company name"" should be listed.
+List the name of your current employer (alma mater) or previous employer.
+
+→Check Backlog if you have any questions, such as if there are no company or school names to list.","The cost is equivalent to ""Out-of-company dining expenses (less than 10,000 yen per person excluding tax): list the company names and names of all participants"" and the consumption tax rate is reduced to 8%.",,"``` json
+{
+""employee_id"": ""JP001"",
+""dues_type"": """",
+""organization_name"": """",
+""membership_start_date"": """",
+""membership_end_date"": """",
+""amount"": """",
+""receipt_number"": """"
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""dues_type"": ""Annual"",
+""organization_name"": ""Tech Innovators"",
+""membership_start_date"": ""2024-01-01"",
+""membership_end_date"": ""2024-12-31"",
+""amount"": ""5000"",
+""receipt_number"": ""TRN-002""
+}
+
+```","['RULE_014', 'RULE_015', 'RULE_038']"
+RULE_052,"Advertising expenses (TV and other mass media advertising, excluding online advertising)",Advertising expenses - mass promotion,"Advertising expenses (TV and other mass media advertising, excluding online advertising)Advertising expenses - mass promotion",error,error,Based on receipt,,"・Advertising expenses using the media, such as TV commercials","・Other than the above: Item ""Advertising expenses (Internet advertising and other general advertising activities. Excluding TV, etc.)""","``` json
+{
+""employee_id"": ""JP001"",
+""dues_type"": ""Advertising"",
+""organization_name"": ""Nihon TV"",
+""membership_start_date"": ""2025-01-01"",
+""membership_end_date"": ""2025-12-31"",
+""amount"": ""1000000"",
+""receipt_number"": ""AD2025001""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""dues_type"": ""TV Ad"",
+""organization_name"": ""Fuji TV"",
+""membership_start_date"": ""2025-07-01"",
+""membership_end_date"": ""2025-07-31"",
+""amount"": ""500000"",
+""receipt_number"": ""AD2025002""
+}
+
+```","['RULE_004', 'RULE_007', 'RULE_010']"
+RULE_053,"Subcontracting costs to affiliated companies (Money Forward i, Inc.)","Subcontracting costs to affiliated companies (Money Forward i, Inc.)","Subcontracting costs to affiliated companies (Money Forward i, Inc.)Subcontracting costs to affiliated companies (Money Forward i, Inc.)",error,error,Based on receipt,,"・IT management cloud usage fee
+(Money Forward i, Inc.)","Project: Required (see below), but no confirmation by the BPO is required.
+→ [Cost] Indirect costs (indirect work not tied to a specific project) (0A)","``` json
+{
+""employee_id"": ""JP001"",
+""meeting_name"": ""Q3 Planning Meeting"",
+""meeting_date"": ""2025-09-07"",
+""participant_names"": ""Taro Yamada, Hanako Tanaka"",
+""amount"": ""15000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""meeting_name"": ""Project X Discussion"",
+""meeting_date"": ""2025-09-15"",
+""participant_names"": ""John Doe"",
+""amount"": ""10000"",
+""receipt_number"": ""R67890""
+}
+
+```","['RULE_054', 'RULE_027', 'RULE_031']"
+RULE_054,"Subcontracting costs to affiliated companies (Knowledge Lab Co., Ltd.)","Subcontracting costs to affiliated companies (Knowledge Lab Co., Ltd.)","Subcontracting costs to affiliated companies (Knowledge Lab Co., Ltd.)Subcontracting costs to affiliated companies (Knowledge Lab Co., Ltd.)",error,error,Based on receipt,,"ManageBoard usage fee
+(Knowledge Lab, Inc.)","Project: Required (see below), but no confirmation by the BPO is required.
+→ [Cost] Indirect costs (indirect work not tied to a specific project) (0A)","``` json
+{
+""employee_id"": ""JP001"",
+""advertising_type"": """",
+""media_name"": """",
+""amount"": """",
+""receipt_number"": """"
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""advertising_type"": ""Digital"",
+""media_name"": ""Google Ads"",
+""amount"": ""100000"",
+""receipt_number"": ""KL002""
+}
+
+```","['RULE_053', 'RULE_027', 'RULE_031']"
+RULE_055,commuting expenses,Travel expenses and transportation expenses,commuting expensesTravel expenses and transportation expenses,none,none,Based on receipt,,・Round-trip commuting expenses between home and office,"- If the item is claimed under this account, the details will be removed.
+*Please comment below.
+--
+Please claim round-trip commuting expenses between home and office via cloud attendance.
+kibera:
+Handling commuting allowances for telework
+https://moneyforward.kibe.la/notes/60486
+--
+
+- ​​Reason for establishing this account
+->We have seen a steady stream of people claiming round-trip commuting expenses under cloud expenses. To eliminate the need for verification and to promote cloud attendance.","``` json
+{
+""employee_id"": ""JP001"",
+""affiliate_name"": """",
+""service_type"": """",
+""amount"": """",
+""receipt_number"": """"
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""affiliate_name"": ""None"",
+""service_type"": ""Train"",
+""amount"": ""0"",
+""receipt_number"": ""N/A""
+}
+
+```","['RULE_001', 'RULE_002', 'RULE_003']"
+RULE_056,PCR test costs,Travel expenses and transportation expenses,PCR test costsTravel expenses and transportation expenses,error,error,Based on receipt,,"PCR testing fees for the following:
+・Leaving Japan
+・Entering Japan
+・Attending a conference
+・Attending an event or filming",,"``` json
+{
+""employee_id"": ""JP123"",
+""affiliate_name"": ""LabCorp Japan"",
+""service_type"": ""COVID-19 PCR Test"",
+""amount"": ""15000"",
+""receipt_number"": ""R123456789""
+}
+
+```","``` json
+{
+""employee_id"": ""JP456"",
+""affiliate_name"": ""MediCheck Clinic"",
+""service_type"": ""PCR Test"",
+""amount"": ""12000"",
+""receipt_number"": ""REC987654321""
+}
+
+```","['RULE_064', 'RULE_001', 'RULE_002']"
+RULE_057,Temporary leave to return home when transferred overseas,Travel expenses and transportation expenses,Temporary leave to return home when transferred overseasTravel expenses and transportation expenses,error,error,Based on receipt,,"・Travel expenses for temporary return home leave for employees transferred to overseas bases (MFV, etc.)","*Expenses are borne by: Money Forward Headquarters
+
+Reference) kibera:
+Business trip expenses for overseas group companies to Japan (Money Forward, Inc.)
+https://moneyforward.kibe.la/notes/223212","``` json
+{
+""employee_id"": ""JP001"",
+""commute_start_date"": ""2025-09-07"",
+""commute_end_date"": ""2025-09-07"",
+""origin"": ""Tokyo"",
+""destination"": ""Osaka"",
+""transport_mode"": ""Airplane"",
+""fare_amount"": ""20000"",
+""receipt_number"": ""not applicable""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""commute_start_date"": ""2025-10-10"",
+""commute_end_date"": ""2025-10-12"",
+""origin"": ""London"",
+""destination"": ""Paris"",
+""transport_mode"": ""Train"",
+""fare_amount"": ""150"",
+""receipt_number"": ""TRN-987""
+}
+
+```","['RULE_003', 'RULE_006', 'RULE_004']"
+RULE_058,Refunds with Amazon gift cards,"Other sales
+Subsidiary account: Refunds","Refunds with Amazon gift cardsOther sales
+Subsidiary account: Refunds",error,error,Based on receipt,,"・Gift certificate fees for refund purposes due to double charges, etc.","Note: Amazon gift certificates and other items are classified into three categories depending on their intended use.
+
+- Outsourcing expenses
+- Advertising activities: video production, advertising fees, flyers, etc.
+- Refunds using Amazon gift certificates","``` json
+{
+""employee_id"": ""JP001"",
+""test_date"": ""2025-09-07"",
+""test_type"": ""Refund"",
+""amount"": ""1000"",
+""receipt_number"": ""R12345""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""test_date"": ""2025-09-09"",
+""test_type"": ""Double Charge Refund"",
+""amount"": ""500"",
+""receipt_number"": ""R67890""
+}
+
+```","['RULE_007', 'RULE_010', 'RULE_011']"
+RULE_059,Corporate card for personal use (payroll deduction at a later date),Accounts payable (employee expenses),Corporate card for personal use (payroll deduction at a later date)Accounts payable (employee expenses),none,none,Based on receipt,,"When using the following corporate cards for personal use:
+・Pay for Business Card
+・Sumitomo Mitsui Card
+・Credit Saison Card","- Checking the amount or receipt availability is not necessary.
+- If ""Personal"" or similar is entered in the memo field when using a corporate card such as PayforBusiness, the relevant account will be used.
+- If the credit account for the relevant account is not one of the following: This may indicate an incorrect expense account selection. Please confirm with the applicant.
+
+Accounts Payable - PayforBusiness
+
+Accounts Payable - Sumitomo Mitsui Card
+
+Accounts Payable - Sumitomo Mitsui Card_Card Control
+
+Accounts Payable - Credit Saison (Corporate Card)","``` json
+{
+""employee_id"": ""JP007"",
+""transfer_start_date"": ""2025-09-01"",
+""transfer_end_date"": ""2025-09-07"",
+""home_country"": ""Japan"",
+""transfer_reason"": ""Personal use"",
+""amount"": ""15000"",
+""receipt_number"": ""not applicable""
+}
+
+```","``` json
+{
+""employee_id"": ""JP008"",
+""transfer_start_date"": ""2025-08-15"",
+""transfer_end_date"": ""2025-08-20"",
+""home_country"": ""USA"",
+""transfer_reason"": ""Family travel"",
+""amount"": ""25000"",
+""receipt_number"": ""N/A""
+}
+
+```","['RULE_005', 'RULE_006', 'RULE_007']"
+RULE_060,Payroll payments (expenses recorded separately via cloud payroll),Advance payment,Payroll payments (expenses recorded separately via cloud payroll)Advance payment,none,error,Based on receipt,,"When distributing the following items ① through ④ to company employees at company events, etc. (even if the value is small):
+
+① Gift certificates, such as Amazon gift certificates
+② Gift catalogs
+③ Other items that are easily convertible into cash (※1)
+④ High-value items (※2)
+
+※1 Regarding determining whether a cash equivalent is ""highly convertible"":
+Items that can be converted into cash at gift certificate shops are considered cash equivalents.
+Items that can be converted into cash at gift certificate shops have a market price, and both ""ease of conversion"" and ""conversion rate"" are high, which means they are considered highly convertible.
+Disney tickets and Starbucks gift cards also qualify as cash equivalents.
+
+※2 While there is no clear standard for the amount, you must also consider the overall balance when making a decision.
+(Example) If the maximum value of the prize to be distributed is ¥30,000
+If only a portion of the total participants receive a prize, it is not subject to payroll tax.
+If 40 out of 50 people receive a prize worth ¥30,000, it is subject to payroll tax.
+","
+*If an application is made for this subject, QA will be checked.","``` json
+{
+""employee_id"": ""JP001"",
+""refund_date"": ""2025-09-07"",
+""refund_item"": ""Amazon gift certificate"",
+""refund_amount"": ""3000"",
+""refund_method"": ""Bank Transfer""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""refund_date"": ""2025-09-15"",
+""refund_item"": ""Gift card"",
+""refund_amount"": ""5000"",
+""refund_method"": ""Cash""
+}
+
+```","['RULE_038', 'RULE_039', 'RULE_059']"
+RULE_061,Land rent (Osaka branch),,Land rent (Osaka branch),error,error,Based on receipt,,"・WeWork Japan usage fees, which is used as a satellite office for the Kansai branch",,"``` json
+{
+""employee_id"": ""JP001"",
+""deduction_date"": ""2025-09-07"",
+""personal_use_item"": """",
+""amount"": """"
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""deduction_date"": ""2025-09-15"",
+""personal_use_item"": ""Office Space"",
+""amount"": ""250000""
+}
+
+```","['RULE_062', 'RULE_051']"
+RULE_062,Land rent (Tokyo: MSB Tamachi),,Land rent (Tokyo: MSB Tamachi),error,error,Based on receipt,,"・Rent for each location
+・Usage fee for WeWork Japan, which is used as a satellite office in Tokyo",,"``` json
+{
+""employee_id"": ""JP001"",
+""payroll_date"": ""2025-09-07"",
+""payroll_item"": ""Office Rent"",
+""amount"": ""100000"",
+""receipt_number"": ""RNT001""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""payroll_date"": ""2025-10-01"",
+""payroll_item"": ""WeWork Fee"",
+""amount"": ""50000"",
+""receipt_number"": ""WWK002""
+}
+
+```","['RULE_061', 'RULE_051']"
+RULE_063,Water and utility costs,Water and utility costs,Water and utility costsWater and utility costs,none,error,Based on receipt,,・Utility costs for each location,"As stated in Kibela, no prior application is required for utility bills.
+https://moneyforward.kibe.la/notes/132864#%E3%81%9D%E3%81%AE%E4%BB%96","``` json
+{
+""employee_id"": ""JP001"",
+""lease_start_date"": ""2025-09-01"",
+""lease_end_date"": ""2025-09-30"",
+""branch_name"": ""Tokyo Branch"",
+""location"": ""Chiyoda-ku, Tokyo"",
+""amount"": ""10000"",
+""receipt_number"": ""R00001""
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""lease_start_date"": ""2025-10-01"",
+""lease_end_date"": ""2025-10-31"",
+""branch_name"": ""Osaka Branch"",
+""location"": ""Osaka"",
+""amount"": ""8500"",
+""receipt_number"": ""R00002""
+}
+
+```","['RULE_016', 'RULE_033', 'RULE_034']"
+RULE_064,Vaccination costs when traveling abroad,Travel expenses and transportation expenses,Vaccination costs when traveling abroadTravel expenses and transportation expenses,error,error,Based on receipt,,"- Vaccination costs when traveling abroad (on business trips)
+- For transportation costs associated with vaccination, please select ""Travel Expenses: Train, Bus, and Limited Express Tickets (Excluding Shinkansen).""",,"``` json
+{
+""employee_id"": ""JP001"",
+""vaccination_date"": ""2025-09-07"",
+""vaccine_name"": ""Yellow Fever Vaccine"",
+""amount"": ""15000"",
+""receipt_number"": ""R12345"",
+""overseas_flag"": true
+}
+
+```","``` json
+{
+""employee_id"": ""JP003"",
+""vaccination_date"": ""2025-08-01"",
+""vaccine_name"": ""Typhoid Vaccine"",
+""amount"": ""10000"",
+""receipt_number"": ""TXR987"",
+""overseas_flag"": true
+}
+
+```","['RULE_056', 'RULE_057', 'RULE_001']"
