@@ -1,8 +1,4 @@
 import pandas as pd
-from approaches.bm25.bm25_retriever import BM25Retriever
-from approaches.dense.dense_retriever import DenseRetriever
-from approaches.rag.rag_retriever import RAGRetriever
-from approaches.butlerai.butlerai_retriever import ButlerAIRetriever
 from approaches.random.random_retriever import RandomRetriever
 
 # Load the evaluation data
@@ -43,13 +39,16 @@ def hit_rate(retrieved, relevant):
 
 
 def ndcg(retrieved, relevant):
-    dcg = sum((1 / (i + 1)) for i, r in enumerate(retrieved) if r in relevant)
+    dcg = sum((1 / (i + 1)) for i, r in enumerate(retrieved)
+               if r in relevant)
     idcg = sum((1 / (i + 1)) for i in range(len(relevant)))
     return dcg / idcg if idcg > 0 else 0
 
 
 def confusion_rate(retrieved, relevant, distractors):
-    return sum(1 for d in distractors if d in retrieved and d not in relevant) / len(distractors)
+    return sum(
+        1 for d in distractors if d in retrieved and d not in relevant
+    ) / len(distractors)
 
 
 def f1_score(recall, precision):
@@ -86,7 +85,9 @@ if __name__ == '__main__':
                 mrr = mean_reciprocal_rank(retrieved, positive_examples)
                 hit_rate_value = hit_rate(retrieved, positive_examples)
                 ndcg_value = ndcg(retrieved, positive_examples)
-                confusion = confusion_rate(retrieved, positive_examples, distractor_rules)
+                confusion = confusion_rate(
+                    retrieved, positive_examples, distractor_rules
+                )
                 f1 = f1_score(recall, precision)
 
                 # Append metrics to lists
