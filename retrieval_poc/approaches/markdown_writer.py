@@ -9,17 +9,13 @@ def write_composite_score_explanation(file_path):
 
             The composite score is calculated using the following formula:
 
-            \\[
+            $$
             \\text{Composite Score} =
             (R \\times W_R + P \\times W_P + F1 \\times W_{F1}
             + MRR \\times W_{MRR} + HR \\times W_{HR}
             + nDCG \\times W_{nDCG} + CR \\times W_{CR})
-            \\]
-            """
-        ))
+            $$
 
-        f.write(dedent(
-            """
             ### Legend
 
             - **R**: Average Recall
@@ -30,11 +26,7 @@ def write_composite_score_explanation(file_path):
             - **nDCG**: Average Normalized Discounted Cumulative Gain
             - **CR**: Average Confusion Rate
             - **W**: Weight of the respective metric
-            """
-        ))
 
-        f.write(dedent(
-            """
             ### Explanation of Components
 
             - **Average Recall**:
@@ -46,7 +38,8 @@ def write_composite_score_explanation(file_path):
             - **Average MRR (Mean Reciprocal Rank)**:
               The average of the reciprocal ranks of the first relevant item.
             - **Average Hit Rate**:
-              The proportion of queries for which the first retrieved item is relevant.
+              The proportion of queries for which the first retrieved
+              item is relevant.
             - **Average nDCG (Normalized Discounted Cumulative Gain)**:
               A measure of ranking quality.
             - **Average Confusion Rate**:
