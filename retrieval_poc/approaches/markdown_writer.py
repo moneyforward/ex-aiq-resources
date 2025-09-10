@@ -11,8 +11,8 @@ def write_composite_score_explanation(file_path):
 
             $$
             \\text{Composite Score} =
-            (R \\times W_R + P \\times W_P + F1 \\times W_{F1}
-            + MRR \\times W_{MRR} + HR \\times W_{HR}
+            (R \\times W_R + P \\times W_P + F1 \\times W_{F1} \\\\
+            + MRR \\times W_{MRR} + HR \\times W_{HR} \\\\
             + nDCG \\times W_{nDCG} + CR \\times W_{CR})
             $$
 
