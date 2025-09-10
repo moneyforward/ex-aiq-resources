@@ -15,14 +15,19 @@ class BM25Retriever(BaseRetriever):
         elif version == 'BM25L':
             self.bm25 = BM25L(self.tokenized_corpus, k1=k1, b=b)
         elif version == 'BM25Plus':
-            self.bm25 = BM25Plus(self.tokenized_corpus, k1=k1, b=b)
+            # Fix line length issue
+            self.bm25 = BM25Plus(
+                self.tokenized_corpus, k1=k1, b=b
+            )
         else:
             raise ValueError(f"Unsupported BM25 version: {version}")
 
     def retrieve(self, query):
         tokenized_query = query.split()
         doc_scores = self.bm25.get_scores(tokenized_query)
-        top_n_indices = sorted(range(len(doc_scores)), key=lambda i: doc_scores[i], reverse=True)[:self.retrieval_size]
+        top_n_indices = sorted(
+            range(len(doc_scores)), key=lambda i: doc_scores[i], reverse=True
+        )[:self.retrieval_size]
         return [self.data.iloc[i]['Rule'] for i in top_n_indices]
 
     def sample_tokenized_corpus(self, sample_size=5):

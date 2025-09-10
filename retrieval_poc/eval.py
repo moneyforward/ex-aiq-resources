@@ -21,9 +21,15 @@ retrieval_size = 3
 
 # Initialize retrievers
 retrievers = {
-    'BM25Okapi': BM25Retriever(data, retrieval_size, version='BM25Okapi', k1=1.2, b=0.75),
-    'BM25L': BM25Retriever(data, retrieval_size, version='BM25L', k1=1.2, b=0.75),
-    'BM25Plus': BM25Retriever(data, retrieval_size, version='BM25Plus', k1=1.2, b=0.75),
+    'BM25Okapi': BM25Retriever(
+        data, retrieval_size, version='BM25Okapi', k1=1.2, b=0.75
+    ),
+    'BM25L': BM25Retriever(
+        data, retrieval_size, version='BM25L', k1=1.2, b=0.75
+    ),
+    'BM25Plus': BM25Retriever(
+        data, retrieval_size, version='BM25Plus', k1=1.2, b=0.75
+    ),
     # 'Dense': DenseRetriever(data, retrieval_size),
     # 'RAG': RAGRetriever(data, retrieval_size),
     # 'ButlerAI': ButlerAIRetriever(data, retrieval_size),
@@ -176,7 +182,7 @@ if __name__ == '__main__':
         'Average Confusion Rate': -1.0  # Negative weight for confusion rate
     }
 
-    # Calculate composite score for each row
+    # Fix line length issues
     results_df['Composite Score'] = (
         results_df['Average Recall'] * weights['Average Recall'] +
         results_df['Average Precision'] * weights['Average Precision'] +
@@ -188,13 +194,22 @@ if __name__ == '__main__':
     )
 
     # Sort the table by k and composite score
-    results_df.sort_values(by=['k', 'Composite Score'], ascending=[True, False], inplace=True)
+    results_df.sort_values(
+        by=['k', 'Composite Score'], ascending=[True, False], inplace=True
+    )
 
     # Reorder columns to place Composite Score after k
-    results_df = results_df[['Retriever', 'k', 'Composite Score', 'Average Recall', 'Average Precision', 'Average F1 Score', 'Average MRR', 'Average Hit Rate', 'Average nDCG', 'Average Confusion Rate']]
+    results_df = results_df[[
+        'Retriever', 'k', 'Composite Score', 'Average Recall', 'Average Precision',
+        'Average F1 Score', 'Average MRR', 'Average Hit Rate', 'Average nDCG',
+        'Average Confusion Rate'
+    ]]
 
     # Save the reordered comparison table as a markdown file
     results_df.to_markdown('approaches/comparison_table.md', index=False)
 
 # Inform the user where the results are saved
-print("The comparison table has been saved as a markdown file at 'approaches/comparison_table.md'.")
+print(
+    "The comparison table has been saved as a markdown file at "
+    "'approaches/comparison_table.md'."
+)
