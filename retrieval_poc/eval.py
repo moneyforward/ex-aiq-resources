@@ -80,13 +80,13 @@ if __name__ == '__main__':
                 retrieved = retriever.retrieve(query)
 
                 # Calculate metrics
-                recall = recall_at_k(retrieved, positive_examples, 3)
-                precision = precision_at_k(retrieved, positive_examples, 3)
-                mrr = mean_reciprocal_rank(retrieved, positive_examples)
-                hit_rate_value = hit_rate(retrieved, positive_examples)
-                ndcg_value = ndcg(retrieved, positive_examples)
+                recall = recall_at_k(retrieved, [rule], 3)
+                precision = precision_at_k(retrieved, [rule], 3)
+                mrr = mean_reciprocal_rank(retrieved, [rule])
+                hit_rate_value = hit_rate(retrieved, [rule])
+                ndcg_value = ndcg(retrieved, [rule])
                 confusion = confusion_rate(
-                    retrieved, positive_examples, distractor_rules
+                    retrieved, [rule], distractor_rules
                 )
                 f1 = f1_score(recall, precision)
 
