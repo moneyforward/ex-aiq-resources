@@ -47,22 +47,21 @@ def precision_at_k(retrieved, relevant, k):
     return sum(1 for r in retrieved[:k] if r in relevant) / k
 
 
-def mean_reciprocal_rank(retrieved, relevant):
-    for rank, item in enumerate(retrieved, start=1):
+def mean_reciprocal_rank_at_k(retrieved, relevant, k):
+    for rank, item in enumerate(retrieved[:k], start=1):
         if item in relevant:
             return 1 / rank
     return 0
 
 
+def ndcg_at_k(retrieved, relevant, k):
+    dcg = sum((1 / (i + 1)) for i, r in enumerate(retrieved[:k]) if r in relevant)
+    idcg = sum((1 / (i + 1)) for i in range(min(len(relevant), k)))
+    return dcg / idcg if idcg > 0 else 0
+
+
 def hit_rate(retrieved, relevant):
     return 1 if retrieved[0] in relevant else 0
-
-
-def ndcg(retrieved, relevant):
-    dcg = sum((1 / (i + 1)) for i, r in enumerate(retrieved)
-               if r in relevant)
-    idcg = sum((1 / (i + 1)) for i in range(len(relevant)))
-    return dcg / idcg if idcg > 0 else 0
 
 
 def confusion_rate(retrieved, relevant, distractors):
@@ -112,9 +111,9 @@ if __name__ == '__main__':
                     # Calculate metrics
                     recall = recall_at_k(retrieved, [rule], k)
                     precision = precision_at_k(retrieved, [rule], k)
-                    mrr = mean_reciprocal_rank(retrieved, [rule])
+                    mrr = mean_reciprocal_rank_at_k(retrieved, [rule], k)
                     hit_rate_value = hit_rate(retrieved, [rule])
-                    ndcg_value = ndcg(retrieved, [rule])
+                    ndcg_value = ndcg_at_k(retrieved, [rule], k)
                     confusion = confusion_rate(
                         retrieved, [rule], distractor_rules
                     )
@@ -135,9 +134,9 @@ if __name__ == '__main__':
                     print(f'Recall@{k}: {recall}')
                     print(f'Precision@{k}: {precision}')
                     print(f'F1 Score: {f1}')
-                    print(f'MRR: {mrr}')
+                    print(f'MRR@{k}: {mrr}')
                     print(f'Hit Rate: {hit_rate_value}')
-                    print(f'nDCG: {ndcg_value}')
+                    print(f'nDCG@{k}: {ndcg_value}')
                     print(f'Confusion Rate: {confusion}')
                     print('---')
 
@@ -176,21 +175,17 @@ if __name__ == '__main__':
     # Invert the Confusion Rate
     results_df['Inverted Confusion Rate'] = 1 - results_df['Average Confusion Rate']
 
-    # Define weights for each metric with priorities
+    # Define weights for each metric, excluding Recall and Precision
     weights = {
-        'Average Recall': 0.05,
-        'Average Precision': 0.05,
-        'Average F1 Score': 0.4,  # Prioritize F1 Score
-        'Average MRR': 0.05,
-        'Average Hit Rate': 0.3,  # Prioritize Hit Rate
-        'Average nDCG': 0.05,
-        'Inverted Confusion Rate': 0.1  # Prioritize Inverted Confusion Rate
+        'Average F1 Score': 0.4,  # Increase to reflect its importance
+        'Average MRR': 0.1,
+        'Average Hit Rate': 0.2,
+        'Average nDCG': 0.1,
+        'Inverted Confusion Rate': 0.2
     }
 
     # Calculate the weighted sum of metrics
     composite_score = (
-        results_df['Average Recall'] * weights['Average Recall'] +
-        results_df['Average Precision'] * weights['Average Precision'] +
         results_df['Average F1 Score'] * weights['Average F1 Score'] +
         results_df['Average MRR'] * weights['Average MRR'] +
         results_df['Average Hit Rate'] * weights['Average Hit Rate'] +
