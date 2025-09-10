@@ -5,6 +5,7 @@ def write_composite_score_explanation(file_path):
         f.write(dedent(
             """
             <br>
+
             ## Composite Score Calculation
 
             The composite score is calculated using the following formula:
@@ -13,23 +14,23 @@ def write_composite_score_explanation(file_path):
         ))
 
         f.write(
-            "$$ \\text{Composite Score} = (R \\times W_R + P \\times W_P "
+            "$$ \\text{{Composite Score}} = \\frac{{(R \\times W_R + P \\times W_P "
             "+ F1 \\times W_{F1} + MRR \\times W_{MRR} + HR \\times W_{HR} "
-            "+ nDCG \\times W_{nDCG} + CR \\times W_{CR}) $$\n"
+            "+ nDCG \\times W_{nDCG} + CR \\times W_{CR})}}{{\\sum W}} $$\n"
         )
 
         f.write(dedent(
             """
             ### Legend
 
-            - **R**: Average Recall
-            - **P**: Average Precision
-            - **F1**: Average F1 Score
-            - **MRR**: Average Mean Reciprocal Rank
-            - **HR**: Average Hit Rate
-            - **nDCG**: Average Normalized Discounted Cumulative Gain
-            - **CR**: Average Confusion Rate
-            - **W**: Weight of the respective metric
+            - **R**: Average Recall (Weight: 0.5)
+            - **P**: Average Precision (Weight: 0.5)
+            - **F1**: Average F1 Score (Weight: 5.0)
+            - **MRR**: Average Mean Reciprocal Rank (Weight: 0.5)
+            - **HR**: Average Hit Rate (Weight: 2.0)
+            - **nDCG**: Average Normalized Discounted Cumulative Gain (Weight: 0.5)
+            - **CR**: Average Confusion Rate (Weight: -2.0)
+            - We divide everything by the sum of the weights to normalize the score.
 
             ### Explanation of Components
 
