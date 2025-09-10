@@ -159,29 +159,6 @@ if __name__ == '__main__':
             print(f'Average Confusion Rate: {avg_confusion}')
             print('===')
 
-            # Define weights for each metric
-            weights = {
-                'Average Recall': 0.5,
-                'Average Precision': 0.5,
-                'Average F1 Score': 5.0,  # Prioritize F1 Score the most
-                'Average MRR': 0.5,
-                'Average Hit Rate': 2.0,  # Prioritize Hit Rate next
-                'Average nDCG': 0.5,
-                'Average Confusion Rate': -2.0  # Prioritize Confusion Rate negatively next
-            }
-
-            # Fix line length issues
-            total_weight = sum(abs(w) for w in weights.values())
-            composite_score = (
-                avg_recall * weights['Average Recall'] +
-                avg_precision * weights['Average Precision'] +
-                avg_f1 * weights['Average F1 Score'] +
-                avg_mrr * weights['Average MRR'] +
-                avg_hit_rate * weights['Average Hit Rate'] +
-                avg_ndcg * weights['Average nDCG'] +
-                avg_confusion * weights['Average Confusion Rate']
-            ) / total_weight  # Normalize by dividing by the sum of absolute weights
-
             # Append results to the DataFrame
             new_row = pd.DataFrame({
                 'Retriever': [name],
@@ -193,9 +170,37 @@ if __name__ == '__main__':
                 'Average Hit Rate': [avg_hit_rate],
                 'Average nDCG': [avg_ndcg],
                 'Average Confusion Rate': [avg_confusion],
-                'Composite Score': [composite_score]
             })
             results_df = pd.concat([results_df, new_row], ignore_index=True)
+
+    # Invert the Confusion Rate
+    results_df['Inverted Confusion Rate'] = 1 - results_df['Average Confusion Rate']
+
+    # Define weights for each metric with priorities
+    weights = {
+        'Average Recall': 0.05,
+        'Average Precision': 0.05,
+        'Average F1 Score': 0.4,  # Prioritize F1 Score
+        'Average MRR': 0.05,
+        'Average Hit Rate': 0.3,  # Prioritize Hit Rate
+        'Average nDCG': 0.05,
+        'Inverted Confusion Rate': 0.1  # Prioritize Inverted Confusion Rate
+    }
+
+    # Calculate the weighted sum of metrics
+    composite_score = (
+        results_df['Average Recall'] * weights['Average Recall'] +
+        results_df['Average Precision'] * weights['Average Precision'] +
+        results_df['Average F1 Score'] * weights['Average F1 Score'] +
+        results_df['Average MRR'] * weights['Average MRR'] +
+        results_df['Average Hit Rate'] * weights['Average Hit Rate'] +
+        results_df['Average nDCG'] * weights['Average nDCG'] +
+        results_df['Inverted Confusion Rate'] * weights['Inverted Confusion Rate']
+    )
+
+    # Normalize by the sum of the weights
+    total_weight = sum(weights.values())
+    results_df['Composite Score'] = composite_score / total_weight
 
     # Sort the table by k and composite score
     results_df.sort_values(
