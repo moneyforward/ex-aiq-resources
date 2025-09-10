@@ -3,6 +3,7 @@ from approaches.random.random_retriever import RandomRetriever
 from approaches.bm25.bm25_retriever import BM25Retriever
 import random
 import numpy as np
+from approaches.markdown_writer import write_composite_score_explanation
 
 # Set a random seed for reproducibility
 random.seed(42)
@@ -173,13 +174,13 @@ if __name__ == '__main__':
 
     # Define weights for each metric
     weights = {
-        'Average Recall': 1.0,
-        'Average Precision': 1.0,
-        'Average F1 Score': 1.0,
-        'Average MRR': 1.0,
-        'Average Hit Rate': 1.0,
-        'Average nDCG': 1.0,
-        'Average Confusion Rate': -1.0  # Negative weight for confusion rate
+        'Average Recall': 0.5,
+        'Average Precision': 0.5,
+        'Average F1 Score': 2.0,  # Prioritize F1 Score
+        'Average MRR': 0.5,
+        'Average Hit Rate': 2.0,  # Prioritize Hit Rate
+        'Average nDCG': 0.5,
+        'Average Confusion Rate': -2.0  # Prioritize Confusion Rate negatively
     }
 
     # Fix line length issues
@@ -207,6 +208,9 @@ if __name__ == '__main__':
 
     # Save the reordered comparison table as a markdown file
     results_df.to_markdown('approaches/comparison_table.md', index=False)
+
+    # Call the function to add explanation of the composite score
+    write_composite_score_explanation('approaches/comparison_table.md')
 
 # Inform the user where the results are saved
 print(
