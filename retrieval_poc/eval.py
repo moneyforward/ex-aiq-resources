@@ -27,26 +27,12 @@ else:
 # Set pandas display options to show all columns
 pd.set_option('display.max_columns', None)
 
-# Set a standard retrieval size
-retrieval_size = 3
-
-# Initialize retrievers
-retrievers = {
-    'BM25Okapi': BM25Retriever(
-        data, retrieval_size, version='BM25Okapi', k1=1.2, b=0.75
-    ),
-    'BM25L': BM25Retriever(
-        data, retrieval_size, version='BM25L', k1=1.2, b=0.75
-    ),
-    'BM25Plus': BM25Retriever(
-        data, retrieval_size, version='BM25Plus', k1=1.2, b=0.75
-    ),
-    # 'Dense': DenseRetriever(data, retrieval_size),
-    # 'RAG': RAGRetriever(data, retrieval_size),
-    # 'ButlerAI': ButlerAIRetriever(
-    #     data=natural_lang_data, retrieval_size=retrieval_size
-    # ),
-    'Random': RandomRetriever(data, retrieval_size)
+# Define retriever configurations
+retriever_configs = {
+    'BM25Okapi': {'version': 'BM25Okapi', 'k1': 1.2, 'b': 0.75},
+    'BM25L': {'version': 'BM25L', 'k1': 1.2, 'b': 0.75},
+    'BM25Plus': {'version': 'BM25Plus', 'k1': 1.2, 'b': 0.75},
+    'Random': {}
 }
 
 # Define evaluation metrics
@@ -77,9 +63,9 @@ def hit_rate(retrieved, relevant):
 
 
 def confusion_rate(retrieved, relevant, distractors):
-    return sum(
-        1 for d in distractors if d in retrieved and d not in relevant
-    ) / len(distractors)
+    if not retrieved:
+        return 0
+    return sum(1 for r in retrieved if r in distractors) / len(retrieved)
 
 
 def f1_score(recall, precision):
@@ -99,9 +85,19 @@ if __name__ == '__main__':
     ])
 
     # Iterate through each retriever and evaluate
-    for name, retriever in retrievers.items():
+    for name, config in retriever_configs.items():
         print(f'Evaluating {name} Retriever')
         for k in k_values:
+            # Initialize retriever with correct size for this k value
+            if name == 'Random':
+                retriever = RandomRetriever(data, k)
+            else:
+                retriever = BM25Retriever(
+                    data, k, 
+                    version=config['version'], 
+                    k1=config['k1'], 
+                    b=config['b']
+                )
             # Initialize lists to store metrics
             recall_list = []
             precision_list = []
