@@ -1,6 +1,8 @@
 import pandas as pd
+import os
 from approaches.random.random_retriever import RandomRetriever
 from approaches.bm25.bm25_retriever import BM25Retriever
+from approaches.butlerai.butlerai_retriever import ButlerAIRetriever
 import random
 import numpy as np
 from approaches.markdown_writer import write_composite_score_explanation
@@ -13,6 +15,15 @@ np.random.seed(42)
 file_path = 'data/eval_en.csv'
 data = pd.read_csv(file_path)
 print(f"Data shape: {data.shape}")  # Print the shape of the DataFrame
+
+# Load natural language data for ButlerAI
+natural_lang_file = 'data/eval_en_natural_language.csv'
+if os.path.exists(natural_lang_file):
+    natural_lang_data = pd.read_csv(natural_lang_file)
+    print(f"Natural language data shape: {natural_lang_data.shape}")
+else:
+    print("Warning: Natural language data not found, ButlerAI will use original data")
+    natural_lang_data = data
 
 # Set pandas display options to show all columns
 pd.set_option('display.max_columns', None)
@@ -33,7 +44,9 @@ retrievers = {
     ),
     # 'Dense': DenseRetriever(data, retrieval_size),
     # 'RAG': RAGRetriever(data, retrieval_size),
-    # 'ButlerAI': ButlerAIRetriever(data, retrieval_size),
+    # 'ButlerAI': ButlerAIRetriever(
+    #     data=natural_lang_data, retrieval_size=retrieval_size
+    # ),
     'Random': RandomRetriever(data, retrieval_size)
 }
 
@@ -61,7 +74,7 @@ def ndcg_at_k(retrieved, relevant, k):
 
 
 def hit_rate(retrieved, relevant):
-    return 1 if retrieved[0] in relevant else 0
+    return 1 if retrieved and retrieved[0] in relevant else 0
 
 
 def confusion_rate(retrieved, relevant, distractors):
@@ -99,12 +112,24 @@ if __name__ == '__main__':
             confusion_list = []
             f1_list = []
 
-            for index, row in data.iterrows():
+            # Use appropriate data source for each retriever
+            eval_data = natural_lang_data if name == 'ButlerAI' else data
+            
+            for index, row in eval_data.iterrows():
                 rule = row['Rule']
-                positive_examples = [row['Example 1'], row['Example 2']]
+                
+                # For ButlerAI, use the converted natural language queries
+                if name == 'ButlerAI':
+                    # Use the converted natural language query
+                    positive_examples = [row['query']]
+                else:
+                    # Use original JSON queries
+                    positive_examples = [row['Example 1'], row['Example 2']]
+                
                 distractor_rules = eval(row['Distractor Rules'])
 
-                for query in positive_examples:  # Use both positive examples as queries
+                # Use appropriate queries for each retriever
+                for query in positive_examples:
                     # Retrieve results
                     retrieved = retriever.retrieve(query)
 
