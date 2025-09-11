@@ -53,9 +53,21 @@ def mean_reciprocal_rank_at_k(retrieved, relevant, k):
 
 
 def ndcg_at_k(retrieved, relevant, k):
-    dcg = sum((1 / (i + 1)) for i, r in enumerate(retrieved[:k]) if r in relevant)
-    idcg = sum((1 / (i + 1)) for i in range(min(len(relevant), k)))
-    return dcg / idcg if idcg > 0 else 0
+    # Calculate DCG: sum of relevance scores divided by log2(rank + 1)
+    dcg = 0
+    for i, r in enumerate(retrieved[:k]):
+        if r in relevant:
+            dcg += 1 / (i + 1)  # relevance score of 1 for relevant items
+    
+    # Calculate IDCG: ideal DCG for the best possible ranking
+    # For a single relevant item, IDCG = 1 (at rank 1)
+    # For multiple relevant items, IDCG = sum of 1/log2(i+1) for i in 
+    # range(min(len(relevant), k))
+    idcg = sum(1 / (i + 1) for i in range(min(len(relevant), k)))
+    
+    # Cap nDCG at 1.0 to prevent values above 1
+    ndcg = dcg / idcg if idcg > 0 else 0
+    return min(ndcg, 1.0)
 
 
 def hit_rate(retrieved, relevant):
@@ -230,13 +242,13 @@ if __name__ == '__main__':
     ]]
 
     # Save the reordered comparison table as a markdown file
-    results_df.to_markdown('approaches/comparison_table.md', index=False)
+    results_df.to_markdown('approaches/comparison_table_en_synth.md', index=False)
 
     # Call the function to add explanation of the composite score
-    write_composite_score_explanation('approaches/comparison_table.md')
+    write_composite_score_explanation('approaches/comparison_table_en_synth.md')
 
 # Inform the user where the results are saved
 print(
     "The comparison table has been saved as a markdown file at "
-    "'approaches/comparison_table.md'."
+    "'approaches/comparison_table_en_synth.md'."
 )
