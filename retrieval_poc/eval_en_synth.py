@@ -2,6 +2,7 @@ import pandas as pd
 import os
 from approaches.random.random_retriever import RandomRetriever
 from approaches.bm25.bm25_retriever import BM25Retriever
+from approaches.elasticsearch.elasticsearch_retriever import ElasticsearchRetriever
 import random
 import numpy as np
 from approaches.markdown_writer import write_composite_score_explanation
@@ -32,6 +33,8 @@ retriever_configs = {
     'BM25Okapi': {'version': 'BM25Okapi', 'k1': 1.2, 'b': 0.75},
     'BM25L': {'version': 'BM25L', 'k1': 1.2, 'b': 0.75},
     'BM25Plus': {'version': 'BM25Plus', 'k1': 1.2, 'b': 0.75},
+    'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200, 
+                      'index_name': 'expense_rules_en'},
     'Random': {}
 }
 
@@ -103,6 +106,18 @@ if __name__ == '__main__':
             # Initialize retriever with correct size for this k value
             if name == 'Random':
                 retriever = RandomRetriever(data, k)
+            elif name == 'Elasticsearch':
+                retriever = ElasticsearchRetriever(
+                    data, k,
+                    rule_column='Rule',
+                    description_column='Expense item name\n'
+                    '(Name registered in Cloud Expenses)',
+                    category_column='Account',
+                    rule_id_column='Rule',
+                    es_host=config['es_host'],
+                    es_port=config['es_port'],
+                    index_name=config['index_name']
+                )
             else:
                 retriever = BM25Retriever(
                     data, k, 
