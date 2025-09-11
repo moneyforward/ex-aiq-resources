@@ -21,6 +21,7 @@ AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4.1-mini
 • **BM25Okapi**: Classic BM25 algorithm for text similarity matching
 • **BM25L**: BM25 variant with length normalization improvements
 • **BM25Plus**: BM25 variant with better term frequency handling
+• **Elasticsearch**: Full-text search using Elasticsearch with Japanese text analysis
 • **ButlerAI**: AI-powered classification using external API service (disabled due to idev instability)
 • **Random**: Baseline random retrieval for comparison
 • **Dense**: Dense vector embeddings (not implemented)
@@ -41,25 +42,54 @@ AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4.1-mini
 
 ## Run Evaluation
 
-### English Synthetic Data
+### Run All Evaluations (Recommended)
 ```bash
-make run-en-synth
+make run-all
 ```
+This will start Elasticsearch and run both English and Japanese evaluations with all retrievers.
 
-### Japanese Real Data
+### Individual Evaluations
 ```bash
+# English synthetic data only
+make run-en-synth
+
+# Japanese real data only  
 make run-ja
 ```
 
-### Run Both Evaluations
+### Elasticsearch Management
 ```bash
-make run-all
+# Start Elasticsearch
+make es-start
+
+# Stop Elasticsearch
+make es-stop
+
+# Check Elasticsearch status
+make es-status
+
+# View Elasticsearch logs
+make es-logs
+
+# Clean Elasticsearch data
+make es-clean
 ```
 
 ### Check Results
 ```bash
 make check-results
 ```
+
+## Elasticsearch Setup
+
+The Elasticsearch retriever uses Docker to run a local Elasticsearch instance. The setup includes:
+
+- **Docker Compose**: Configured in `docker-compose.yml`
+- **Japanese Text Analysis**: Uses standard analyzer with wildcard matching for Japanese text
+- **Configurable Column Mapping**: Supports different dataset structures
+- **Automatic Management**: Started automatically with `make run-all`
+
+For detailed setup instructions, see `ELASTICSEARCH_SETUP.md`.
 
 ## Results
 

@@ -2,6 +2,7 @@ import pandas as pd
 import json
 from approaches.random.random_retriever import RandomRetriever
 from approaches.bm25.bm25_retriever import BM25Retriever
+from approaches.elasticsearch.elasticsearch_retriever import ElasticsearchRetriever
 import random
 import numpy as np
 from approaches.markdown_writer import write_composite_score_explanation
@@ -92,6 +93,7 @@ retriever_configs = {
     'BM25Okapi': {'version': 'BM25Okapi', 'k1': 1.2, 'b': 0.75},
     'BM25L': {'version': 'BM25L', 'k1': 1.2, 'b': 0.75},
     'BM25Plus': {'version': 'BM25Plus', 'k1': 1.2, 'b': 0.75},
+    'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200, 'index_name': 'expense_rules_ja'},
     'Random': {}
 }
 
@@ -165,6 +167,17 @@ if __name__ == '__main__':
             # Use the full rule space (64 rules) for retrieval, not just the JSON data
             if name == 'Random':
                 retriever = RandomRetriever(rule_space_data, k)
+            elif name == 'Elasticsearch':
+                retriever = ElasticsearchRetriever(
+                    rule_space_data, k,
+                    rule_column='Rule',
+                    description_column='経費科目名称\n（クラウド経費に登録されている名称）',
+                    category_column='勘定科目',
+                    rule_id_column='Rule',
+                    es_host=config['es_host'],
+                    es_port=config['es_port'],
+                    index_name=config['index_name']
+                )
             else:
                 retriever = BM25Retriever(
                     rule_space_data, k, 
