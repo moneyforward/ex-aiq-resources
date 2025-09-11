@@ -56,9 +56,15 @@ def json_to_dataframe(json_data, ground_truth_df, rule_space_data):
         query = (f"Expense: {description}, Amount: {amount} yen, "
                 f"Date: {date}, Category: {category}")
         
-        # Create distractor rules (all other rules from the full rule space 
-        # except the correct one)
-        distractor_rules = [r for r in all_available_rules if r != rule_id]
+        # Get distractor rules from the rule space data for this specific rule
+        rule_row = rule_space_data[rule_space_data['Rule'] == rule_id]
+        if not rule_row.empty:
+            distractor_rules_str = rule_row.iloc[0]['Distractor Rules']
+            # Parse the string representation of the list
+            distractor_rules = eval(distractor_rules_str)
+        else:
+            # Fallback: use all other rules if not found
+            distractor_rules = [r for r in all_available_rules if r != rule_id]
         
         rows.append({
             'Rule': rule_id,
