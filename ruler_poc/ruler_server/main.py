@@ -13,7 +13,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel
 
 from ruler_server.validator import evaluate_rule, get_rule_by_id, validate_rulebook_schema
-from ruler_server.demo_utils import build_demo_options, get_demo_rule_summary
+from ruler_server.demo_utils import build_demo_options
 
 # Configuration
 CONFIG_PATH = Path("config.toml")
