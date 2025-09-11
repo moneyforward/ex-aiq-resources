@@ -33,7 +33,8 @@ retriever_configs = {
     'BM25Okapi': {'version': 'BM25Okapi', 'k1': 1.2, 'b': 0.75},
     'BM25L': {'version': 'BM25L', 'k1': 1.2, 'b': 0.75},
     'BM25Plus': {'version': 'BM25Plus', 'k1': 1.2, 'b': 0.75},
-    'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200, 'index_name': 'expense_rules_en'},
+    'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200, 
+                      'index_name': 'expense_rules_en'},
     'Random': {}
 }
 
@@ -109,7 +110,8 @@ if __name__ == '__main__':
                 retriever = ElasticsearchRetriever(
                     data, k,
                     rule_column='Rule',
-                    description_column='Expense item name\n(Name registered in Cloud Expenses)',
+                    description_column='Expense item name\n'
+                    '(Name registered in Cloud Expenses)',
                     category_column='Account',
                     rule_id_column='Rule',
                     es_host=config['es_host'],

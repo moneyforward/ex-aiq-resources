@@ -1,6 +1,5 @@
 from elasticsearch import Elasticsearch
 from ..base_retriever import BaseRetriever
-import json
 from typing import List, Dict, Any
 
 
@@ -72,7 +71,7 @@ class ElasticsearchRetriever(BaseRetriever):
             print(f"✅ Created Elasticsearch index: {self.index_name}")
         except Exception as e:
             if "resource_already_exists_exception" in str(e):
-                print(f"ℹ️  Index {self.index_name} already exists, using existing index")
+                print(f"ℹ️  Index {self.index_name} already exists, using existing")
             else:
                 raise
     
@@ -101,7 +100,7 @@ class ElasticsearchRetriever(BaseRetriever):
     
     def _extract_expense_description(self, query: str) -> str:
         """Extract the expense description from the query format"""
-        # Handle Japanese format: "Expense: [description], Amount: [amount], Date: [date]"
+        # Handle Japanese data format
         if "Expense:" in query:
             # Extract the expense description part
             expense_part = query.split("Expense:")[1]
@@ -116,13 +115,14 @@ class ElasticsearchRetriever(BaseRetriever):
                 data = json.loads(query)
                 # Extract key fields that are most relevant for search
                 search_terms = []
-                for key in ['transport_mode', 'origin', 'destination', 'campaign_name', 
-                           'event_name', 'vaccine_name', 'advertising_platform', 'bank_name',
-                           'organization_name', 'meeting_name', 'affiliate_name']:
+                for key in ['transport_mode', 'origin', 'destination', 
+                           'campaign_name', 'event_name', 'vaccine_name', 
+                           'advertising_platform', 'bank_name', 'organization_name', 
+                           'meeting_name', 'affiliate_name']:
                     if key in data and data[key]:
                         search_terms.append(str(data[key]))
                 return ' '.join(search_terms) if search_terms else query
-            except:
+            except Exception:
                 # If JSON parsing fails, return original query
                 return query
         
@@ -199,7 +199,8 @@ class ElasticsearchRetriever(BaseRetriever):
                 if rule_id:
                     results.append(rule_id)
             
-            print(f"🔍 Elasticsearch found {len(results)} results for query: '{query[:50]}...'")
+            print(f'🔍 Elasticsearch found {len(results)} results for query: '
+                  f"'{query[:50]}...'")
             return results
             
         except Exception as e:
@@ -210,9 +211,10 @@ class ElasticsearchRetriever(BaseRetriever):
         """Get statistics about the Elasticsearch index"""
         try:
             stats = self.es.indices.stats(index=self.index_name)
+            total_stats = stats['indices'][self.index_name]['total']
             return {
-                "total_documents": stats['indices'][self.index_name]['total']['docs']['count'],
-                "index_size": stats['indices'][self.index_name]['total']['store']['size_in_bytes']
+                "total_documents": total_stats['docs']['count'],
+                "index_size": total_stats['store']['size_in_bytes'],
             }
         except Exception as e:
             print(f"Warning: Could not get Elasticsearch stats: {e}")

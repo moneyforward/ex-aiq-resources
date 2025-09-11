@@ -93,7 +93,8 @@ retriever_configs = {
     'BM25Okapi': {'version': 'BM25Okapi', 'k1': 1.2, 'b': 0.75},
     'BM25L': {'version': 'BM25L', 'k1': 1.2, 'b': 0.75},
     'BM25Plus': {'version': 'BM25Plus', 'k1': 1.2, 'b': 0.75},
-    'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200, 'index_name': 'expense_rules_ja'},
+    'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200, 
+                      'index_name': 'expense_rules_ja'},
     'Random': {}
 }
 
