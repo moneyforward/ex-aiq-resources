@@ -2,7 +2,6 @@ import pandas as pd
 import os
 from approaches.random.random_retriever import RandomRetriever
 from approaches.bm25.bm25_retriever import BM25Retriever
-from approaches.butlerai.butlerai_retriever import ButlerAIRetriever
 import random
 import numpy as np
 from approaches.markdown_writer import write_composite_score_explanation
