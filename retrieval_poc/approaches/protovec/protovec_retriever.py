@@ -69,44 +69,64 @@ class ProtovecRetriever(BaseRetriever):
             self._generate_english_synthetic_data()
     
     def _generate_english_synthetic_data(self):
-        """Generate synthetic training data from eval_en.csv."""
+        """Generate synthetic training data from the provided data."""
         from .synthetic_data_generator import SyntheticDataGenerator
         
-        # Find eval_en.csv path
-        csv_path = os.path.join(os.path.dirname(__file__), "../../data/eval_en.csv")
-        if not os.path.exists(csv_path):
-            raise FileNotFoundError(f"Could not find eval_en.csv at {csv_path}")
+        # Use the data passed to the retriever instead of reading from file
+        # This prevents data leakage by ensuring we don't use test examples
+        if self.data is None or self.data.empty:
+            raise ValueError("No data provided for synthetic data generation")
             
-        generator = SyntheticDataGenerator(csv_path)
-        training_data = generator.generate_training_data()
+        # Create a temporary CSV file from the provided data
+        import tempfile
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+            self.data.to_csv(f.name, index=False)
+            temp_csv_path = f.name
         
-        # Store training data
-        self.rule_examples = {}
-        for item in training_data:
-            rule_id = item['rule_id']
-            if rule_id not in self.rule_examples:
-                self.rule_examples[rule_id] = []
-            self.rule_examples[rule_id].append(item['text'])
+        try:
+            generator = SyntheticDataGenerator(temp_csv_path)
+            training_data = generator.generate_training_data()
+            
+            # Store training data
+            self.rule_examples = {}
+            for item in training_data:
+                rule_id = item['rule_id']
+                if rule_id not in self.rule_examples:
+                    self.rule_examples[rule_id] = []
+                self.rule_examples[rule_id].append(item['text'])
+        finally:
+            # Clean up temporary file
+            os.unlink(temp_csv_path)
     
     def _generate_japanese_synthetic_data(self):
-        """Generate synthetic training data from eval_ja.csv."""
+        """Generate synthetic training data from the provided data."""
         from .japanese_synthetic_data_generator import JapaneseSyntheticDataGenerator
         
-        # Find eval_ja.csv path
-        csv_path = os.path.join(os.path.dirname(__file__), "../../data/eval_ja.csv")
-        if not os.path.exists(csv_path):
-            raise FileNotFoundError(f"Could not find eval_ja.csv at {csv_path}")
+        # Use the data passed to the retriever instead of reading from file
+        # This prevents data leakage by ensuring we don't use test examples
+        if self.data is None or self.data.empty:
+            raise ValueError("No data provided for synthetic data generation")
             
-        generator = JapaneseSyntheticDataGenerator(csv_path)
-        training_data = generator.generate_training_data()
+        # Create a temporary CSV file from the provided data
+        import tempfile
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+            self.data.to_csv(f.name, index=False)
+            temp_csv_path = f.name
         
-        # Store training data
-        self.rule_examples = {}
-        for item in training_data:
-            rule_id = item['rule_id']
-            if rule_id not in self.rule_examples:
-                self.rule_examples[rule_id] = []
-            self.rule_examples[rule_id].append(item['text'])
+        try:
+            generator = JapaneseSyntheticDataGenerator(temp_csv_path)
+            training_data = generator.generate_training_data()
+            
+            # Store training data
+            self.rule_examples = {}
+            for item in training_data:
+                rule_id = item['rule_id']
+                if rule_id not in self.rule_examples:
+                    self.rule_examples[rule_id] = []
+                self.rule_examples[rule_id].append(item['text'])
+        finally:
+            # Clean up temporary file
+            os.unlink(temp_csv_path)
     
     def load_training_data(self, training_data_path: str):
         """Load training data from JSON file."""

@@ -126,6 +126,7 @@ if __name__ == '__main__':
                     index_name=config['index_name']
                 )
             elif name == 'Protovec':
+                # Use filtered data to prevent data leakage (exclude test examples)
                 retriever = ProtovecRetriever(
                     retriever_data, k,
                     model_name=config['model_name']
@@ -165,7 +166,13 @@ if __name__ == '__main__':
                 # Use appropriate queries for each retriever
                 for query in positive_examples:
                     # Retrieve results
-                    retrieved = retriever.retrieve(query)
+                    if name == 'Protovec':
+                        # Protovec returns list of dictionaries, extract rule IDs
+                        retrieved_results = retriever.retrieve(query)
+                        retrieved = [r['rule_id'] for r in retrieved_results]
+                    else:
+                        # Other retrievers return list of rule IDs directly
+                        retrieved = retriever.retrieve(query)
 
                     # Calculate metrics
                     recall = recall_at_k(retrieved, [rule], k)
