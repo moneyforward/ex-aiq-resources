@@ -205,60 +205,200 @@ class JapaneseSyntheticDataGenerator:
         }
     
     def generate_rule_examples(self, rule_id: str, rule_description: str) -> List[str]:
-        """Generate examples for a specific rule."""
-        # Check if we have predefined patterns
+        """Generate JSON examples for a specific rule."""
+        # Check if we have predefined patterns - convert to JSON format
         if rule_id in self.expense_patterns:
-            return self.expense_patterns[rule_id]
+            return [self._text_to_json(text, rule_id) for text in self.expense_patterns[rule_id]]
         
-        # Generate examples based on rule description
+        # Generate JSON examples based on rule description
         examples = []
         
-        # Extract key terms from rule description
+        # Extract key terms from rule description and create JSON
         if "電車" in rule_description or "バス" in rule_description:
             examples.extend([
-                f"{rule_id}の電車利用で500円",
-                f"{rule_id}のバス利用で300円",
-                f"{rule_id}の交通費で800円"
+                self._create_travel_json("電車", "東京", "新宿", "500"),
+                self._create_travel_json("バス", "大阪", "京都", "300"),
+                self._create_travel_json("電車", "渋谷", "新宿", "800")
             ])
         elif "新幹線" in rule_description or "飛行機" in rule_description:
             examples.extend([
-                f"{rule_id}の新幹線で15000円",
-                f"{rule_id}の飛行機で25000円",
-                f"{rule_id}の交通費で30000円"
+                self._create_travel_json("新幹線", "東京", "大阪", "15000"),
+                self._create_travel_json("飛行機", "東京", "福岡", "25000"),
+                self._create_travel_json("新幹線", "東京", "名古屋", "30000")
             ])
         elif "タクシー" in rule_description:
             examples.extend([
-                f"{rule_id}のタクシー代で3000円",
-                f"{rule_id}のタクシー利用で2500円",
-                f"{rule_id}のタクシー料金で4000円"
+                self._create_taxi_json("会議のため", "3000"),
+                self._create_taxi_json("緊急時", "2500"),
+                self._create_taxi_json("お客様訪問", "4000")
             ])
         elif "会議" in rule_description or "セミナー" in rule_description:
             examples.extend([
-                f"{rule_id}の会議費で50000円",
-                f"{rule_id}のセミナー費用で30000円",
-                f"{rule_id}の会議開催費で40000円"
+                self._create_meeting_json("会議", "50000"),
+                self._create_meeting_json("セミナー", "30000"),
+                self._create_meeting_json("研修", "40000")
             ])
         elif "食事" in rule_description or "会食" in rule_description:
             examples.extend([
-                f"{rule_id}の食事代で8000円",
-                f"{rule_id}の会食費で12000円",
-                f"{rule_id}の食事費用で6000円"
+                self._create_meal_json("お客様との食事", "8000"),
+                self._create_meal_json("取引先との会食", "12000"),
+                self._create_meal_json("ビジネス食事", "6000")
             ])
-        elif "購入" in rule_description or "購入" in rule_description:
+        elif "購入" in rule_description:
             examples.extend([
-                f"{rule_id}の購入で5000円",
-                f"{rule_id}の購入費用で8000円",
-                f"{rule_id}の購入代で3000円"
+                self._create_purchase_json("文房具", "5000"),
+                self._create_purchase_json("オフィス用品", "8000"),
+                self._create_purchase_json("設備", "3000")
             ])
         else:
-            # Generic examples
+            # Generic expense JSON
             examples.extend([
-                f"{rule_id}の費用で5000円",
-                f"{rule_id}の支出で8000円",
-                f"{rule_id}の経費で3000円"
+                self._create_generic_json("ビジネス費用", "5000"),
+                self._create_generic_json("業務関連費用", "8000"),
+                self._create_generic_json("業務活動費", "6000")
             ])
         
         return examples[:4]  # Return up to 4 examples
+    
+    def _text_to_json(self, text: str, rule_id: str) -> str:
+        """Convert Japanese text to JSON format matching the actual data structure."""
+        # Extract amount from text if possible
+        import re
+        amount_match = re.search(r'(\d+)円', text)
+        amount = amount_match.group(1) if amount_match else "500"
+        
+        return json.dumps({
+            "number": f"JP{random.randint(100000, 999999)}",
+            "category": self._get_category_for_rule(rule_id),
+            "amount": amount,
+            "date": "2025-01-01",
+            "description": text,
+            "memo": "",
+            "payment_input_method": "account",
+            "receipt_type": "Unknown",
+            "receipt_text": ""
+        }, ensure_ascii=False)
+    
+    def _get_category_for_rule(self, rule_id: str) -> str:
+        """Get the category name for a rule ID."""
+        # Map rule IDs to their Japanese category names
+        category_map = {
+            'RULE_001': '旅費交通費：(国内)近隣の電車・バスのみ',
+            'RULE_002': '旅費交通費：(国内)新幹線・飛行機・宿泊',
+            'RULE_003': '旅費交通費：(海外)近隣の電車・バス',
+            'RULE_004': '旅費交通費：(海外)新幹線・飛行機・宿泊',
+            'RULE_005': '旅費交通費：(国内)タクシー',
+            'RULE_006': '旅費交通費：(海外)タクシー',
+            'RULE_007': '旅費交通費：(国内)接待タクシー',
+            'RULE_008': '旅費交通費：(国内)日当',
+            'RULE_009': '旅費交通費：(海外)日当',
+            'RULE_010': '旅費交通費：宿泊税・入湯税',
+            'RULE_011': '旅費交通費：高速道路ETC',
+            'RULE_012': '会議費',
+            'RULE_013': '会議費（8%）',
+            'RULE_014': '交際費：外部との食事',
+            'RULE_015': '交際費：外部との高額食事',
+            'RULE_016': '交際費：社内メンバーのみの食事',
+            'RULE_017': '交際費：社内メンバーの食事（8%）',
+            'RULE_018': '交際費：お客様へのお土産',
+            'RULE_019': '交際費：お客様へのお土産（8%）',
+            'RULE_020': '通信費：コピー代',
+            'RULE_021': '消耗品費：文房具',
+            'RULE_022': '消耗品費：高額機器',
+            'RULE_023': '通信費：新聞購読',
+            'RULE_024': '通信費：海外新聞購読',
+            'RULE_025': '通信費：SaaS利用料',
+            'RULE_026': '通信費：海外SaaS利用料',
+            'RULE_027': '通信費：郵送料',
+            'RULE_028': '通信費：国内郵送料',
+            'RULE_029': '通信費：国内配送',
+            'RULE_030': '通信費：海外配送'
+        }
+        return category_map.get(rule_id, 'その他経費')
+    
+    def _create_travel_json(self, transport_mode: str, origin: str, destination: str, amount: str) -> str:
+        """Create travel expense JSON matching Japanese data structure."""
+        return json.dumps({
+            "number": f"JP{random.randint(100000, 999999)}",
+            "category": "旅費交通費：(国内)近隣の電車・バスのみ",
+            "amount": amount,
+            "date": "2025-01-01",
+            "description": f"入 {origin} 出 {destination}",
+            "memo": "",
+            "payment_input_method": "account",
+            "receipt_type": "Unknown",
+            "receipt_text": ""
+        }, ensure_ascii=False)
+    
+    def _create_taxi_json(self, reason: str, amount: str) -> str:
+        """Create taxi expense JSON matching Japanese data structure."""
+        return json.dumps({
+            "number": f"JP{random.randint(100000, 999999)}",
+            "category": "旅費交通費：(国内)タクシー",
+            "amount": amount,
+            "date": "2025-01-01",
+            "description": f"タクシー代 {reason}",
+            "memo": "",
+            "payment_input_method": "account",
+            "receipt_type": "Unknown",
+            "receipt_text": ""
+        }, ensure_ascii=False)
+    
+    def _create_meeting_json(self, meeting_type: str, amount: str) -> str:
+        """Create meeting expense JSON matching Japanese data structure."""
+        return json.dumps({
+            "number": f"JP{random.randint(100000, 999999)}",
+            "category": "会議費",
+            "amount": amount,
+            "date": "2025-01-01",
+            "description": f"{meeting_type}参加費",
+            "memo": "",
+            "payment_input_method": "account",
+            "receipt_type": "Unknown",
+            "receipt_text": ""
+        }, ensure_ascii=False)
+    
+    def _create_meal_json(self, meal_type: str, amount: str) -> str:
+        """Create meal expense JSON matching Japanese data structure."""
+        return json.dumps({
+            "number": f"JP{random.randint(100000, 999999)}",
+            "category": "交際費：外部との食事",
+            "amount": amount,
+            "date": "2025-01-01",
+            "description": f"{meal_type}代",
+            "memo": "",
+            "payment_input_method": "account",
+            "receipt_type": "Unknown",
+            "receipt_text": ""
+        }, ensure_ascii=False)
+    
+    def _create_purchase_json(self, item: str, amount: str) -> str:
+        """Create purchase expense JSON matching Japanese data structure."""
+        return json.dumps({
+            "number": f"JP{random.randint(100000, 999999)}",
+            "category": "消耗品費：文房具",
+            "amount": amount,
+            "date": "2025-01-01",
+            "description": f"{item}購入",
+            "memo": "",
+            "payment_input_method": "account",
+            "receipt_type": "Unknown",
+            "receipt_text": ""
+        }, ensure_ascii=False)
+    
+    def _create_generic_json(self, description: str, amount: str) -> str:
+        """Create generic expense JSON matching Japanese data structure."""
+        return json.dumps({
+            "number": f"JP{random.randint(100000, 999999)}",
+            "category": "その他経費",
+            "amount": amount,
+            "date": "2025-01-01",
+            "description": description,
+            "memo": "",
+            "payment_input_method": "account",
+            "receipt_type": "Unknown",
+            "receipt_text": ""
+        }, ensure_ascii=False)
     
     def generate_training_data(self, min_examples_per_rule: int = 2) -> List[Dict[str, Any]]:
         """Generate training data from all rules."""
@@ -307,44 +447,44 @@ class JapaneseSyntheticDataGenerator:
         return additional_examples
     
     def _create_additional_japanese_example(self, rule_id: str, rule_description: str, variation: int) -> str:
-        """Create additional Japanese synthetic examples."""
-        # Generate variations based on rule type
+        """Create additional Japanese synthetic JSON examples."""
+        # Generate JSON variations based on rule type
         if "電車" in rule_description or "バス" in rule_description:
             variations = [
-                f"駅Aから駅Bまで電車で{500 + variation * 100}円",
-                f"都市Aから都市Bまでバスで{300 + variation * 50}円",
-                f"場所Aから場所Bまで公共交通で{400 + variation * 75}円"
+                self._create_travel_json("電車", "駅A", "駅B", str(500 + variation * 100)),
+                self._create_travel_json("バス", "都市A", "都市B", str(300 + variation * 50)),
+                self._create_travel_json("電車", "場所A", "場所B", str(400 + variation * 75))
             ]
         elif "新幹線" in rule_description or "飛行機" in rule_description:
             variations = [
-                f"東京から大阪まで新幹線で{15000 + variation * 2000}円",
-                f"東京から福岡まで飛行機で{25000 + variation * 3000}円",
-                f"都市Aから都市Bまで高速交通で{20000 + variation * 2500}円"
+                self._create_travel_json("新幹線", "東京", "大阪", str(15000 + variation * 2000)),
+                self._create_travel_json("飛行機", "東京", "福岡", str(25000 + variation * 3000)),
+                self._create_travel_json("新幹線", "都市A", "都市B", str(20000 + variation * 2500))
             ]
         elif "タクシー" in rule_description:
             variations = [
-                f"会議のためタクシーで{3000 + variation * 500}円",
-                f"緊急時のタクシーで{2500 + variation * 400}円",
-                f"お客様訪問のタクシーで{3500 + variation * 600}円"
+                self._create_taxi_json("会議のため", str(3000 + variation * 500)),
+                self._create_taxi_json("緊急時", str(2500 + variation * 400)),
+                self._create_taxi_json("お客様訪問", str(3500 + variation * 600))
             ]
         elif "会議" in rule_description or "セミナー" in rule_description:
             variations = [
-                f"会議参加費で{50000 + variation * 10000}円",
-                f"セミナー費用で{30000 + variation * 5000}円",
-                f"研修参加費で{40000 + variation * 7500}円"
+                self._create_meeting_json("会議", str(50000 + variation * 10000)),
+                self._create_meeting_json("セミナー", str(30000 + variation * 5000)),
+                self._create_meeting_json("研修", str(40000 + variation * 7500))
             ]
         elif "食事" in rule_description or "会食" in rule_description:
             variations = [
-                f"お客様との食事で{8000 + variation * 1000}円",
-                f"取引先との会食で{12000 + variation * 1500}円",
-                f"ビジネス食事で{6000 + variation * 800}円"
+                self._create_meal_json("お客様との食事", str(8000 + variation * 1000)),
+                self._create_meal_json("取引先との会食", str(12000 + variation * 1500)),
+                self._create_meal_json("ビジネス食事", str(6000 + variation * 800))
             ]
         else:
-            # Generic expense
+            # Generic expense JSON
             variations = [
-                f"ビジネス費用で{5000 + variation * 1000}円",
-                f"業務関連費用で{8000 + variation * 1500}円",
-                f"業務活動費で{6000 + variation * 1200}円"
+                self._create_generic_json("ビジネス費用", str(5000 + variation * 1000)),
+                self._create_generic_json("業務関連費用", str(8000 + variation * 1500)),
+                self._create_generic_json("業務活動費", str(6000 + variation * 1200))
             ]
         
         return variations[variation % len(variations)]

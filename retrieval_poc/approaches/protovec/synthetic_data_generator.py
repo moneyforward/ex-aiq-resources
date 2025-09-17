@@ -39,84 +39,9 @@ class SyntheticDataGenerator:
         return examples
     
     def json_to_text(self, json_data: Dict[str, Any]) -> str:
-        """Convert JSON data to natural language text."""
-        text_parts = []
-        
-        # Key fields to emphasize
-        key_fields = [
-            'transport_mode', 'origin', 'destination', 'trip_start_date', 
-            'trip_end_date', 'fare_amount', 'accommodation_name', 'accommodation_amount',
-            'taxi_reason', 'taxi_destination', 'conference_name', 'meeting_name',
-            'participant_names', 'participant_companies', 'meal_costs',
-            'gift_type', 'recipient_name', 'recipient_company', 'gift_amount',
-            'item_name', 'equipment_name', 'equipment_cost', 'service_type',
-            'provider_name', 'amount', 'overseas_flag'
-        ]
-        
-        # Build descriptive text
-        if 'transport_mode' in json_data:
-            transport = json_data['transport_mode']
-            if transport in ['Train', 'Bus', 'Subway']:
-                text_parts.append(f"Local {transport.lower()} travel")
-            elif transport == 'Shinkansen':
-                text_parts.append("Shinkansen bullet train travel")
-            elif transport == 'Flight':
-                text_parts.append("Airplane flight")
-            elif transport == 'Taxi':
-                text_parts.append("Taxi ride")
-                
-        if 'origin' in json_data and 'destination' in json_data:
-            text_parts.append(f"from {json_data['origin']} to {json_data['destination']}")
-            
-        if 'overseas_flag' in json_data and json_data.get('overseas_flag'):
-            text_parts.append("overseas travel")
-            
-        if 'trip_start_date' in json_data:
-            text_parts.append(f"on {json_data['trip_start_date']}")
-            
-        if 'fare_amount' in json_data and json_data['fare_amount'] != 'not applicable':
-            text_parts.append(f"costing {json_data['fare_amount']} yen")
-            
-        if 'accommodation_name' in json_data and json_data['accommodation_name']:
-            text_parts.append(f"staying at {json_data['accommodation_name']}")
-            
-        if 'taxi_reason' in json_data:
-            text_parts.append(f"for {json_data['taxi_reason']}")
-            
-        if 'conference_name' in json_data:
-            text_parts.append(f"conference: {json_data['conference_name']}")
-            
-        if 'meeting_name' in json_data:
-            text_parts.append(f"meeting: {json_data['meeting_name']}")
-            
-        if 'participant_companies' in json_data:
-            text_parts.append(f"with {json_data['participant_companies']}")
-            
-        if 'gift_type' in json_data:
-            text_parts.append(f"{json_data['gift_type']} for {json_data.get('recipient_name', 'client')}")
-            
-        if 'item_name' in json_data:
-            text_parts.append(f"purchase of {json_data['item_name']}")
-            
-        if 'service_type' in json_data:
-            text_parts.append(f"{json_data['service_type']} service")
-            
-        if 'provider_name' in json_data:
-            text_parts.append(f"from {json_data['provider_name']}")
-            
-        # Add amount if available
-        amount_fields = ['amount', 'fare_amount', 'accommodation_amount', 'gift_amount', 'equipment_cost']
-        for field in amount_fields:
-            if field in json_data and json_data[field] and json_data[field] != 'not applicable':
-                try:
-                    amount = int(json_data[field])
-                    if amount > 0:
-                        text_parts.append(f"amount: {amount} yen")
-                        break
-                except (ValueError, TypeError):
-                    continue
-                    
-        return " ".join(text_parts) if text_parts else "expense request"
+        """Convert JSON data to JSON string for direct comparison."""
+        # Return the JSON as a string for direct comparison with query JSON
+        return json.dumps(json_data, sort_keys=True)
     
     def generate_training_data(self, min_examples_per_rule: int = 2) -> List[Dict[str, Any]]:
         """Generate training data from all rules."""

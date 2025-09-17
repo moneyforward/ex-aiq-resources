@@ -189,8 +189,11 @@ class ProtovecRetriever(BaseRetriever):
         if not self.prototypes:
             return []
             
+        # Extract JSON from markdown code block if present
+        processed_query = self._extract_json_from_markdown(query)
+        
         # Encode query
-        query_embedding = self.model.encode([query])
+        query_embedding = self.model.encode([processed_query])
         
         # Compute similarities with all prototypes
         similarities = []
@@ -222,6 +225,37 @@ class ProtovecRetriever(BaseRetriever):
                 })
         
         return results
+    
+    def _extract_json_from_markdown(self, query: str) -> str:
+        """Extract JSON from markdown code block if present."""
+        import json
+        import re
+        
+        # Check if query looks like JSON in markdown
+        if query.strip().startswith('``` json') or query.strip().startswith('```'):
+            try:
+                # Extract JSON from markdown code block
+                json_match = re.search(r'```\s*json\s*\n(.*?)\n```', query, re.DOTALL)
+                if json_match:
+                    json_str = json_match.group(1)
+                else:
+                    # Try to extract JSON directly
+                    json_str = query.strip()
+                    if json_str.startswith('```'):
+                        json_str = json_str.split('\n', 1)[1]
+                    if json_str.endswith('```'):
+                        json_str = json_str.rsplit('\n', 1)[0]
+                
+                # Parse and re-serialize JSON to normalize format
+                data = json.loads(json_str)
+                return json.dumps(data, sort_keys=True)
+                    
+            except (json.JSONDecodeError, KeyError, ValueError):
+                # If JSON parsing fails, return original query
+                pass
+        
+        # Return original query if not JSON or parsing failed
+        return query
     
     def get_rule_examples(self, rule_id: str) -> List[str]:
         """Get examples for a specific rule."""
