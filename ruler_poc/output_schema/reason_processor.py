@@ -6,7 +6,6 @@ and generating suggested fixes with variable substitution.
 """
 
 import json
-import os
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 
@@ -88,7 +87,7 @@ class ReasonProcessor:
         try:
             # Substitute variables in the template
             return template.format(**variables)
-        except KeyError as e:
+        except KeyError:
             # If a required variable is missing, return the template as-is
             return template
     
@@ -178,7 +177,7 @@ class ReasonProcessor:
                 # Generate field-specific context if not already provided
                 if "field_context" not in reason_variables:
                     # Try to create a meaningful context
-                    reason_variables["field_context"] = f" This field is required for proper expense validation and processing."
+                    reason_variables["field_context"] = " This field is required for proper expense validation and processing."
             
             # Get the base reason info (handle field-specific codes)
             base_reason = reason_code.split(":")[0] if ":" in reason_code else reason_code

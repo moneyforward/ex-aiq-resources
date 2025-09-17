@@ -1,0 +1,1 @@
+# Elasticsearch retrieval approach

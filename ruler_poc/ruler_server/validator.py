@@ -4,16 +4,7 @@ Expense Rule Validator
 This module provides validation logic for expense rules based on rulebook definitions.
 """
 
-import json
-from typing import Dict, List, Any, Optional, Tuple
-import sys
-from pathlib import Path
-
-# Add the parent directory to the path to import output_schema
-# This allows us to import from the parent directory where output_schema is located
-current_file = Path(__file__)
-parent_dir = current_file.parent.parent
-sys.path.insert(0, str(parent_dir))
+from typing import Dict, List, Any
 
 from output_schema.reason_processor import ReasonProcessor
 
@@ -88,12 +79,12 @@ def get_missing_field_reason(field_name: str, rule: Dict[str, Any]) -> tuple[str
             )
     
     # Check validation rules for field-specific requirements
-    validation_rules = rule.get("validation_rules", {})
+    # validation_rules = rule.get("validation_rules", {})
     
     # Use field metadata to determine the reason
     if field_def:
-        field_type = field_def.get("type", "")
-        field_purpose = field_def.get("purpose", "")
+        # field_type = field_def.get("type", "")
+        # field_purpose = field_def.get("purpose", "")
         field_metadata = field_def.get("metadata", {})
         
         # Check if field has specific validation requirements from metadata
@@ -131,10 +122,9 @@ def generate_field_context(field_name: str, rule: Dict[str, Any], variables: Dic
         Context string explaining why the field is required
     """
     # Get the field definition from the rule
-    field_def = None
     for field in rule.get("required_fields", {}).get("inputs", []):
         if field.get("key") == field_name:
-            field_def = field
+            # field_def = field
             break
     
     # Generate context based on field type and purpose
@@ -444,7 +434,7 @@ def process_frequency_constraints(constraints: Dict[str, Any], given: Dict[str, 
     
     scope = max_occurrences.get("scope")
     count = max_occurrences.get("count")
-    period = max_occurrences.get("period")
+    # period = max_occurrences.get("period")
     
     if scope == "person" and count is not None:
         # In real implementation, you'd check against database for frequency
@@ -833,9 +823,9 @@ def evaluate_rule(rule: Dict[str, Any], given: Dict[str, Any]) -> Dict[str, Any]
     
     for i in rule.get("required_fields", {}).get("inputs", []):
         key = i.get("key")
-        field_type = i.get("type", "string")
+        # field_type = i.get("type", "string")
         required = i.get("required", False)
-        allowed_values = i.get("allowed_values", [])
+        # allowed_values = i.get("allowed_values", [])
         
         print(f"DEBUG: Processing field {key}, required: {required}, value: {repr(given.get(key))}")
         
@@ -934,7 +924,7 @@ def evaluate_rule(rule: Dict[str, Any], given: Dict[str, Any]) -> Dict[str, Any]
     # Add missing field names and context for better suggested fixes
     for reason_code, field_display_name in missing_field_names.items():
         # Extract the base reason code (remove the field-specific suffix)
-        base_reason = reason_code.split(":")[0] if ":" in reason_code else reason_code
+        # base_reason = reason_code.split(":")[0] if ":" in reason_code else reason_code
         
         # Set the field name variable
         variables["field_name"] = field_display_name

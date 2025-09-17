@@ -3,7 +3,7 @@ Demo utilities for the expense rule validator.
 This module contains functions for generating demo data and options.
 """
 
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 
 def build_demo_options(rule: Dict[str, Any]) -> Dict[str, Any]:
