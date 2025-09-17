@@ -1,5 +1,5 @@
-# from ..base_retriever import BaseRetriever
-
+from ..base_retriever import BaseRetriever
+import re
 from sqlalchemy import (
     create_engine,
     insert,
@@ -8,16 +8,24 @@ from sqlalchemy import (
     Column,
     String,
 )
-
 from llama_index.core import SQLDatabase
 from llama_index.llms.openai import OpenAI
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.retrievers import NLSQLRetriever
 
 
-class TextToSQLRetriever:
-    def __init__(self, sql_database=None):
-        # super().__init__(data, retrieval_size)
+def sanitize_column(col_name: str) -> str:
+    safe = re.sub(r"[^0-9a-zA-Z_]", "_", col_name)  # replace spaces/special chars
+    if safe[0].isdigit():
+        safe = f"col_{safe}"
+    return safe.lower()
+
+
+class TextToSQLRetriever(BaseRetriever):
+    def __init__(self, data, retrieval_size=3, sql_database=None):
+        super().__init__(data, retrieval_size)
+        self.df = data
+        self.engine = create_engine("sqlite:///:memory:")
         self.sql_database = sql_database
         if not sql_database:
             self._create_db()
@@ -31,56 +39,52 @@ class TextToSQLRetriever:
 
     def retrieve(self, query):
         # Implement RAG retrieval logic here
-        response = self.query_engine.query(query)
-        return response
+        # response = self.query_engine.query(query)
+        # return response
+        response = self.nl_sql_retriever.retrieve(query)
+        answer = []
+        for item in response:
+            answer.append(item.metadata["rule_name"])
+        return answer
 
     def _create_db(self):
-        engine = create_engine("sqlite:///:memory:")
         metadata_obj = MetaData()
 
         # create city SQL table
         table_name = "ex_rules"
+        new_names = [
+            "rule_name",
+            "expense_name",
+            "account",
+            "expense_and_account_name",
+            "advance_application",
+            "receipt_attached",
+            "eligibility_number",
+            "contents_to_enter",
+            "when_to_use_this_expense_item",
+            "content_to_check",
+        ]
+        if len(new_names) != len(self.df.columns):
+            raise ValueError("Column length mismatch")
+        mapping = {col: new_names[i] for i, col in enumerate(self.df.columns)}
+        df = self.df.rename(columns=mapping)
+
         ex_rules_table = Table(
             table_name,
             metadata_obj,
-            Column("expense_name", String(16), primary_key=True),
-            Column("account", String(16), nullable=False),
-            # Column("advance application", String(16), nullable=False),
-            # Column("Memo section", String(16), nullable=True)
+            *[Column(sanitize_column(col), String) for col in df.columns],
         )
-        metadata_obj.create_all(engine)
-        self.sql_database = SQLDatabase(engine, include_tables=["ex_rules"])
+        metadata_obj.create_all(self.engine)
 
-        rows = [
-            {
-                "expense_name": "Travel expenses: (Domestic) Local trains and buses only",
-                "account": "Travel expenses and transportation expenses",
-            },
-            {
-                "expense_name": "Travel expenses: (overseas_not subject to consumption tax) Local trains and buses only",
-                "account": "Travel expenses and transportation expenses(Support: Overseas)",
-            },
-            {
-                "expense_name": "Travel expenses: (overseas subject to consumption tax)",
-                "account": "Travel expenses and transportation expenses(Support: Overseas)",
-            },
-            {
-                "expense_name": "Company food and drink expenses (reduced tax rate 8%): Only company members can participate (excluding Happy Hour and general meeting social gatherings)",
-                "account": "Entertainment and social expenses(Subsidy: Internal entertainment and social expenses)",
-            },
-            {
-                "expense_name": "Communication costs: postage (stamps, etc.), motorcycle courier, courier service - subject to consumption tax",
-                "account": "communication costs",
-            },
-        ]
-        for row in rows:
-            stmt = insert(ex_rules_table).values(**row)
-            with engine.begin() as connection:
-                cursor = connection.execute(stmt)
+        with self.engine.begin() as connection:
+            for _, row in df.iterrows():
+                stmt = insert(ex_rules_table).values(**row.to_dict())
+                connection.execute(stmt)
 
+        self.sql_database = SQLDatabase(self.engine, include_tables=["ex_rules"])
 
-if __name__ == "__main__":
-    query_str = "Return the top 3 expense name(s) for travel"
-    text2_sql = TextToSQLRetriever()
-    answer = text2_sql.retrieve(query_str)
-    print(answer)
+        # with self.engine.connect() as connection:
+        #     result = connection.execute(ex_rules_table.select())
+        #     rows = result.fetchall()
+        #     for row in rows:
+        #         print(row)
