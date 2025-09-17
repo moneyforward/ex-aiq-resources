@@ -23,10 +23,13 @@ class JapaneseSyntheticDataGenerator:
         # Japanese expense type patterns
         self.expense_patterns = {
             'RULE_001': [
-                "東京から新宿まで電車で500円",
-                "大阪から京都までバスで800円", 
-                "近隣の電車利用で300円",
-                "短距離バス移動で200円"
+                "入 東京 出 新宿",
+                "入 大阪 出 京都", 
+                "入 渋谷 出 新宿",
+                "入 田町 出 浜松町",
+                "バス等 じょうB",
+                "北都交通バス",
+                "入 モ浜松町 出 東モ羽田"
             ],
             'RULE_002': [
                 "東京から大阪まで新幹線で15000円",

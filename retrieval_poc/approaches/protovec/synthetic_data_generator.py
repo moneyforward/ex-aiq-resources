@@ -101,47 +101,109 @@ class SyntheticDataGenerator:
         return additional_examples
     
     def _create_synthetic_example(self, rule_id: str, rule_description: str, variation: int) -> str:
-        """Create a synthetic example based on rule description."""
-        # Common patterns for different rule types
+        """Create a synthetic JSON example based on rule description."""
+        import random
+        
+        # Generate JSON examples that match the test data format
         if "train" in rule_description.lower() or "bus" in rule_description.lower():
-            variations = [
-                f"Local train travel from station A to station B for {500 + variation * 100} yen",
-                f"Bus ride from city A to city B costing {300 + variation * 50} yen",
-                f"Public transport from location A to location B for {400 + variation * 75} yen"
+            examples = [
+                {
+                    "employee_id": f"JP{random.randint(100, 999)}",
+                    "trip_start_date": "2025-09-07",
+                    "trip_end_date": "2025-09-07",
+                    "origin": "Tokyo",
+                    "destination": "Shinjuku",
+                    "transport_mode": "Train",
+                    "fare_amount": str(500 + variation * 100),
+                    "receipt_number": "not applicable"
+                },
+                {
+                    "employee_id": f"JP{random.randint(100, 999)}",
+                    "trip_start_date": "2025-09-08",
+                    "trip_end_date": "2025-09-08",
+                    "origin": "Osaka",
+                    "destination": "Kyoto",
+                    "transport_mode": "Bus",
+                    "fare_amount": str(300 + variation * 50),
+                    "receipt_number": "not applicable"
+                }
             ]
         elif "shinkansen" in rule_description.lower() or "flight" in rule_description.lower():
-            variations = [
-                f"Shinkansen travel from Tokyo to Osaka for {15000 + variation * 2000} yen",
-                f"Flight from Tokyo to Fukuoka costing {25000 + variation * 3000} yen",
-                f"High-speed transport from city A to city B for {20000 + variation * 2500} yen"
+            examples = [
+                {
+                    "employee_id": f"JP{random.randint(100, 999)}",
+                    "trip_start_date": "2025-09-07",
+                    "trip_end_date": "2025-09-07",
+                    "origin": "Tokyo",
+                    "destination": "Osaka",
+                    "transport_mode": "Shinkansen",
+                    "fare_amount": str(15000 + variation * 2000),
+                    "receipt_number": "not applicable"
+                },
+                {
+                    "employee_id": f"JP{random.randint(100, 999)}",
+                    "trip_start_date": "2025-09-08",
+                    "trip_end_date": "2025-09-08",
+                    "origin": "Tokyo",
+                    "destination": "Fukuoka",
+                    "transport_mode": "Flight",
+                    "fare_amount": str(25000 + variation * 3000),
+                    "receipt_number": "not applicable"
+                }
             ]
         elif "taxi" in rule_description.lower():
-            variations = [
-                f"Taxi ride for business meeting costing {3000 + variation * 500} yen",
-                f"Taxi for emergency transport for {2500 + variation * 400} yen",
-                f"Taxi service for client visit for {3500 + variation * 600} yen"
+            examples = [
+                {
+                    "employee_id": f"JP{random.randint(100, 999)}",
+                    "trip_start_date": "2025-09-07",
+                    "trip_end_date": "2025-09-07",
+                    "origin": "Office",
+                    "destination": "Client Office",
+                    "transport_mode": "Taxi",
+                    "fare_amount": str(3000 + variation * 500),
+                    "receipt_number": "not applicable"
+                }
             ]
         elif "conference" in rule_description.lower() or "meeting" in rule_description.lower():
-            variations = [
-                f"Conference attendance fee for {50000 + variation * 10000} yen",
-                f"Meeting expenses for {30000 + variation * 5000} yen",
-                f"Seminar participation cost of {40000 + variation * 7500} yen"
+            examples = [
+                {
+                    "employee_id": f"JP{random.randint(100, 999)}",
+                    "trip_start_date": "2025-09-07",
+                    "trip_end_date": "2025-09-07",
+                    "event_type": "Conference",
+                    "event_name": "Business Conference",
+                    "registration_fee": str(50000 + variation * 10000),
+                    "receipt_number": "not applicable"
+                }
             ]
         elif "meal" in rule_description.lower() or "dining" in rule_description.lower():
-            variations = [
-                f"Business meal with clients for {8000 + variation * 1000} yen",
-                f"Client dining expense of {12000 + variation * 1500} yen",
-                f"Business dinner for {6000 + variation * 800} yen"
+            examples = [
+                {
+                    "employee_id": f"JP{random.randint(100, 999)}",
+                    "trip_start_date": "2025-09-07",
+                    "trip_end_date": "2025-09-07",
+                    "meal_type": "Business Meal",
+                    "participants": "Client",
+                    "amount": str(8000 + variation * 1000),
+                    "receipt_number": "not applicable"
+                }
             ]
         else:
-            # Generic expense
-            variations = [
-                f"Business expense for {5000 + variation * 1000} yen",
-                f"Work-related cost of {8000 + variation * 1500} yen",
-                f"Business activity expense for {6000 + variation * 1200} yen"
+            # Generic business expense
+            examples = [
+                {
+                    "employee_id": f"JP{random.randint(100, 999)}",
+                    "trip_start_date": "2025-09-07",
+                    "trip_end_date": "2025-09-07",
+                    "expense_type": "Business Expense",
+                    "description": "Work-related expense",
+                    "amount": str(5000 + variation * 1000),
+                    "receipt_number": "not applicable"
+                }
             ]
         
-        return variations[variation % len(variations)]
+        selected_example = examples[variation % len(examples)]
+        return json.dumps(selected_example, sort_keys=True)
     
     def save_training_data(self, output_path: str):
         """Save training data to JSON file."""
