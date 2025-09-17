@@ -4,6 +4,7 @@ from approaches.random.random_retriever import RandomRetriever
 from approaches.bm25.bm25_retriever import BM25Retriever
 from approaches.elasticsearch.elasticsearch_retriever import ElasticsearchRetriever
 from approaches.dense.dense_retriever import DenseRetriever
+from approaches.protovec.protovec_retriever import ProtovecRetriever
 import random
 import numpy as np
 from approaches.markdown_writer import write_composite_score_explanation
@@ -16,6 +17,10 @@ np.random.seed(42)
 file_path = 'data/eval_en.csv'
 data = pd.read_csv(file_path)
 print(f"Data shape: {data.shape}")  # Print the shape of the DataFrame
+
+# Create filtered data for retrievers (exclude test examples to prevent data leakage)
+retriever_data = data.drop(columns=['Example 1', 'Example 2', 'Distractor Rules'])
+print(f"Retriever data shape (excluding test columns): {retriever_data.shape}")
 
 # Load natural language data for ButlerAI
 natural_lang_file = 'data/eval_en_natural_language.csv'
@@ -38,6 +43,7 @@ retriever_configs = {
                       'index_name': 'expense_rules_en'},
     'Random': {},
     'dense_retriever': {'version': 'dense_retriever'},
+    'Protovec': {'model_name': 'all-MiniLM-L6-v2'}
 }
 
 # Define evaluation metrics
@@ -106,13 +112,14 @@ if __name__ == '__main__':
         print(f'Evaluating {name} Retriever')
         for k in k_values:
             # Initialize retriever with correct size for this k value
+            # Use filtered data to prevent data leakage (exclude test examples)
             if name == 'Random':
-                retriever = RandomRetriever(data, k)
+              retriever = RandomRetriever(retriever_data, k)
             elif name == 'dense_retriever':
-                retriever = DenseRetriever(data, k)
+                retriever = DenseRetriever(retriever_data, k)
             elif name == 'Elasticsearch':
                 retriever = ElasticsearchRetriever(
-                    data, k,
+                    retriever_data, k,
                     rule_column='Rule',
                     description_column='Expense item name\n'
                     '(Name registered in Cloud Expenses)',
@@ -122,11 +129,17 @@ if __name__ == '__main__':
                     es_port=config['es_port'],
                     index_name=config['index_name']
                 )
+            elif name == 'Protovec':
+                # Use filtered data to prevent data leakage (exclude test examples)
+                retriever = ProtovecRetriever(
+                    retriever_data, k,
+                    model_name=config['model_name']
+                )
             else:
                 retriever = BM25Retriever(
-                    data, k,
-                    version=config['version'],
-                    k1=config['k1'],
+                    retriever_data, k, 
+                    version=config['version'], 
+                    k1=config['k1'], 
                     b=config['b']
                 )
             # Initialize lists to store metrics
@@ -157,7 +170,13 @@ if __name__ == '__main__':
                 # Use appropriate queries for each retriever
                 for query in positive_examples:
                     # Retrieve results
-                    retrieved = retriever.retrieve(query)
+                    if name == 'Protovec':
+                        # Protovec returns list of dictionaries, extract rule IDs
+                        retrieved_results = retriever.retrieve(query)
+                        retrieved = [r['rule_id'] for r in retrieved_results]
+                    else:
+                        # Other retrievers return list of rule IDs directly
+                        retrieved = retriever.retrieve(query)
 
                     # Calculate metrics
                     recall = recall_at_k(retrieved, [rule], k)
