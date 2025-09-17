@@ -3,6 +3,7 @@ import json
 from approaches.random.random_retriever import RandomRetriever
 from approaches.bm25.bm25_retriever import BM25Retriever
 from approaches.elasticsearch.elasticsearch_retriever import ElasticsearchRetriever
+from approaches.protovec.protovec_retriever import ProtovecRetriever
 import random
 import numpy as np
 from approaches.markdown_writer import write_composite_score_explanation
@@ -17,8 +18,12 @@ ground_truth_file = 'data/ja_labels.csv'
 
 # Load the full rule space from eval_ja.csv (Japanese rules)
 rule_space_file = 'data/eval_ja.csv'
-rule_space_data = pd.read_csv(rule_space_file)
-print(f"Rule space: {len(rule_space_data)} rules from eval_ja.csv")
+rule_space_data_full = pd.read_csv(rule_space_file)
+print(f"Rule space: {len(rule_space_data_full)} rules from eval_ja.csv")
+
+# Create filtered data for retrievers (exclude Distractor Rules to prevent data leakage)
+rule_space_data = rule_space_data_full.drop(columns=['Distractor Rules'])
+print(f"Filtered rule space shape (excluding Distractor Rules): {rule_space_data.shape}")
 
 # Load JSON data
 with open(json_file_path, 'r', encoding='utf-8') as f:
@@ -30,12 +35,12 @@ print(f"JSON data: {len(json_data['expenses'])} expenses")
 print(f"Ground truth: {len(ground_truth_df)} mappings")
 
 # Convert JSON data to DataFrame format compatible with existing retrievers
-def json_to_dataframe(json_data, ground_truth_df, rule_space_data):
+def json_to_dataframe(json_data, ground_truth_df, rule_space_data_full):
     """Convert JSON expense data to DataFrame format for evaluation"""
     rows = []
     
-    # Get all available rules from the rule space (64 rules from eval_en.csv)
-    all_available_rules = rule_space_data['Rule'].unique()
+    # Get all available rules from the rule space (64 rules from eval_ja.csv)
+    all_available_rules = rule_space_data_full['Rule'].unique()
     print(f"Available rules for search space: {len(all_available_rules)}")
     
     for idx, expense in enumerate(json_data['expenses']):
@@ -57,8 +62,11 @@ def json_to_dataframe(json_data, ground_truth_df, rule_space_data):
         query = (f"Expense: {description}, Amount: {amount} yen, "
                 f"Date: {date}, Category: {category}")
         
-        # Get distractor rules from the rule space data for this specific rule
-        rule_row = rule_space_data[rule_space_data['Rule'] == rule_id]
+        # Create JSON query for protovec retriever
+        json_query = json.dumps(expense, ensure_ascii=False)
+        
+        # Get distractor rules from the full rule space data for this specific rule
+        rule_row = rule_space_data_full[rule_space_data_full['Rule'] == rule_id]
         if not rule_row.empty:
             distractor_rules_str = rule_row.iloc[0]['Distractor Rules']
             # Parse the string representation of the list
@@ -70,6 +78,7 @@ def json_to_dataframe(json_data, ground_truth_df, rule_space_data):
         rows.append({
             'Rule': rule_id,
             'query': query,
+            'json_query': json_query,  # JSON query for protovec
             'description': description,
             'amount': amount,
             'date': date,
@@ -82,7 +91,7 @@ def json_to_dataframe(json_data, ground_truth_df, rule_space_data):
     return pd.DataFrame(rows)
 
 # Convert JSON data to DataFrame
-data = json_to_dataframe(json_data, ground_truth_df, rule_space_data)
+data = json_to_dataframe(json_data, ground_truth_df, rule_space_data_full)
 print(f"Converted data shape: {data.shape}")
 
 # Set pandas display options to show all columns
@@ -95,6 +104,7 @@ retriever_configs = {
     'BM25Plus': {'version': 'BM25Plus', 'k1': 1.2, 'b': 0.75},
     'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200, 
                       'index_name': 'expense_rules_ja'},
+    'Protovec': {'model_name': 'all-MiniLM-L6-v2'},
     'Random': {}
 }
 
@@ -179,6 +189,11 @@ if __name__ == '__main__':
                     es_port=config['es_port'],
                     index_name=config['index_name']
                 )
+            elif name == 'Protovec':
+                retriever = ProtovecRetriever(
+                    rule_space_data, k,
+                    model_name=config['model_name']
+                )
             else:
                 retriever = BM25Retriever(
                     rule_space_data, k, 
@@ -200,10 +215,18 @@ if __name__ == '__main__':
             for index, row in data.iterrows():
                 rule = row['Rule']
                 query = row['query']
+                json_query = row['json_query']
                 distractor_rules = row['Distractor Rules']
 
-                # Retrieve results
-                retrieved = retriever.retrieve(query)
+                # Use appropriate query for each retriever
+                if name == 'Protovec':
+                    # Use JSON query for protovec retriever
+                    retrieved_results = retriever.retrieve(json_query)
+                    # Extract rule IDs from protovec results
+                    retrieved = [r['rule_id'] for r in retrieved_results]
+                else:
+                    # Use natural language query for other retrievers
+                    retrieved = retriever.retrieve(query)
 
                 # Calculate metrics
                 recall = recall_at_k(retrieved, [rule], k)
