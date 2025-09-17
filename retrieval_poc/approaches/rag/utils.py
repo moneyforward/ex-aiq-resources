@@ -1,6 +1,7 @@
 import yaml
 import os
 
+
 def load_prompt_from_yaml(filepath, field_name):
     """
     Loads a prompt from a YAML file.
@@ -9,7 +10,7 @@ def load_prompt_from_yaml(filepath, field_name):
         raise FileNotFoundError(f"The file '{filepath}' was not found.")
 
     try:
-        with open(filepath, 'r', encoding='utf-8') as file:
+        with open(filepath, "r", encoding="utf-8") as file:
             data = yaml.safe_load(file)
             if data is None:
                 raise ValueError(f"The file '{filepath}' is empty or not valid YAML.")
