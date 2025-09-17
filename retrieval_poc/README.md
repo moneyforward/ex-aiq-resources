@@ -22,6 +22,7 @@ AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4.1-mini
 • **BM25L**: BM25 variant with length normalization improvements
 • **BM25Plus**: BM25 variant with better term frequency handling
 • **Elasticsearch**: Full-text search using Elasticsearch with Japanese text analysis
+• **Protovec**: Prototype network using sentence transformers for rule classification
 • **ButlerAI**: AI-powered classification using external API service (disabled due to idev instability)
 • **Random**: Baseline random retrieval for comparison
 • **Dense**: Dense vector embeddings (not implemented)

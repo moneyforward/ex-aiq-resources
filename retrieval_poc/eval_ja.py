@@ -3,6 +3,7 @@ import json
 from approaches.random.random_retriever import RandomRetriever
 from approaches.bm25.bm25_retriever import BM25Retriever
 from approaches.elasticsearch.elasticsearch_retriever import ElasticsearchRetriever
+from approaches.protovec.protovec_retriever import ProtovecRetriever
 import random
 import numpy as np
 from approaches.markdown_writer import write_composite_score_explanation
@@ -95,6 +96,7 @@ retriever_configs = {
     'BM25Plus': {'version': 'BM25Plus', 'k1': 1.2, 'b': 0.75},
     'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200, 
                       'index_name': 'expense_rules_ja'},
+    'Protovec': {'model_name': 'all-MiniLM-L6-v2'},
     'Random': {}
 }
 
@@ -178,6 +180,11 @@ if __name__ == '__main__':
                     es_host=config['es_host'],
                     es_port=config['es_port'],
                     index_name=config['index_name']
+                )
+            elif name == 'Protovec':
+                retriever = ProtovecRetriever(
+                    rule_space_data, k,
+                    model_name=config['model_name']
                 )
             else:
                 retriever = BM25Retriever(
