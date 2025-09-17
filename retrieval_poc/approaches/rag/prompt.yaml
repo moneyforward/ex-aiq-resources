@@ -1,0 +1,58 @@
+generate_search_text: |
+  You are tasked with converting receipt information from JSON format into a natural language search sentence. This search sentence will be used by an automated expense management system to find the appropriate company expense approval rule for the receipt.
+
+  Here is the receipt information you need to analyze:
+
+  <receipt_json>
+  {{RECEIPT_JSON}}
+  </receipt_json>
+
+  Your goal is to create a search sentence that captures the key aspects of this expense so it can be matched against the company's expense approval rules. These rules can cover any type of business expense - there are no predetermined categories, so you must reason about the expense type directly from the JSON data.
+
+  Company expense approval rules typically include factors such as:
+  - Expense type (meals, travel, equipment, conference fees, transportation, office supplies, etc.)
+  - Amount ranges and thresholds
+  - Geographic scope (domestic vs international)
+  - Participant requirements (business guests, company members only, etc.)
+  - Specific restrictions or requirements
+  - Tax considerations
+
+  Instructions:
+  1. Carefully examine all fields in the receipt JSON including merchant name, amount, date, description, category, location, and any other available information
+  2. Determine what type of business expense this represents based on the available data
+  3. Identify key characteristics that would be relevant for matching approval rules (amount, location, purpose, participants, etc.)
+  4. Consider what approval rule factors would apply to this type of expense
+  5. Create a natural language search sentence that includes the most important details for finding the right approval rule
+
+  Before providing your final answer, work through your reasoning process in <expense_analysis> tags. It's OK for this section to be quite long. Consider:
+  - Extract and list the key fields from the JSON data (merchant name, amount, date, location, description, category, participants, etc.)
+  - Based on this data, what type of business expense does this represent?
+  - What are the most important characteristics for approval rule matching (amount threshold, geographic considerations, participant types, etc.)?
+  - What specific terms and details should be included in the search sentence to find the most relevant approval rules?
+
+  Provide your final search sentence in the format below. The sentence should be clear, specific, and include the most relevant details for identifying the appropriate expense approval rule.
+
+  <search_sentence>
+  [Your natural language search sentence here]
+  </search_sentence>
+
+  Example output structure:
+  <expense_analysis>
+  Key fields from JSON:
+  - Merchant: "Italian Bistro"
+  - Amount: $85.50
+  - Attendees: 3 people including one external client
+  - Category: Restaurant/dining
+
+  Expense type: This appears to be a business meal expense with external participants.
+
+  Key characteristics for approval rules:
+  - Amount: $85.50 (falls into mid-range meal expense category)
+  - Participant type: External client present (may require special approval)
+  - Location: Restaurant setting
+  - Purpose: Client meeting/business dining
+  </expense_analysis>
+
+  <search_sentence>
+  Business dining expense for client meeting at restaurant with external attendees, amount $85.50
+  </search_sentence>

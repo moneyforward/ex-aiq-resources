@@ -1,3 +1,4 @@
+
 | Retriever     |   k |   Composite Score |   Average Recall |   Average Precision |   Average F1 Score |   Average MRR |   Average Hit Rate |   Average nDCG |   Average Confusion Rate |
 |:--------------|----:|------------------:|-----------------:|--------------------:|-------------------:|--------------:|-------------------:|---------------:|-------------------------:|
 | Elasticsearch |   1 |          0.3      |        0.164062  |           0.164062  |          0.164062  |     0.164062  |          0.164062  |      0.164062  |                0.15625   |
