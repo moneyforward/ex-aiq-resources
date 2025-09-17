@@ -1,0 +1,1502 @@
+[
+  {
+    "text": "Local train travel from Tokyo to Shinjuku on 2025-09-07 costing 500 yen amount: 500 yen",
+    "rule_id": "RULE_001",
+    "json_data": {
+      "employee_id": "JP001",
+      "trip_start_date": "2025-09-07",
+      "trip_end_date": "2025-09-07",
+      "origin": "Tokyo",
+      "destination": "Shinjuku",
+      "transport_mode": "Train",
+      "fare_amount": "500",
+      "receipt_number": "not applicable"
+    }
+  },
+  {
+    "text": "Local bus travel from Osaka to Kyoto on 2025-09-08 costing 800 yen amount: 800 yen",
+    "rule_id": "RULE_001",
+    "json_data": {
+      "employee_id": "JP002",
+      "trip_start_date": "2025-09-08",
+      "trip_end_date": "2025-09-08",
+      "origin": "Osaka",
+      "destination": "Kyoto",
+      "transport_mode": "Bus",
+      "fare_amount": "800",
+      "receipt_number": "not applicable"
+    }
+  },
+  {
+    "text": "Shinkansen bullet train travel from Tokyo to Osaka on 2025-09-07",
+    "rule_id": "RULE_002",
+    "json_data": {
+      "employee_id": "JP001",
+      "trip_start_date": "2025-09-07",
+      "trip_end_date": "2025-09-07",
+      "origin": "Tokyo",
+      "destination": "Osaka",
+      "transport_mode": "Shinkansen",
+      "ticket_type": "Ordinary",
+      "accommodation_name": "",
+      "accommodation_amount": "",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "Airplane flight from Nagoya to Fukuoka on 2025-09-09 staying at Grand Hotel amount: 20000 yen",
+    "rule_id": "RULE_002",
+    "json_data": {
+      "employee_id": "JP003",
+      "trip_start_date": "2025-09-09",
+      "trip_end_date": "2025-09-09",
+      "origin": "Nagoya",
+      "destination": "Fukuoka",
+      "transport_mode": "Flight",
+      "ticket_type": "First Class",
+      "accommodation_name": "Grand Hotel",
+      "accommodation_amount": "20000",
+      "receipt_number": "FLT67890"
+    }
+  },
+  {
+    "text": "Local subway travel from Seoul to Busan overseas travel on 2025-09-08 costing 3000 yen amount: 3000 yen",
+    "rule_id": "RULE_003",
+    "json_data": {
+      "employee_id": "JP002",
+      "trip_start_date": "2025-09-08",
+      "trip_end_date": "2025-09-08",
+      "origin": "Seoul",
+      "destination": "Busan",
+      "transport_mode": "Subway",
+      "fare_amount": "3000",
+      "receipt_number": "not applicable",
+      "overseas_flag": true
+    }
+  },
+  {
+    "text": "Local bus travel from London to Paris overseas travel on 2025-09-09 costing 20 yen amount: 20 yen",
+    "rule_id": "RULE_003",
+    "json_data": {
+      "employee_id": "JP003",
+      "trip_start_date": "2025-09-09",
+      "trip_end_date": "2025-09-09",
+      "origin": "London",
+      "destination": "Paris",
+      "transport_mode": "Bus",
+      "fare_amount": "20",
+      "receipt_number": "N/A",
+      "overseas_flag": true
+    }
+  },
+  {
+    "text": "Airplane flight overseas travel on 2025-09-07 staying at Hotel XYZ",
+    "rule_id": "RULE_004",
+    "json_data": {
+      "employee_id": "JP001",
+      "trip_start_date": "2025-09-07",
+      "trip_end_date": "2025-09-10",
+      "origin_country": "Japan",
+      "destination_country": "USA",
+      "transport_mode": "Flight",
+      "ticket_type": "Economy",
+      "accommodation_name": "Hotel XYZ",
+      "accommodation_amount": "not applicable",
+      "receipt_number": "R12345",
+      "overseas_flag": true
+    }
+  },
+  {
+    "text": "Local train travel overseas travel on 2025-11-01 staying at Grand Hotel",
+    "rule_id": "RULE_004",
+    "json_data": {
+      "employee_id": "JP003",
+      "trip_start_date": "2025-11-01",
+      "trip_end_date": "2025-11-05",
+      "origin_country": "USA",
+      "destination_country": "UK",
+      "transport_mode": "Train",
+      "ticket_type": "First Class",
+      "accommodation_name": "Grand Hotel",
+      "accommodation_amount": "not applicable",
+      "receipt_number": "TRP002",
+      "overseas_flag": true
+    }
+  },
+  {
+    "text": "costing 3000 yen for Late-night work amount: 3000 yen",
+    "rule_id": "RULE_005",
+    "json_data": {
+      "employee_id": "JP001",
+      "trip_date": "2025-09-07",
+      "taxi_reason": "Late-night work",
+      "taxi_destination": "Home",
+      "fare_amount": "3000",
+      "receipt_number": "TXI12345"
+    }
+  },
+  {
+    "text": "costing 4500 yen for Emergency amount: 4500 yen",
+    "rule_id": "RULE_005",
+    "json_data": {
+      "employee_id": "JP003",
+      "trip_date": "2025-09-09",
+      "taxi_reason": "Emergency",
+      "taxi_destination": "Hospital",
+      "fare_amount": "4500",
+      "receipt_number": "TXI67890"
+    }
+  },
+  {
+    "text": "overseas travel costing 2500 yen for Business meeting amount: 2500 yen",
+    "rule_id": "RULE_006",
+    "json_data": {
+      "employee_id": "JP001",
+      "trip_date": "2025-09-07",
+      "overseas_flag": true,
+      "taxi_reason": "Business meeting",
+      "taxi_destination": "Tokyo Station",
+      "fare_amount": "2500",
+      "receipt_number": "TXI789"
+    }
+  },
+  {
+    "text": "overseas travel costing 5000 yen for Airport transfer amount: 5000 yen",
+    "rule_id": "RULE_006",
+    "json_data": {
+      "employee_id": "JP003",
+      "trip_date": "2025-09-07",
+      "overseas_flag": true,
+      "taxi_reason": "Airport transfer",
+      "taxi_destination": "Hotel",
+      "fare_amount": "5000",
+      "receipt_number": "TXI987"
+    }
+  },
+  {
+    "text": "costing 3000 yen for Client entertainment amount: 3000 yen",
+    "rule_id": "RULE_007",
+    "json_data": {
+      "employee_id": "JP001",
+      "trip_date": "2025-09-07",
+      "guest_names": "Mr. Tanaka",
+      "destination": "Shinjuku Station",
+      "taxi_reason": "Client entertainment",
+      "fare_amount": "3000",
+      "receipt_number": "R00123"
+    }
+  },
+  {
+    "text": "costing 4500 yen for Dinner with clients amount: 4500 yen",
+    "rule_id": "RULE_007",
+    "json_data": {
+      "employee_id": "JP003",
+      "trip_date": "2025-09-07",
+      "guest_names": "Ms. Sato, Mr. Endo",
+      "destination": "Ginza",
+      "taxi_reason": "Dinner with clients",
+      "fare_amount": "4500",
+      "receipt_number": "TXI456"
+    }
+  },
+  {
+    "text": "Local train travel from station A to station B for 500 yen",
+    "rule_id": "RULE_008",
+    "json_data": {}
+  },
+  {
+    "text": "Bus ride from city A to city B costing 350 yen",
+    "rule_id": "RULE_008",
+    "json_data": {}
+  },
+  {
+    "text": "overseas travel",
+    "rule_id": "RULE_009",
+    "json_data": {
+      "employee_id": "JP005",
+      "allowance_start_date": "2025-10-01",
+      "allowance_end_date": "2025-10-05",
+      "wf_number": "TRV-005",
+      "overseas_daily_allowance_amount": "not applicable",
+      "overseas_flag": "true"
+    }
+  },
+  {
+    "text": "overseas travel",
+    "rule_id": "RULE_009",
+    "json_data": {
+      "employee_id": "JP006",
+      "allowance_start_date": "2025-11-10",
+      "allowance_end_date": "2025-11-12",
+      "wf_number": "TRV-006",
+      "overseas_daily_allowance_amount": "not applicable",
+      "overseas_flag": "true"
+    }
+  },
+  {
+    "text": "Business expense for 5000 yen",
+    "rule_id": "RULE_010",
+    "json_data": {}
+  },
+  {
+    "text": "Work-related cost of 9500 yen",
+    "rule_id": "RULE_010",
+    "json_data": {}
+  },
+  {
+    "text": "on 2025-09-07 amount: 2500 yen",
+    "rule_id": "RULE_011",
+    "json_data": {
+      "employee_id": "JP001",
+      "trip_start_date": "2025-09-07",
+      "trip_end_date": "2025-09-07",
+      "expressway_name": "Tomei Expressway",
+      "etccard_number": "1234567890",
+      "amount": "2500",
+      "receipt_number": "EXPWY12345"
+    }
+  },
+  {
+    "text": "on 2025-09-09 amount: 1800 yen",
+    "rule_id": "RULE_011",
+    "json_data": {
+      "employee_id": "JP003",
+      "trip_start_date": "2025-09-09",
+      "trip_end_date": "2025-09-09",
+      "expressway_name": "Chuo Expressway",
+      "etccard_number": "0987654321",
+      "amount": "1800",
+      "receipt_number": "EXPWY67890"
+    }
+  },
+  {
+    "text": "conference: Tech Conference 2025",
+    "rule_id": "RULE_012",
+    "json_data": {
+      "employee_id": "JP001",
+      "conference_name": "Tech Conference 2025",
+      "conference_start_date": "2025-10-15",
+      "conference_end_date": "2025-10-17",
+      "conference_location": "Tokyo Big Sight",
+      "conference_fee": "50000",
+      "receipt_number": "CFC2025001"
+    }
+  },
+  {
+    "text": "conference: AI Summit",
+    "rule_id": "RULE_012",
+    "json_data": {
+      "employee_id": "JP002",
+      "conference_name": "AI Summit",
+      "conference_start_date": "2025-11-01",
+      "conference_end_date": "2025-11-02",
+      "conference_location": "Kyoto",
+      "conference_fee": "30000",
+      "receipt_number": "AIS2025002"
+    }
+  },
+  {
+    "text": "meeting: Team Meeting",
+    "rule_id": "RULE_013",
+    "json_data": {
+      "employee_id": "JP001",
+      "meeting_name": "Team Meeting",
+      "meeting_date": "2025-09-07",
+      "meeting_location": "Tokyo Office",
+      "meeting_fee": "5000",
+      "meal_costs": "3000",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "meeting: Project Review",
+    "rule_id": "RULE_013",
+    "json_data": {
+      "employee_id": "JP003",
+      "meeting_name": "Project Review",
+      "meeting_date": "2025-09-15",
+      "meeting_location": "Conference Room A",
+      "meeting_fee": "2000",
+      "meal_costs": "1500",
+      "receipt_number": "MRF678"
+    }
+  },
+  {
+    "text": "meeting: Team Lunch with Money Forward, Inc.",
+    "rule_id": "RULE_014",
+    "json_data": {
+      "employee_id": "JP001",
+      "meeting_name": "Team Lunch",
+      "meeting_date": "2025-09-07",
+      "meeting_location": "Shinjuku Restaurant",
+      "participant_names": "Taro Yamada, Hanako Suzuki",
+      "participant_companies": "Money Forward, Inc.",
+      "meal_costs": "9000",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "meeting: Client Dinner with Acme Corp, Beta Ltd",
+    "rule_id": "RULE_014",
+    "json_data": {
+      "employee_id": "JP003",
+      "meeting_name": "Client Dinner",
+      "meeting_date": "2025-09-06",
+      "meeting_location": "Ginza Restaurant",
+      "participant_names": "John Doe, Jane Smith",
+      "participant_companies": "Acme Corp, Beta Ltd",
+      "meal_costs": "8500",
+      "receipt_number": "R67890"
+    }
+  },
+  {
+    "text": "with ABC Corp., XYZ Ltd.",
+    "rule_id": "RULE_015",
+    "json_data": {
+      "employee_id": "JP001",
+      "dining_date": "2025-09-07",
+      "event_name": "Business Dinner",
+      "participant_names": "Mr. Tanaka, Ms. Sato",
+      "participant_companies": "ABC Corp., XYZ Ltd.",
+      "meal_costs": "15000",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "with DEF Co.",
+    "rule_id": "RULE_015",
+    "json_data": {
+      "employee_id": "JP003",
+      "dining_date": "2025-08-15",
+      "event_name": "Client Appreciation",
+      "participant_names": "Ms. Green",
+      "participant_companies": "DEF Co.",
+      "meal_costs": "12000",
+      "receipt_number": "REC987"
+    }
+  },
+  {
+    "text": "Conference attendance fee for 50000 yen",
+    "rule_id": "RULE_016",
+    "json_data": {}
+  },
+  {
+    "text": "Meeting expenses for 35000 yen",
+    "rule_id": "RULE_016",
+    "json_data": {}
+  },
+  {
+    "text": "Conference attendance fee for 50000 yen",
+    "rule_id": "RULE_017",
+    "json_data": {}
+  },
+  {
+    "text": "Meeting expenses for 35000 yen",
+    "rule_id": "RULE_017",
+    "json_data": {}
+  },
+  {
+    "text": "Souvenir for Mr. Tanaka amount: 3000 yen",
+    "rule_id": "RULE_018",
+    "json_data": {
+      "employee_id": "JP001",
+      "gift_date": "2025-09-07",
+      "gift_type": "Souvenir",
+      "recipient_name": "Mr. Tanaka",
+      "recipient_company": "ABC Corp",
+      "gift_amount": "3000",
+      "receipt_number": "12345"
+    }
+  },
+  {
+    "text": "Gift for Ms. Sato amount: 5000 yen",
+    "rule_id": "RULE_018",
+    "json_data": {
+      "employee_id": "JP003",
+      "gift_date": "2025-09-01",
+      "gift_type": "Gift",
+      "recipient_name": "Ms. Sato",
+      "recipient_company": "XYZ Ltd.",
+      "gift_amount": "5000",
+      "receipt_number": "67890"
+    }
+  },
+  {
+    "text": "Souvenir for Taro Yamada amount: 5000 yen",
+    "rule_id": "RULE_019",
+    "json_data": {
+      "employee_id": "JP001",
+      "gift_date": "2025-09-07",
+      "gift_type": "Souvenir",
+      "recipient_name": "Taro Yamada",
+      "recipient_company": "ABC Corp",
+      "gift_amount": "5000",
+      "receipt_number": "R001"
+    }
+  },
+  {
+    "text": "Gift for Hanako Suzuki amount: 3500 yen",
+    "rule_id": "RULE_019",
+    "json_data": {
+      "employee_id": "JP002",
+      "gift_date": "2025-09-08",
+      "gift_type": "Gift",
+      "recipient_name": "Hanako Suzuki",
+      "recipient_company": "XYZ Ltd.",
+      "gift_amount": "3500",
+      "receipt_number": "R002"
+    }
+  },
+  {
+    "text": "amount: 100 yen",
+    "rule_id": "RULE_020",
+    "json_data": {
+      "employee_id": "JP003",
+      "copy_date": "2025-09-07",
+      "copy_service_name": "FamilyMart",
+      "pages": "10",
+      "amount": "100",
+      "receipt_number": "CFM002"
+    }
+  },
+  {
+    "text": "Business expense for 5000 yen",
+    "rule_id": "RULE_020",
+    "json_data": {}
+  },
+  {
+    "text": "purchase of ペン",
+    "rule_id": "RULE_021",
+    "json_data": {
+      "employee_id": "JP001",
+      "purchase_date": "2025-09-07",
+      "item_name": "ペン",
+      "item_quantity": "1",
+      "item_amount": "100",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "purchase of Paper",
+    "rule_id": "RULE_021",
+    "json_data": {
+      "employee_id": "JP003",
+      "purchase_date": "2025-09-06",
+      "item_name": "Paper",
+      "item_quantity": "10",
+      "item_amount": "500",
+      "receipt_number": "R98765"
+    }
+  },
+  {
+    "text": "amount: 150000 yen",
+    "rule_id": "RULE_022",
+    "json_data": {
+      "employee_id": "JP001",
+      "purchase_date": "2025-09-07",
+      "equipment_name": "Laptop",
+      "equipment_cost": "150000",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "amount: 120000 yen",
+    "rule_id": "RULE_022",
+    "json_data": {
+      "employee_id": "JP003",
+      "purchase_date": "2025-09-01",
+      "equipment_name": "Projector",
+      "equipment_cost": "120000",
+      "receipt_number": "EQP002"
+    }
+  },
+  {
+    "text": "amount: 4000 yen",
+    "rule_id": "RULE_023",
+    "json_data": {
+      "employee_id": "JP001",
+      "newspaper_name": "Asahi Shimbun",
+      "subscription_start_date": "2025-01-01",
+      "subscription_end_date": "2025-12-31",
+      "amount": "4000",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "amount: 5000 yen",
+    "rule_id": "RULE_023",
+    "json_data": {
+      "employee_id": "JP003",
+      "newspaper_name": "New York Times",
+      "subscription_start_date": "2025-06-01",
+      "subscription_end_date": "2026-05-31",
+      "amount": "5000",
+      "receipt_number": "NYT67890"
+    }
+  },
+  {
+    "text": "overseas travel amount: 3000 yen",
+    "rule_id": "RULE_024",
+    "json_data": {
+      "employee_id": "JP001",
+      "newspaper_name": "Japan Times",
+      "subscription_start_date": "2024-01-01",
+      "subscription_end_date": "2024-12-31",
+      "amount": "3000",
+      "receipt_number": "R12345",
+      "overseas_flag": "true"
+    }
+  },
+  {
+    "text": "overseas travel amount: 20 yen",
+    "rule_id": "RULE_024",
+    "json_data": {
+      "employee_id": "JP003",
+      "newspaper_name": "The Guardian",
+      "subscription_start_date": "2025-03-01",
+      "subscription_end_date": "2025-03-31",
+      "amount": "20",
+      "receipt_number": "REC987",
+      "overseas_flag": "true"
+    }
+  },
+  {
+    "text": "SaaS service from Freee Accounting Software",
+    "rule_id": "RULE_025",
+    "json_data": {
+      "employee_id": "JP001",
+      "provider_name": "Freee Accounting Software",
+      "service_type": "SaaS",
+      "service_start_date": "2025-09-01",
+      "service_end_date": "2025-09-30",
+      "invoice_number": "INV001",
+      "amount_incl_tax": 16500
+    }
+  },
+  {
+    "text": "Video Conferencing service from Zoom",
+    "rule_id": "RULE_025",
+    "json_data": {
+      "employee_id": "JP003",
+      "provider_name": "Zoom",
+      "service_type": "Video Conferencing",
+      "service_start_date": "2025-08-15",
+      "service_end_date": "2025-09-14",
+      "invoice_number": "INV002",
+      "amount_incl_tax": 2000
+    }
+  },
+  {
+    "text": "SaaS service from TestRail",
+    "rule_id": "RULE_026",
+    "json_data": {
+      "employee_id": "JP999",
+      "provider_name": "TestRail",
+      "service_type": "SaaS",
+      "service_start_date": "2025-09-01",
+      "service_end_date": "2025-09-30",
+      "invoice_number": "INV-202509-001",
+      "amount_excl_tax": "10000"
+    }
+  },
+  {
+    "text": "Cloud Storage service from Dropbox",
+    "rule_id": "RULE_026",
+    "json_data": {
+      "employee_id": "JP100",
+      "provider_name": "Dropbox",
+      "service_type": "Cloud Storage",
+      "service_start_date": "2025-08-01",
+      "service_end_date": "2025-08-31",
+      "invoice_number": "DROP-202508-002",
+      "amount_excl_tax": "5000"
+    }
+  },
+  {
+    "text": "amount: 84 yen",
+    "rule_id": "RULE_027",
+    "json_data": {
+      "employee_id": "JP001",
+      "courier_date": "2025-09-07",
+      "courier_type": "postage",
+      "destination": "Tokyo",
+      "amount": "84",
+      "receipt_number": "not applicable"
+    }
+  },
+  {
+    "text": "amount: 1500 yen",
+    "rule_id": "RULE_027",
+    "json_data": {
+      "employee_id": "JP003",
+      "courier_date": "2025-09-09",
+      "courier_type": "courier service",
+      "destination": "Osaka",
+      "amount": "1500",
+      "receipt_number": "CS98765"
+    }
+  },
+  {
+    "text": "amount: 370 yen",
+    "rule_id": "RULE_028",
+    "json_data": {
+      "employee_id": "JP001",
+      "courier_date": "2025-09-07",
+      "courier_type": "Letter Pack",
+      "destination": "Tokyo",
+      "amount": "370",
+      "receipt_number": "not applicable"
+    }
+  },
+  {
+    "text": "amount: 85 yen",
+    "rule_id": "RULE_028",
+    "json_data": {
+      "employee_id": "JP003",
+      "courier_date": "2025-09-08",
+      "courier_type": "Postcard",
+      "destination": "Osaka",
+      "amount": "85",
+      "receipt_number": ""
+    }
+  },
+  {
+    "text": "overseas travel amount: 1500 yen",
+    "rule_id": "RULE_029",
+    "json_data": {
+      "employee_id": "JP001",
+      "courier_date": "2025-09-07",
+      "courier_type": "Motorcycle",
+      "destination_country": "Japan",
+      "amount": "1500",
+      "receipt_number": "RECEIPT001",
+      "overseas_flag": "not applicable"
+    }
+  },
+  {
+    "text": "overseas travel amount: 800 yen",
+    "rule_id": "RULE_029",
+    "json_data": {
+      "employee_id": "JP003",
+      "courier_date": "2025-09-09",
+      "courier_type": "Parcel Delivery",
+      "destination_country": "Japan",
+      "amount": "800",
+      "receipt_number": "DELIVERY002",
+      "overseas_flag": "not applicable"
+    }
+  },
+  {
+    "text": "amount: 1500 yen",
+    "rule_id": "RULE_030",
+    "json_data": {
+      "employee_id": "JP001",
+      "courier_date": "2025-09-07",
+      "courier_type": "EMS",
+      "domestic_flag": "not applicable",
+      "amount": "1500",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "amount: 2000 yen",
+    "rule_id": "RULE_030",
+    "json_data": {
+      "employee_id": "JP003",
+      "courier_date": "2025-09-09",
+      "courier_type": "DHL",
+      "domestic_flag": "false",
+      "amount": "2000",
+      "receipt_number": "DHL98765"
+    }
+  },
+  {
+    "text": "amount: 1000 yen",
+    "rule_id": "RULE_031",
+    "json_data": {
+      "employee_id": "JP001",
+      "courier_date": "2025-09-07",
+      "courier_type": "Document",
+      "domestic_flag": true,
+      "amount": "1000",
+      "receipt_number": "R001"
+    }
+  },
+  {
+    "text": "amount: 2500 yen",
+    "rule_id": "RULE_031",
+    "json_data": {
+      "employee_id": "JP003",
+      "courier_date": "2025-09-10",
+      "courier_type": "Package",
+      "domestic_flag": false,
+      "amount": "2500",
+      "receipt_number": "R002"
+    }
+  },
+  {
+    "text": "overseas travel",
+    "rule_id": "RULE_032",
+    "json_data": {
+      "employee_id": "JP001",
+      "courier_date": "2025-09-07",
+      "courier_type": "",
+      "destination_country": "Japan",
+      "overseas_flag": "not applicable",
+      "amount": "",
+      "receipt_number": ""
+    }
+  },
+  {
+    "text": "overseas travel amount: 15000 yen",
+    "rule_id": "RULE_032",
+    "json_data": {
+      "employee_id": "JP003",
+      "courier_date": "2025-09-08",
+      "courier_type": "Express",
+      "destination_country": "USA",
+      "overseas_flag": true,
+      "amount": "15000",
+      "receipt_number": "REC789"
+    }
+  },
+  {
+    "text": "amount: 5000 yen",
+    "rule_id": "RULE_033",
+    "json_data": {
+      "employee_id": "JP001",
+      "event_name": "Fire Prevention Training",
+      "event_start_date": "2025-09-01",
+      "event_end_date": "2025-09-01",
+      "amount": "5000",
+      "receipt_number": "TRN001"
+    }
+  },
+  {
+    "text": "amount: 15000 yen",
+    "rule_id": "RULE_033",
+    "json_data": {
+      "employee_id": "JP003",
+      "event_name": "Leadership Seminar",
+      "event_start_date": "2025-11-10",
+      "event_end_date": "2025-11-12",
+      "amount": "15000",
+      "receipt_number": "LDR2025"
+    }
+  },
+  {
+    "text": "amount: 100000 yen",
+    "rule_id": "RULE_034",
+    "json_data": {
+      "employee_id": "JP001",
+      "event_name": "Language Training",
+      "event_start_date": "2025-09-01",
+      "event_end_date": "2025-09-30",
+      "amount": "100000",
+      "receipt_number": "R7890"
+    }
+  },
+  {
+    "text": "amount: 50000 yen",
+    "rule_id": "RULE_034",
+    "json_data": {
+      "employee_id": "JP003",
+      "event_name": "Overseas Workshop",
+      "event_start_date": "2025-11-01",
+      "event_end_date": "2025-11-05",
+      "amount": "50000",
+      "receipt_number": "WSK123"
+    }
+  },
+  {
+    "text": "amount: 50000 yen",
+    "rule_id": "RULE_035",
+    "json_data": {
+      "employee_id": "JP001",
+      "training_name": "New Hire Onboarding",
+      "training_start_date": "2025-09-01",
+      "training_end_date": "2025-09-05",
+      "provider": "ABC Training",
+      "amount": "50000",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "amount: 20000 yen",
+    "rule_id": "RULE_035",
+    "json_data": {
+      "employee_id": "JP003",
+      "training_name": "Interview Skills",
+      "training_start_date": "2025-10-20",
+      "training_end_date": "2025-10-20",
+      "provider": "Recruit Co.",
+      "amount": "20000",
+      "receipt_number": "R67890"
+    }
+  },
+  {
+    "text": "overseas travel amount: 50000 yen",
+    "rule_id": "RULE_036",
+    "json_data": {
+      "employee_id": "JP001",
+      "training_name": "New Hire Orientation",
+      "training_start_date": "2025-09-08",
+      "training_end_date": "2025-09-08",
+      "provider": "ABC Training Co.",
+      "amount": "50000",
+      "receipt_number": "R7890",
+      "overseas_flag": "not applicable"
+    }
+  },
+  {
+    "text": "overseas travel amount: 120000 yen",
+    "rule_id": "RULE_036",
+    "json_data": {
+      "employee_id": "JP003",
+      "training_name": "Leadership Training",
+      "training_start_date": "2025-11-01",
+      "training_end_date": "2025-11-03",
+      "provider": "Global Ed",
+      "amount": "120000",
+      "receipt_number": "GE2025-001",
+      "overseas_flag": "true"
+    }
+  },
+  {
+    "text": "amount: 10000 yen",
+    "rule_id": "RULE_037",
+    "json_data": {
+      "employee_id": "JP001",
+      "training_media": "",
+      "publication_name": "",
+      "amount": "10000",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "amount: 7500 yen",
+    "rule_id": "RULE_037",
+    "json_data": {
+      "employee_id": "JP003",
+      "training_media": "Online Ad",
+      "publication_name": "Tech Blog",
+      "amount": "7500",
+      "receipt_number": "AD7890"
+    }
+  },
+  {
+    "text": "amount: 5000 yen",
+    "rule_id": "RULE_038",
+    "json_data": {
+      "employee_id": "JP001",
+      "recruitment_service_name": "",
+      "agent_name": "",
+      "amount": "5000",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "amount: 2000 yen",
+    "rule_id": "RULE_038",
+    "json_data": {
+      "employee_id": "JP003",
+      "recruitment_service_name": "Survey Campaign",
+      "agent_name": "SurveyMonkey",
+      "amount": "2000",
+      "receipt_number": "SURVEY001"
+    }
+  },
+  {
+    "text": "amount: 10000 yen",
+    "rule_id": "RULE_039",
+    "json_data": {
+      "employee_id": "JP001",
+      "advertising_type": "Online Survey",
+      "media_name": "Google Ads",
+      "campaign_name": "Autumn Survey 2025",
+      "campaign_start_date": "2025-09-01",
+      "campaign_end_date": "2025-09-30",
+      "amount": "10000",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "amount: 5000 yen",
+    "rule_id": "RULE_039",
+    "json_data": {
+      "employee_id": "JP003",
+      "advertising_type": "Referral Program",
+      "media_name": "Website",
+      "campaign_name": "Spring Referrals",
+      "campaign_start_date": "2025-04-01",
+      "campaign_end_date": "2025-06-30",
+      "amount": "5000",
+      "receipt_number": "N/A"
+    }
+  },
+  {
+    "text": "amount: 1000 yen",
+    "rule_id": "RULE_040",
+    "json_data": {
+      "employee_id": "JP007",
+      "campaign_name": "Autumn Survey",
+      "campaign_start_date": "2025-10-01",
+      "campaign_end_date": "2025-10-31",
+      "survey_required": true,
+      "recipient_name": "Taro Yamada",
+      "amount": "1000",
+      "receipt_number": "not applicable"
+    }
+  },
+  {
+    "text": "amount: 5000 yen",
+    "rule_id": "RULE_040",
+    "json_data": {
+      "employee_id": "JP008",
+      "campaign_name": "Winter Raffle",
+      "campaign_start_date": "2025-12-01",
+      "campaign_end_date": "2025-12-25",
+      "survey_required": false,
+      "recipient_name": "Hanako Sato",
+      "amount": "5000",
+      "receipt_number": ""
+    }
+  },
+  {
+    "text": "amount: 1000 yen",
+    "rule_id": "RULE_041",
+    "json_data": {
+      "employee_id": "JP041",
+      "campaign_name": "Autumn Sale",
+      "campaign_start_date": "2025-10-01",
+      "campaign_end_date": "2025-10-31",
+      "survey_required": "no",
+      "lottery_flag": "no",
+      "amount": "1000",
+      "receipt_number": "not applicable"
+    }
+  },
+  {
+    "text": "amount: 5000 yen",
+    "rule_id": "RULE_041",
+    "json_data": {
+      "employee_id": "JP042",
+      "campaign_name": "Winter Campaign",
+      "campaign_start_date": "2025-12-01",
+      "campaign_end_date": "2025-12-25",
+      "survey_required": "yes",
+      "lottery_flag": "yes",
+      "amount": "5000",
+      "receipt_number": "CMP2025002"
+    }
+  },
+  {
+    "text": "amount: 200 yen",
+    "rule_id": "RULE_042",
+    "json_data": {
+      "employee_id": "JP001",
+      "campaign_name": "Revenue Stamp Purchase",
+      "campaign_start_date": "2025-09-07",
+      "campaign_end_date": "2025-09-07",
+      "amount": "200",
+      "receipt_number": "RS001"
+    }
+  },
+  {
+    "text": "amount: 16000 yen",
+    "rule_id": "RULE_042",
+    "json_data": {
+      "employee_id": "JP002",
+      "campaign_name": "Passport Renewal",
+      "campaign_start_date": "2025-10-01",
+      "campaign_end_date": "2025-10-01",
+      "amount": "16000",
+      "receipt_number": "PSPRT-001"
+    }
+  },
+  {
+    "text": "amount: 10000 yen",
+    "rule_id": "RULE_043",
+    "json_data": {
+      "employee_id": "JP001",
+      "campaign_name": "Health Checkup",
+      "campaign_start_date": "2025-09-01",
+      "campaign_end_date": "2025-09-01",
+      "amount": "10000",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "amount: 2500 yen",
+    "rule_id": "RULE_043",
+    "json_data": {
+      "employee_id": "JP002",
+      "campaign_name": "Happy Hour",
+      "campaign_start_date": "2025-09-15",
+      "campaign_end_date": "2025-09-15",
+      "amount": "2500",
+      "receipt_number": "HH9876"
+    }
+  },
+  {
+    "text": "Business expense for 5000 yen",
+    "rule_id": "RULE_044",
+    "json_data": {}
+  },
+  {
+    "text": "Work-related cost of 9500 yen",
+    "rule_id": "RULE_044",
+    "json_data": {}
+  },
+  {
+    "text": "amount: 2060 yen",
+    "rule_id": "RULE_045",
+    "json_data": {
+      "employee_id": "JP001",
+      "event_name": "Influenza Vaccination",
+      "event_start_date": "2025-09-07",
+      "event_end_date": "2025-09-07",
+      "participant_names": "Employee",
+      "health_item": "Influenza Vaccination",
+      "amount": "2060",
+      "receipt_number": "ABC12345"
+    }
+  },
+  {
+    "text": "amount: 1900 yen",
+    "rule_id": "RULE_045",
+    "json_data": {
+      "employee_id": "JP003",
+      "event_name": "Flu Shot",
+      "event_start_date": "2025-10-01",
+      "event_end_date": "2025-10-01",
+      "participant_names": "All Employees",
+      "health_item": "Vaccination",
+      "amount": "1900",
+      "receipt_number": "XYZ98765"
+    }
+  },
+  {
+    "text": "amount: 100000 yen",
+    "rule_id": "RULE_046",
+    "json_data": {
+      "employee_id": "JP001",
+      "event_name": "Facebook Ad Campaign",
+      "event_start_date": "2025-09-01",
+      "event_end_date": "2025-09-07",
+      "participant_names": "not applicable",
+      "health_item": "not applicable",
+      "amount": "100000",
+      "receipt_number": "FB12345"
+    }
+  },
+  {
+    "text": "amount: 50000 yen",
+    "rule_id": "RULE_046",
+    "json_data": {
+      "employee_id": "JP003",
+      "event_name": "Twitter Ad",
+      "event_start_date": "2025-08-15",
+      "event_end_date": "2025-08-30",
+      "participant_names": "",
+      "health_item": "",
+      "amount": "50000",
+      "receipt_number": "TWIT67890"
+    }
+  },
+  {
+    "text": "amount: 3000 yen",
+    "rule_id": "RULE_047",
+    "json_data": {
+      "employee_id": "JP003",
+      "vaccination_date": "2025-09-15",
+      "vaccine_name": "Flu Vaccine",
+      "amount": "3000",
+      "receipt_number": "TXR001"
+    }
+  },
+  {
+    "text": "Business expense for 5000 yen",
+    "rule_id": "RULE_047",
+    "json_data": {}
+  },
+  {
+    "text": "overseas travel",
+    "rule_id": "RULE_048",
+    "json_data": {
+      "employee_id": "JP001",
+      "advertising_platform": "",
+      "campaign_name": "",
+      "campaign_start_date": "",
+      "campaign_end_date": "",
+      "amount": "",
+      "receipt_number": "",
+      "overseas_flag": "not applicable"
+    }
+  },
+  {
+    "text": "amount: 10000 yen",
+    "rule_id": "RULE_048",
+    "json_data": {
+      "employee_id": "JP003",
+      "advertising_platform": "Google Ads",
+      "campaign_name": "Summer Sale",
+      "campaign_start_date": "2025-07-01",
+      "campaign_end_date": "2025-07-31",
+      "amount": "10000",
+      "receipt_number": "AD202507",
+      "overseas_flag": false
+    }
+  },
+  {
+    "text": "amount: 10000 yen",
+    "rule_id": "RULE_049",
+    "json_data": {
+      "employee_id": "JP001",
+      "bank_name": "Japan Bank",
+      "transfer_date": "2025-09-07",
+      "transfer_reason": "Membership Fee",
+      "amount": "10000",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "amount: 15000 yen",
+    "rule_id": "RULE_049",
+    "json_data": {
+      "employee_id": "JP003",
+      "bank_name": "Tokyo Bank",
+      "transfer_date": "2025-08-01",
+      "transfer_reason": "Registration Fee",
+      "amount": "15000",
+      "receipt_number": "R67890"
+    }
+  },
+  {
+    "text": "amount: 60000 yen",
+    "rule_id": "RULE_050",
+    "json_data": {
+      "employee_id": "JP001",
+      "outsourcing_service_name": "Bar Association",
+      "provider": "Japan Bar Association",
+      "service_start_date": "2025-04-01",
+      "service_end_date": "2026-03-31",
+      "amount": "60000",
+      "receipt_number": "R000001"
+    }
+  },
+  {
+    "text": "amount: 300 yen",
+    "rule_id": "RULE_050",
+    "json_data": {
+      "employee_id": "JP002",
+      "outsourcing_service_name": "CPA Association",
+      "provider": "American Institute of CPAs",
+      "service_start_date": "2025-01-01",
+      "service_end_date": "2025-12-31",
+      "amount": "300",
+      "receipt_number": "CPA002"
+    }
+  },
+  {
+    "text": "amount: 5000 yen",
+    "rule_id": "RULE_051",
+    "json_data": {
+      "employee_id": "JP003",
+      "dues_type": "Annual",
+      "organization_name": "Tech Innovators",
+      "membership_start_date": "2024-01-01",
+      "membership_end_date": "2024-12-31",
+      "amount": "5000",
+      "receipt_number": "TRN-002"
+    }
+  },
+  {
+    "text": "Business meal with clients for 8000 yen",
+    "rule_id": "RULE_051",
+    "json_data": {}
+  },
+  {
+    "text": "amount: 1000000 yen",
+    "rule_id": "RULE_052",
+    "json_data": {
+      "employee_id": "JP001",
+      "dues_type": "Advertising",
+      "organization_name": "Nihon TV",
+      "membership_start_date": "2025-01-01",
+      "membership_end_date": "2025-12-31",
+      "amount": "1000000",
+      "receipt_number": "AD2025001"
+    }
+  },
+  {
+    "text": "amount: 500000 yen",
+    "rule_id": "RULE_052",
+    "json_data": {
+      "employee_id": "JP003",
+      "dues_type": "TV Ad",
+      "organization_name": "Fuji TV",
+      "membership_start_date": "2025-07-01",
+      "membership_end_date": "2025-07-31",
+      "amount": "500000",
+      "receipt_number": "AD2025002"
+    }
+  },
+  {
+    "text": "meeting: Q3 Planning Meeting amount: 15000 yen",
+    "rule_id": "RULE_053",
+    "json_data": {
+      "employee_id": "JP001",
+      "meeting_name": "Q3 Planning Meeting",
+      "meeting_date": "2025-09-07",
+      "participant_names": "Taro Yamada, Hanako Tanaka",
+      "amount": "15000",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "meeting: Project X Discussion amount: 10000 yen",
+    "rule_id": "RULE_053",
+    "json_data": {
+      "employee_id": "JP003",
+      "meeting_name": "Project X Discussion",
+      "meeting_date": "2025-09-15",
+      "participant_names": "John Doe",
+      "amount": "10000",
+      "receipt_number": "R67890"
+    }
+  },
+  {
+    "text": "amount: 100000 yen",
+    "rule_id": "RULE_054",
+    "json_data": {
+      "employee_id": "JP003",
+      "advertising_type": "Digital",
+      "media_name": "Google Ads",
+      "amount": "100000",
+      "receipt_number": "KL002"
+    }
+  },
+  {
+    "text": "Business expense for 5000 yen",
+    "rule_id": "RULE_054",
+    "json_data": {}
+  },
+  {
+    "text": " service",
+    "rule_id": "RULE_055",
+    "json_data": {
+      "employee_id": "JP001",
+      "affiliate_name": "",
+      "service_type": "",
+      "amount": "",
+      "receipt_number": ""
+    }
+  },
+  {
+    "text": "Train service",
+    "rule_id": "RULE_055",
+    "json_data": {
+      "employee_id": "JP003",
+      "affiliate_name": "None",
+      "service_type": "Train",
+      "amount": "0",
+      "receipt_number": "N/A"
+    }
+  },
+  {
+    "text": "COVID-19 PCR Test service amount: 15000 yen",
+    "rule_id": "RULE_056",
+    "json_data": {
+      "employee_id": "JP123",
+      "affiliate_name": "LabCorp Japan",
+      "service_type": "COVID-19 PCR Test",
+      "amount": "15000",
+      "receipt_number": "R123456789"
+    }
+  },
+  {
+    "text": "PCR Test service amount: 12000 yen",
+    "rule_id": "RULE_056",
+    "json_data": {
+      "employee_id": "JP456",
+      "affiliate_name": "MediCheck Clinic",
+      "service_type": "PCR Test",
+      "amount": "12000",
+      "receipt_number": "REC987654321"
+    }
+  },
+  {
+    "text": "from Tokyo to Osaka costing 20000 yen amount: 20000 yen",
+    "rule_id": "RULE_057",
+    "json_data": {
+      "employee_id": "JP001",
+      "commute_start_date": "2025-09-07",
+      "commute_end_date": "2025-09-07",
+      "origin": "Tokyo",
+      "destination": "Osaka",
+      "transport_mode": "Airplane",
+      "fare_amount": "20000",
+      "receipt_number": "not applicable"
+    }
+  },
+  {
+    "text": "Local train travel from London to Paris costing 150 yen amount: 150 yen",
+    "rule_id": "RULE_057",
+    "json_data": {
+      "employee_id": "JP003",
+      "commute_start_date": "2025-10-10",
+      "commute_end_date": "2025-10-12",
+      "origin": "London",
+      "destination": "Paris",
+      "transport_mode": "Train",
+      "fare_amount": "150",
+      "receipt_number": "TRN-987"
+    }
+  },
+  {
+    "text": "amount: 1000 yen",
+    "rule_id": "RULE_058",
+    "json_data": {
+      "employee_id": "JP001",
+      "test_date": "2025-09-07",
+      "test_type": "Refund",
+      "amount": "1000",
+      "receipt_number": "R12345"
+    }
+  },
+  {
+    "text": "amount: 500 yen",
+    "rule_id": "RULE_058",
+    "json_data": {
+      "employee_id": "JP003",
+      "test_date": "2025-09-09",
+      "test_type": "Double Charge Refund",
+      "amount": "500",
+      "receipt_number": "R67890"
+    }
+  },
+  {
+    "text": "amount: 15000 yen",
+    "rule_id": "RULE_059",
+    "json_data": {
+      "employee_id": "JP007",
+      "transfer_start_date": "2025-09-01",
+      "transfer_end_date": "2025-09-07",
+      "home_country": "Japan",
+      "transfer_reason": "Personal use",
+      "amount": "15000",
+      "receipt_number": "not applicable"
+    }
+  },
+  {
+    "text": "amount: 25000 yen",
+    "rule_id": "RULE_059",
+    "json_data": {
+      "employee_id": "JP008",
+      "transfer_start_date": "2025-08-15",
+      "transfer_end_date": "2025-08-20",
+      "home_country": "USA",
+      "transfer_reason": "Family travel",
+      "amount": "25000",
+      "receipt_number": "N/A"
+    }
+  },
+  {
+    "text": "Business expense for 5000 yen",
+    "rule_id": "RULE_060",
+    "json_data": {}
+  },
+  {
+    "text": "Work-related cost of 9500 yen",
+    "rule_id": "RULE_060",
+    "json_data": {}
+  },
+  {
+    "text": "amount: 250000 yen",
+    "rule_id": "RULE_061",
+    "json_data": {
+      "employee_id": "JP003",
+      "deduction_date": "2025-09-15",
+      "personal_use_item": "Office Space",
+      "amount": "250000"
+    }
+  },
+  {
+    "text": "Business expense for 5000 yen",
+    "rule_id": "RULE_061",
+    "json_data": {}
+  },
+  {
+    "text": "amount: 100000 yen",
+    "rule_id": "RULE_062",
+    "json_data": {
+      "employee_id": "JP001",
+      "payroll_date": "2025-09-07",
+      "payroll_item": "Office Rent",
+      "amount": "100000",
+      "receipt_number": "RNT001"
+    }
+  },
+  {
+    "text": "amount: 50000 yen",
+    "rule_id": "RULE_062",
+    "json_data": {
+      "employee_id": "JP003",
+      "payroll_date": "2025-10-01",
+      "payroll_item": "WeWork Fee",
+      "amount": "50000",
+      "receipt_number": "WWK002"
+    }
+  },
+  {
+    "text": "amount: 10000 yen",
+    "rule_id": "RULE_063",
+    "json_data": {
+      "employee_id": "JP001",
+      "lease_start_date": "2025-09-01",
+      "lease_end_date": "2025-09-30",
+      "branch_name": "Tokyo Branch",
+      "location": "Chiyoda-ku, Tokyo",
+      "amount": "10000",
+      "receipt_number": "R00001"
+    }
+  },
+  {
+    "text": "amount: 8500 yen",
+    "rule_id": "RULE_063",
+    "json_data": {
+      "employee_id": "JP003",
+      "lease_start_date": "2025-10-01",
+      "lease_end_date": "2025-10-31",
+      "branch_name": "Osaka Branch",
+      "location": "Osaka",
+      "amount": "8500",
+      "receipt_number": "R00002"
+    }
+  },
+  {
+    "text": "overseas travel amount: 15000 yen",
+    "rule_id": "RULE_064",
+    "json_data": {
+      "employee_id": "JP001",
+      "vaccination_date": "2025-09-07",
+      "vaccine_name": "Yellow Fever Vaccine",
+      "amount": "15000",
+      "receipt_number": "R12345",
+      "overseas_flag": true
+    }
+  },
+  {
+    "text": "overseas travel amount: 10000 yen",
+    "rule_id": "RULE_064",
+    "json_data": {
+      "employee_id": "JP003",
+      "vaccination_date": "2025-08-01",
+      "vaccine_name": "Typhoid Vaccine",
+      "amount": "10000",
+      "receipt_number": "TXR987",
+      "overseas_flag": true
+    }
+  }
+]
