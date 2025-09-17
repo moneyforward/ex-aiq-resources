@@ -22,12 +22,12 @@ def sanitize_column(col_name: str) -> str:
 
 
 class TextToSQLRetriever(BaseRetriever):
-    def __init__(self, data, retrieval_size=3, sql_database=None):
+    def __init__(self, data, retrieval_size=3):
         super().__init__(data, retrieval_size)
         self.df = data
         self.engine = create_engine("sqlite:///:memory:")
-        self.sql_database = sql_database
-        if not sql_database:
+        self.sql_database = None
+        if not self.sql_database:
             self._create_db()
         self.llm = OpenAI(temperature=0.1, model="gpt-4.1-mini")
         self.nl_sql_retriever = NLSQLRetriever(
@@ -44,7 +44,7 @@ class TextToSQLRetriever(BaseRetriever):
         response = self.nl_sql_retriever.retrieve(query)
         answer = []
         for item in response:
-            answer.append(item.metadata["rule_name"])
+            answer.append(item.metadata.get("rule_name", ""))
         return answer
 
     def _create_db(self):
@@ -64,9 +64,10 @@ class TextToSQLRetriever(BaseRetriever):
             "when_to_use_this_expense_item",
             "content_to_check",
         ]
-        if len(new_names) != len(self.df.columns):
-            raise ValueError("Column length mismatch")
-        mapping = {col: new_names[i] for i, col in enumerate(self.df.columns)}
+        # if len(new_names) != len(self.df.columns):
+        #     raise ValueError("Column length mismatch")
+        # mapping = {col: new_names[i] for i, col in enumerate(self.df.columns)}
+        mapping = dict(zip(self.df.columns, new_names))
         df = self.df.rename(columns=mapping)
 
         ex_rules_table = Table(

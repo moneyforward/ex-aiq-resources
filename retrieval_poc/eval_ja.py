@@ -4,6 +4,8 @@ from approaches.random.random_retriever import RandomRetriever
 from approaches.bm25.bm25_retriever import BM25Retriever
 from approaches.elasticsearch.elasticsearch_retriever import ElasticsearchRetriever
 from approaches.protovec.protovec_retriever import ProtovecRetriever
+from approaches.dense.dense_retriever import DenseRetriever
+from approaches.rag.text_to_sql import TextToSQLRetriever
 import random
 import numpy as np
 from approaches.markdown_writer import write_composite_score_explanation
@@ -38,33 +40,33 @@ print(f"Ground truth: {len(ground_truth_df)} mappings")
 def json_to_dataframe(json_data, ground_truth_df, rule_space_data_full):
     """Convert JSON expense data to DataFrame format for evaluation"""
     rows = []
-    
+
     # Get all available rules from the rule space (64 rules from eval_ja.csv)
     all_available_rules = rule_space_data_full['Rule'].unique()
     print(f"Available rules for search space: {len(all_available_rules)}")
-    
+
     for idx, expense in enumerate(json_data['expenses']):
         # Get the ground truth rule for this expense
         ground_truth_row = ground_truth_df[ground_truth_df['index'] == idx]
         if ground_truth_row.empty:
             print(f"Warning: No ground truth found for expense {idx}")
             continue
-            
+
         rule_id = ground_truth_row.iloc[0]['rule_id']
-        
+
         # Create a natural language description of the expense
         description = expense.get('description', '')
         amount = expense.get('amount', 0)
         date = expense.get('date', '')
         category = expense.get('category', '')
-        
+
         # Create a comprehensive query that includes all relevant information
         query = (f"Expense: {description}, Amount: {amount} yen, "
                 f"Date: {date}, Category: {category}")
-        
+
         # Create JSON query for protovec retriever
         json_query = json.dumps(expense, ensure_ascii=False)
-        
+
         # Get distractor rules from the full rule space data for this specific rule
         rule_row = rule_space_data_full[rule_space_data_full['Rule'] == rule_id]
         if not rule_row.empty:
@@ -74,7 +76,7 @@ def json_to_dataframe(json_data, ground_truth_df, rule_space_data_full):
         else:
             # Fallback: use all other rules if not found
             distractor_rules = [r for r in all_available_rules if r != rule_id]
-        
+
         rows.append({
             'Rule': rule_id,
             'query': query,
@@ -87,7 +89,7 @@ def json_to_dataframe(json_data, ground_truth_df, rule_space_data_full):
             'Example 1': query,  # For compatibility with existing retrievers
             'Example 2': query   # For compatibility with existing retrievers
         })
-    
+
     return pd.DataFrame(rows)
 
 # Convert JSON data to DataFrame
@@ -102,10 +104,12 @@ retriever_configs = {
     'BM25Okapi': {'version': 'BM25Okapi', 'k1': 1.2, 'b': 0.75},
     'BM25L': {'version': 'BM25L', 'k1': 1.2, 'b': 0.75},
     'BM25Plus': {'version': 'BM25Plus', 'k1': 1.2, 'b': 0.75},
-    'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200, 
+    'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200,
                       'index_name': 'expense_rules_ja'},
     'Protovec': {'model_name': 'all-MiniLM-L6-v2'},
-    'Random': {}
+    'Random': {},
+    'dense_retriever': {'version': 'dense_retriever'},
+    'text2sql': {}
 }
 
 # Define evaluation metrics (same as original eval.py)
@@ -127,13 +131,13 @@ def ndcg_at_k(retrieved, relevant, k):
     for i, r in enumerate(retrieved[:k]):
         if r in relevant:
             dcg += 1 / (i + 1)  # relevance score of 1 for relevant items
-    
+
     # Calculate IDCG: ideal DCG for the best possible ranking
     # For a single relevant item, IDCG = 1 (at rank 1)
-    # For multiple relevant items, IDCG = sum of 1/log2(i+1) for i in 
+    # For multiple relevant items, IDCG = sum of 1/log2(i+1) for i in
     # range(min(len(relevant), k))
     idcg = sum(1 / (i + 1) for i in range(min(len(relevant), k)))
-    
+
     # Cap nDCG at 1.0 to prevent values above 1
     ndcg = dcg / idcg if idcg > 0 else 0
     return min(ndcg, 1.0)
@@ -156,7 +160,7 @@ if __name__ == '__main__':
     print("=" * 60)
     print("EVALUATING RETRIEVERS ON JSON EXPENSE DATASET")
     print("=" * 60)
-    
+
     # Define k values to evaluate
     k_values = [1, 3]
 
@@ -170,14 +174,19 @@ if __name__ == '__main__':
     for name, config in retriever_configs.items():
         print(f'\nEvaluating {name} Retriever on JSON dataset')
         print("-" * 40)
-        
+
         for k in k_values:
             print(f'\nEvaluating at k={k}')
-            
+
             # Initialize retriever with correct size for this k value
             # Use the full rule space (64 rules) for retrieval, not just the JSON data
             if name == 'Random':
                 retriever = RandomRetriever(rule_space_data, k)
+            elif name == 'dense_retriever':
+                retriever = DenseRetriever(rule_space_data, k)
+            elif name == 'text2sql':
+                print('text2sql selected')
+                retriever = TextToSQLRetriever(rule_space_data, k)
             elif name == 'Elasticsearch':
                 retriever = ElasticsearchRetriever(
                     rule_space_data, k,
@@ -196,12 +205,12 @@ if __name__ == '__main__':
                 )
             else:
                 retriever = BM25Retriever(
-                    rule_space_data, k, 
-                    version=config['version'], 
-                    k1=config['k1'], 
+                    rule_space_data, k,
+                    version=config['version'],
+                    k1=config['k1'],
                     b=config['b']
                 )
-            
+
             # Initialize lists to store metrics
             recall_list = []
             precision_list = []
