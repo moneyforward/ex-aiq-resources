@@ -3,6 +3,7 @@ import os
 from approaches.random.random_retriever import RandomRetriever
 from approaches.bm25.bm25_retriever import BM25Retriever
 from approaches.elasticsearch.elasticsearch_retriever import ElasticsearchRetriever
+from approaches.dense.dense_retriever import DenseRetriever
 import random
 import numpy as np
 from approaches.markdown_writer import write_composite_score_explanation
@@ -33,9 +34,10 @@ retriever_configs = {
     'BM25Okapi': {'version': 'BM25Okapi', 'k1': 1.2, 'b': 0.75},
     'BM25L': {'version': 'BM25L', 'k1': 1.2, 'b': 0.75},
     'BM25Plus': {'version': 'BM25Plus', 'k1': 1.2, 'b': 0.75},
-    'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200, 
+    'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200,
                       'index_name': 'expense_rules_en'},
-    'Random': {}
+    'Random': {},
+    'dense_retriever': {'version': 'dense_retriever'},
 }
 
 # Define evaluation metrics
@@ -61,13 +63,13 @@ def ndcg_at_k(retrieved, relevant, k):
     for i, r in enumerate(retrieved[:k]):
         if r in relevant:
             dcg += 1 / (i + 1)  # relevance score of 1 for relevant items
-    
+
     # Calculate IDCG: ideal DCG for the best possible ranking
     # For a single relevant item, IDCG = 1 (at rank 1)
-    # For multiple relevant items, IDCG = sum of 1/log2(i+1) for i in 
+    # For multiple relevant items, IDCG = sum of 1/log2(i+1) for i in
     # range(min(len(relevant), k))
     idcg = sum(1 / (i + 1) for i in range(min(len(relevant), k)))
-    
+
     # Cap nDCG at 1.0 to prevent values above 1
     ndcg = dcg / idcg if idcg > 0 else 0
     return min(ndcg, 1.0)
@@ -106,6 +108,8 @@ if __name__ == '__main__':
             # Initialize retriever with correct size for this k value
             if name == 'Random':
                 retriever = RandomRetriever(data, k)
+            elif name == 'dense_retriever':
+                retriever = DenseRetriever(data, k)
             elif name == 'Elasticsearch':
                 retriever = ElasticsearchRetriever(
                     data, k,
@@ -120,9 +124,9 @@ if __name__ == '__main__':
                 )
             else:
                 retriever = BM25Retriever(
-                    data, k, 
-                    version=config['version'], 
-                    k1=config['k1'], 
+                    data, k,
+                    version=config['version'],
+                    k1=config['k1'],
                     b=config['b']
                 )
             # Initialize lists to store metrics
@@ -136,10 +140,10 @@ if __name__ == '__main__':
 
             # Use appropriate data source for each retriever
             eval_data = natural_lang_data if name == 'ButlerAI' else data
-            
+
             for index, row in eval_data.iterrows():
                 rule = row['Rule']
-                
+
                 # For ButlerAI, use the converted natural language queries
                 if name == 'ButlerAI':
                     # Use the converted natural language query
@@ -147,7 +151,7 @@ if __name__ == '__main__':
                 else:
                     # Use original JSON queries
                     positive_examples = [row['Example 1'], row['Example 2']]
-                
+
                 distractor_rules = eval(row['Distractor Rules'])
 
                 # Use appropriate queries for each retriever
