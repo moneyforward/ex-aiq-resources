@@ -80,7 +80,9 @@ def ndcg_at_k(retrieved, relevant, k):
 
 
 def hit_rate(retrieved, relevant):
-    return 1 if retrieved and retrieved[0] in relevant else 0
+    # return 1 if retrieved and retrieved[0] in relevant else 0
+    # Corrected to check within top-k retrieved items, not just the first item
+    return 1 if any(item in relevant for item in retrieved[:k]) else 0
 
 
 def confusion_rate(retrieved, relevant, distractors):
