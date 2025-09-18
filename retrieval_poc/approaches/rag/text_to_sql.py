@@ -1,4 +1,5 @@
 from ..base_retriever import BaseRetriever
+import os
 import re
 from sqlalchemy import (
     create_engine,
@@ -8,10 +9,22 @@ from sqlalchemy import (
     Column,
     String,
 )
+from llama_index.core import Settings
 from llama_index.core import SQLDatabase
-from llama_index.llms.openai import OpenAI
+from llama_index.llms.azure_openai import AzureOpenAI
+from llama_index.embeddings.azure_openai import AzureOpenAIEmbedding
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.retrievers import NLSQLRetriever
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+Settings.embed_model = AzureOpenAIEmbedding(
+    endpoint=os.getenv("AZURE_EMBEDDING_ENDPOINT"),
+    credential=os.getenv("AZURE_EMBEDDING_API_KEY"),
+    model=os.getenv("AZURE_EMBEDDING_DEPLOYMENT_NAME"),
+)
 
 
 def sanitize_column(col_name: str) -> str:
@@ -29,9 +42,19 @@ class TextToSQLRetriever(BaseRetriever):
         self.sql_database = None
         if not self.sql_database:
             self._create_db()
-        self.llm = OpenAI(temperature=0.1, model="gpt-4.1-mini")
+        self.llm = AzureOpenAI(
+            temperature=0.1,
+            engine="gpt-4.1-mini",
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+            api_version="2025-01-01-preview",
+        )
         self.nl_sql_retriever = NLSQLRetriever(
-            self.sql_database, tables=["ex_rules"], llm=self.llm, return_raw=False
+            self.sql_database,
+            tables=["ex_rules"],
+            llm=self.llm,
+            embed_model=Settings.embed_model,
+            return_raw=False,
         )
         self.query_engine = RetrieverQueryEngine.from_args(
             self.nl_sql_retriever, llm=self.llm
@@ -39,8 +62,6 @@ class TextToSQLRetriever(BaseRetriever):
 
     def retrieve(self, query):
         # Implement RAG retrieval logic here
-        # response = self.query_engine.query(query)
-        # return response
         response = self.nl_sql_retriever.retrieve(query)
         answer = []
         for item in response:
@@ -71,9 +92,7 @@ class TextToSQLRetriever(BaseRetriever):
         df = self.df.rename(columns=mapping)
 
         ex_rules_table = Table(
-            table_name,
-            metadata_obj,
-            *[Column(sanitize_column(col), String) for col in df.columns],
+            table_name, metadata_obj, *[Column(col, String) for col in df.columns]
         )
         metadata_obj.create_all(self.engine)
 
