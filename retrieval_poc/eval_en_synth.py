@@ -3,6 +3,7 @@ import os
 from approaches.random.random_retriever import RandomRetriever
 from approaches.bm25.bm25_retriever import BM25Retriever
 from approaches.elasticsearch.elasticsearch_retriever import ElasticsearchRetriever
+from approaches.protovec.protovec_retriever import ProtovecRetriever
 from approaches.dense.dense_retriever import DenseRetriever
 from approaches.rag.text_to_sql import TextToSQLRetriever
 import random
@@ -39,9 +40,10 @@ retriever_configs = {
     'BM25Plus': {'version': 'BM25Plus', 'k1': 1.2, 'b': 0.75},
     'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200,
                       'index_name': 'expense_rules_en'},
+    'Protovec': {},
     'Random': {},
-    'dense_retriever': {'version': 'dense_retriever'},
-    'text2sql': {},
+    'Dense Retriever': {'version': 'dense_retriever'},
+    'Text2SQL': {},
 }
 
 # Define evaluation metrics
@@ -114,10 +116,12 @@ if __name__ == '__main__':
             # Initialize retriever with correct size for this k value
             if name == 'Random':
                 retriever = RandomRetriever(retriever_data, k)
-            elif name == 'dense_retriever':
+            elif name == 'Dense Retriever':
                 retriever = DenseRetriever(retriever_data, k)
-            elif name == 'text2sql':
+            elif name == 'Text2SQL':
                 retriever = TextToSQLRetriever(retriever_data, k)
+            elif name == 'Protovec':
+                retriever = ProtovecRetriever(retriever_data, k)
             elif name == 'Elasticsearch':
                 retriever = ElasticsearchRetriever(
                     retriever_data, k,

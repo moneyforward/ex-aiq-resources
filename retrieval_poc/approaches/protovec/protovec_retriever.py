@@ -9,11 +9,15 @@ by finding the most similar prototype.
 import json
 import numpy as np
 from typing import List, Dict, Any, Tuple
-from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import os
 from tqdm import tqdm
+from llama_index.core import Settings
+from llama_index.embeddings.azure_openai import AzureOpenAIEmbedding
+from dotenv import load_dotenv
 from ..base_retriever import BaseRetriever
+
+load_dotenv()
 
 
 class ProtovecRetriever(BaseRetriever):
@@ -22,7 +26,7 @@ class ProtovecRetriever(BaseRetriever):
     from training examples and classifies new requests by similarity.
     """
     
-    def __init__(self, data, retrieval_size=3, model_name="all-MiniLM-L6-v2", 
+    def __init__(self, data, retrieval_size=3, model_name=None, 
                  training_data_path=None):
         """
         Initialize the prototype retriever.
@@ -30,12 +34,20 @@ class ProtovecRetriever(BaseRetriever):
         Args:
             data: The rule data (same format as other retrievers)
             retrieval_size: Number of top rules to return
-            model_name: Sentence transformer model name
+            model_name: Deprecated - kept for compatibility but not used
             training_data_path: Path to synthetic training data JSON file
         """
         super().__init__(data, retrieval_size)
-        self.model_name = model_name
-        self.model = SentenceTransformer(model_name)
+        self.model_name = "azure-openai"  # Use Azure OpenAI embeddings
+        
+        # Initialize Azure OpenAI embedding model (same as dense retriever)
+        self.embed_model = AzureOpenAIEmbedding(
+            azure_endpoint=os.getenv("AZURE_EMBEDDING_ENDPOINT"),
+            api_key=os.getenv("AZURE_EMBEDDING_API_KEY"),
+            azure_deployment=os.getenv("AZURE_EMBEDDING_DEPLOYMENT_NAME"),
+            api_version="2024-02-01",
+        )
+        
         self.prototypes = {}
         self.rule_examples = {}
         
@@ -161,11 +173,15 @@ class ProtovecRetriever(BaseRetriever):
                 print(f"Warning: Skipping {rule_id} - no examples")
                 continue
                 
-            # Encode all examples for this rule
-            embeddings = self.model.encode(examples)
+            # Encode all examples for this rule using Azure OpenAI
+            embeddings = []
+            for example in examples:
+                embedding = self.embed_model.get_text_embedding(example)
+                embeddings.append(embedding)
             
-            # Compute mean prototype vector
-            prototype = np.mean(embeddings, axis=0)
+            # Convert to numpy array and compute mean prototype vector
+            embeddings_array = np.array(embeddings)
+            prototype = np.mean(embeddings_array, axis=0)
             self.prototypes[rule_id] = prototype
             
         print(f"Built {len(self.prototypes)} prototypes")
@@ -186,9 +202,15 @@ class ProtovecRetriever(BaseRetriever):
         if not examples:
             return
             
-        # Encode examples and compute prototype
-        embeddings = self.model.encode(examples)
-        prototype = np.mean(embeddings, axis=0)
+        # Encode examples and compute prototype using Azure OpenAI
+        embeddings = []
+        for example in examples:
+            embedding = self.embed_model.get_text_embedding(example)
+            embeddings.append(embedding)
+        
+        # Convert to numpy array and compute mean prototype
+        embeddings_array = np.array(embeddings)
+        prototype = np.mean(embeddings_array, axis=0)
         
         # Store prototype and examples
         self.prototypes[rule_id] = prototype
@@ -196,7 +218,7 @@ class ProtovecRetriever(BaseRetriever):
         
         print(f"Added new rule {rule_id} with {len(examples)} examples")
     
-    def retrieve(self, query: str) -> List[Dict[str, Any]]:
+    def retrieve(self, query: str) -> List[str]:
         """
         Retrieve the most similar rules for a query.
         
@@ -204,7 +226,7 @@ class ProtovecRetriever(BaseRetriever):
             query: The input query text
             
         Returns:
-            List of rule dictionaries with similarity scores
+            List of rule IDs (strings) for compatibility with evaluation
         """
         if not self.prototypes:
             return []
@@ -212,8 +234,8 @@ class ProtovecRetriever(BaseRetriever):
         # Extract JSON from markdown code block if present
         processed_query = self._extract_json_from_markdown(query)
         
-        # Encode query
-        query_embedding = self.model.encode([processed_query])
+        # Encode query using Azure OpenAI
+        query_embedding = np.array([self.embed_model.get_text_embedding(processed_query)])
         
         # Compute similarities with all prototypes
         similarities = []
@@ -224,27 +246,9 @@ class ProtovecRetriever(BaseRetriever):
         # Sort by similarity (descending)
         similarities.sort(key=lambda x: x[1], reverse=True)
         
-        # Get top results
+        # Get top results - return just the rule IDs for evaluation compatibility
         top_results = similarities[:self.retrieval_size]
-        
-        # Format results
-        results = []
-        for rule_id, similarity in top_results:
-            # Find rule data from DataFrame
-            rule_data = None
-            if self.data is not None and not self.data.empty:
-                rule_row = self.data[self.data['Rule'] == rule_id]
-                if not rule_row.empty:
-                    rule_data = rule_row.iloc[0].to_dict()
-            
-            if rule_data:
-                results.append({
-                    'rule_id': rule_id,
-                    'similarity': float(similarity),
-                    'rule_data': rule_data
-                })
-        
-        return results
+        return [rule_id for rule_id, _ in top_results]
     
     def _extract_json_from_markdown(self, query: str) -> str:
         """Extract JSON from markdown code block if present."""
@@ -310,7 +314,14 @@ class ProtovecRetriever(BaseRetriever):
             data = json.load(f)
         
         self.model_name = data['model_name']
-        self.model = SentenceTransformer(self.model_name)
+        
+        # Initialize Azure OpenAI embedding model (same as dense retriever)
+        self.embed_model = AzureOpenAIEmbedding(
+            azure_endpoint=os.getenv("AZURE_EMBEDDING_ENDPOINT"),
+            api_key=os.getenv("AZURE_EMBEDDING_API_KEY"),
+            azure_deployment=os.getenv("AZURE_EMBEDDING_DEPLOYMENT_NAME"),
+            api_version="2024-02-01",
+        )
         
         # Convert prototype lists back to numpy arrays
         self.prototypes = {

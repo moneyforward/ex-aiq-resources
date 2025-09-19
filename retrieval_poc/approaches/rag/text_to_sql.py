@@ -21,9 +21,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 Settings.embed_model = AzureOpenAIEmbedding(
-    endpoint=os.getenv("AZURE_EMBEDDING_ENDPOINT"),
-    credential=os.getenv("AZURE_EMBEDDING_API_KEY"),
-    model=os.getenv("AZURE_EMBEDDING_DEPLOYMENT_NAME"),
+    azure_endpoint=os.getenv("AZURE_EMBEDDING_ENDPOINT"),
+    api_key=os.getenv("AZURE_EMBEDDING_API_KEY"),
+    azure_deployment=os.getenv("AZURE_EMBEDDING_DEPLOYMENT_NAME"),
+    api_version="2024-02-01",
 )
 
 

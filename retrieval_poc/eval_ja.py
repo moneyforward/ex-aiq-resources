@@ -106,10 +106,10 @@ retriever_configs = {
     'BM25Plus': {'version': 'BM25Plus', 'k1': 1.2, 'b': 0.75},
     'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200,
                       'index_name': 'expense_rules_ja'},
-    'Protovec': {'model_name': 'all-MiniLM-L6-v2'},
+    'Protovec': {},
     'Random': {},
-    'dense_retriever': {'version': 'dense_retriever'},
-    'text2sql': {}
+    'Dense Retriever': {'version': 'dense_retriever'},
+    'Text2SQL': {}
 }
 
 # Define evaluation metrics (same as original eval.py)
@@ -182,10 +182,10 @@ if __name__ == '__main__':
             # Use the full rule space (64 rules) for retrieval, not just the JSON data
             if name == 'Random':
                 retriever = RandomRetriever(rule_space_data, k)
-            elif name == 'dense_retriever':
+            elif name == 'Dense Retriever':
                 retriever = DenseRetriever(rule_space_data, k)
-            elif name == 'text2sql':
-                print('text2sql selected')
+            elif name == 'Text2SQL':
+                print('Text2SQL selected')
                 retriever = TextToSQLRetriever(rule_space_data, k)
             elif name == 'Elasticsearch':
                 retriever = ElasticsearchRetriever(
@@ -199,10 +199,7 @@ if __name__ == '__main__':
                     index_name=config['index_name']
                 )
             elif name == 'Protovec':
-                retriever = ProtovecRetriever(
-                    rule_space_data, k,
-                    model_name=config['model_name']
-                )
+                retriever = ProtovecRetriever(rule_space_data, k)
             else:
                 retriever = BM25Retriever(
                     rule_space_data, k,
@@ -230,9 +227,7 @@ if __name__ == '__main__':
                 # Use appropriate query for each retriever
                 if name == 'Protovec':
                     # Use JSON query for protovec retriever
-                    retrieved_results = retriever.retrieve(json_query)
-                    # Extract rule IDs from protovec results
-                    retrieved = [r['rule_id'] for r in retrieved_results]
+                    retrieved = retriever.retrieve(json_query)
                 else:
                     # Use natural language query for other retrievers
                     retrieved = retriever.retrieve(query)
