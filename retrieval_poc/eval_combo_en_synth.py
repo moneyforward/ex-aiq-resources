@@ -1,11 +1,8 @@
 import pandas as pd
 import os
-from approaches.random.random_retriever import RandomRetriever
-from approaches.bm25.bm25_retriever import BM25Retriever
-from approaches.elasticsearch.elasticsearch_retriever import ElasticsearchRetriever
-from approaches.protovec.protovec_retriever import ProtovecRetriever
-from approaches.dense.dense_retriever import DenseRetriever
-from approaches.rag.text_to_sql import TextToSQLRetriever
+from approaches.combo.dense_bm25.dense_bm25_retriever import DenseBM25Retriever
+from approaches.combo.dense_text2sql.dense_text2sql_retriever import DenseText2SQLRetriever
+from approaches.combo.dense_text2sql_bm25.dense_text2sql_bm25_retriever import DenseText2SQLBM25Retriever
 import random
 import numpy as np
 from approaches.markdown_writer import write_composite_score_explanation
@@ -33,17 +30,11 @@ else:
 # Set pandas display options to show all columns
 pd.set_option('display.max_columns', None)
 
-# Define retriever configurations
-retriever_configs = {
-    'BM25Okapi': {'version': 'BM25Okapi', 'k1': 1.2, 'b': 0.75},
-    'BM25L': {'version': 'BM25L', 'k1': 1.2, 'b': 0.75},
-    'BM25Plus': {'version': 'BM25Plus', 'k1': 1.2, 'b': 0.75},
-    'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200,
-                      'index_name': 'expense_rules_en'},
-    'Protovec': {},
-    'Random': {},
-    'Dense Retriever': {'version': 'dense_retriever'},
-    'Text2SQL': {},
+# Define combo retriever configurations
+combo_retriever_configs = {
+    'Dense+BM25': {'num_queries': 4},
+    'Dense+Text2SQL': {'num_queries': 4},
+    'Dense+Text2SQL+BM25': {'num_queries': 4},
 }
 
 # Define evaluation metrics
@@ -81,7 +72,7 @@ def ndcg_at_k(retrieved, relevant, k):
     return min(ndcg, 1.0)
 
 
-def hit_rate(retrieved, relevant):
+def hit_rate(retrieved, relevant, k):
     # return 1 if retrieved and retrieved[0] in relevant else 0
     # Corrected to check within top-k retrieved items, not just the first item
     return 1 if any(item in relevant for item in retrieved[:k]) else 0
@@ -102,6 +93,7 @@ def f1_score(recall, precision):
 if __name__ == '__main__':
     # Define k values to evaluate
     k_values = [1, 3]
+    max_k = max(k_values)  # Optimize: run with max k and slice results
 
     # Initialize a DataFrame to store the results
     results_df = pd.DataFrame(columns=[
@@ -109,38 +101,45 @@ if __name__ == '__main__':
         'Average MRR', 'Average Hit Rate', 'Average nDCG', 'Average Confusion Rate'
     ])
 
-    # Iterate through each retriever and evaluate
-    for name, config in retriever_configs.items():
-        print(f'Evaluating {name} Retriever')
-        for k in k_values:
-            # Initialize retriever with correct size for this k value
-            if name == 'Random':
-                retriever = RandomRetriever(retriever_data, k)
-            elif name == 'Dense Retriever':
-                retriever = DenseRetriever(retriever_data, k)
-            elif name == 'Text2SQL':
-                retriever = TextToSQLRetriever(retriever_data, k)
-            elif name == 'Protovec':
-                retriever = ProtovecRetriever(retriever_data, k)
-            elif name == 'Elasticsearch':
-                retriever = ElasticsearchRetriever(
-                    retriever_data, k,
-                    rule_column='Rule',
-                    description_column='Expense item name\n'
-                    '(Name registered in Cloud Expenses)',
-                    category_column='Account',
-                    rule_id_column='Rule',
-                    es_host=config['es_host'],
-                    es_port=config['es_port'],
-                    index_name=config['index_name']
-                )
+    # Iterate through each combo retriever and evaluate
+    for name, config in combo_retriever_configs.items():
+        print(f'Evaluating {name} Combo Retriever')
+        
+        # Initialize retriever with max k value for optimization
+        if name == 'Dense+BM25':
+            retriever = DenseBM25Retriever(retriever_data, max_k, num_queries=config['num_queries'])
+        elif name == 'Dense+Text2SQL':
+            retriever = DenseText2SQLRetriever(retriever_data, max_k, num_queries=config['num_queries'])
+        elif name == 'Dense+Text2SQL+BM25':
+            retriever = DenseText2SQLBM25Retriever(retriever_data, max_k, num_queries=config['num_queries'])
+        
+        # Store results for all k values to avoid recomputation
+        all_retrieved_results = {}
+        
+        # Use appropriate data source for each retriever
+        eval_data = natural_lang_data if name == 'ButlerAI' else data
+
+        for index, row in eval_data.iterrows():
+            rule = row['Rule']
+
+            # For ButlerAI, use the converted natural language queries
+            if name == 'ButlerAI':
+                # Use the converted natural language query
+                positive_examples = [row['query']]
             else:
-                retriever = BM25Retriever(
-                    retriever_data, k,
-                    version=config['version'],
-                    k1=config['k1'],
-                    b=config['b']
-                )
+                # Use original JSON queries
+                positive_examples = [row['Example 1'], row['Example 2']]
+
+            distractor_rules = eval(row['Distractor Rules'])
+
+            # Use appropriate queries for each retriever
+            for query in positive_examples:
+                # Retrieve results once with max k
+                retrieved = retriever.retrieve(query)
+                all_retrieved_results[f"{index}_{query}"] = retrieved
+
+        # Now evaluate for each k value using the cached results
+        for k in k_values:
             # Initialize lists to store metrics
             recall_list = []
             precision_list = []
@@ -149,9 +148,6 @@ if __name__ == '__main__':
             ndcg_list = []
             confusion_list = []
             f1_list = []
-
-            # Use appropriate data source for each retriever
-            eval_data = natural_lang_data if name == 'ButlerAI' else data
 
             for index, row in eval_data.iterrows():
                 rule = row['Rule']
@@ -168,14 +164,14 @@ if __name__ == '__main__':
 
                 # Use appropriate queries for each retriever
                 for query in positive_examples:
-                    # Retrieve results
-                    retrieved = retriever.retrieve(query)
+                    # Get cached results and slice to current k
+                    retrieved = all_retrieved_results[f"{index}_{query}"][:k]
 
                     # Calculate metrics
                     recall = recall_at_k(retrieved, [rule], k)
                     precision = precision_at_k(retrieved, [rule], k)
                     mrr = mean_reciprocal_rank_at_k(retrieved, [rule], k)
-                    hit_rate_value = hit_rate(retrieved, [rule])
+                    hit_rate_value = hit_rate(retrieved, [rule], k)
                     ndcg_value = ndcg_at_k(retrieved, [rule], k)
                     confusion = confusion_rate(
                         retrieved, [rule], distractor_rules
@@ -273,13 +269,13 @@ if __name__ == '__main__':
     ]]
 
     # Save the reordered comparison table as a markdown file
-    results_df.to_markdown('approaches/comparison_table_en_synth.md', index=False)
+    results_df.to_markdown('approaches/comparison_table_combo_en_synth.md', index=False)
 
     # Call the function to add explanation of the composite score
-    write_composite_score_explanation('approaches/comparison_table_en_synth.md')
+    write_composite_score_explanation('approaches/comparison_table_combo_en_synth.md')
 
 # Inform the user where the results are saved
 print(
-    "The comparison table has been saved as a markdown file at "
-    "'approaches/comparison_table_en_synth.md'."
+    "The combo retriever comparison table has been saved as a markdown file at "
+    "'approaches/comparison_table_combo_en_synth.md'."
 )

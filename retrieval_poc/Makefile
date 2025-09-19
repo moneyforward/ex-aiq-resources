@@ -78,6 +78,25 @@ run-en-synth:
 run-ja:
 	poetry run python eval_ja.py
 
+run-combo-en-synth:
+	poetry run python eval_combo_en_synth.py
+
+run-combo-ja:
+	poetry run python eval_combo_ja.py
+
+run-combo-all: es-start
+	@echo "=========================================="
+	@echo "Running combo retrievers on English synthetic data..."
+	@echo "=========================================="
+	poetry run python eval_combo_en_synth.py
+	@echo "\n=========================================="
+	@echo "Running combo retrievers on Japanese real data..."
+	@echo "=========================================="
+	poetry run python eval_combo_ja.py
+	@echo "\n=========================================="
+	@echo "All combo retriever evaluations completed!"
+	@echo "=========================================="
+
 run-all: es-start
 	@echo "=========================================="
 	@echo "Running English synthetic evaluation..."
@@ -102,3 +121,7 @@ check-results:
 	@cat approaches/comparison_table_en_synth.md
 	@echo "\nJapanese real data results:"
 	@cat approaches/comparison_table_ja.md
+	@echo "\nCombo retrievers on English synthetic data:"
+	@cat approaches/comparison_table_combo_en_synth.md
+	@echo "\nCombo retrievers on Japanese real data:"
+	@cat approaches/comparison_table_combo_ja.md

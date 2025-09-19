@@ -1,11 +1,8 @@
 import pandas as pd
 import json
-from approaches.random.random_retriever import RandomRetriever
-from approaches.bm25.bm25_retriever import BM25Retriever
-from approaches.elasticsearch.elasticsearch_retriever import ElasticsearchRetriever
-from approaches.protovec.protovec_retriever import ProtovecRetriever
-from approaches.dense.dense_retriever import DenseRetriever
-from approaches.rag.text_to_sql import TextToSQLRetriever
+from approaches.combo.dense_bm25.dense_bm25_retriever import DenseBM25Retriever
+from approaches.combo.dense_text2sql.dense_text2sql_retriever import DenseText2SQLRetriever
+from approaches.combo.dense_text2sql_bm25.dense_text2sql_bm25_retriever import DenseText2SQLBM25Retriever
 import random
 import numpy as np
 from approaches.markdown_writer import write_composite_score_explanation
@@ -99,17 +96,11 @@ print(f"Converted data shape: {data.shape}")
 # Set pandas display options to show all columns
 pd.set_option('display.max_columns', None)
 
-# Define retriever configurations
-retriever_configs = {
-    'BM25Okapi': {'version': 'BM25Okapi', 'k1': 1.2, 'b': 0.75},
-    'BM25L': {'version': 'BM25L', 'k1': 1.2, 'b': 0.75},
-    'BM25Plus': {'version': 'BM25Plus', 'k1': 1.2, 'b': 0.75},
-    'Elasticsearch': {'es_host': 'localhost', 'es_port': 9200,
-                      'index_name': 'expense_rules_ja'},
-    'Protovec': {},
-    'Random': {},
-    'Dense Retriever': {'version': 'dense_retriever'},
-    'Text2SQL': {}
+# Define combo retriever configurations
+combo_retriever_configs = {
+    'Dense+BM25': {'num_queries': 4},
+    'Dense+Text2SQL': {'num_queries': 4},
+    'Dense+Text2SQL+BM25': {'num_queries': 4},
 }
 
 # Define evaluation metrics (same as original eval.py)
@@ -142,8 +133,8 @@ def ndcg_at_k(retrieved, relevant, k):
     ndcg = dcg / idcg if idcg > 0 else 0
     return min(ndcg, 1.0)
 
-def hit_rate(retrieved, relevant):
-    return 1 if retrieved and retrieved[0] in relevant else 0
+def hit_rate(retrieved, relevant, k):
+    return 1 if any(item in relevant for item in retrieved[:k]) else 0
 
 def confusion_rate(retrieved, relevant, distractors):
     if not retrieved:
@@ -158,11 +149,12 @@ def f1_score(recall, precision):
 # Main evaluation loop
 if __name__ == '__main__':
     print("=" * 60)
-    print("EVALUATING RETRIEVERS ON JSON EXPENSE DATASET")
+    print("EVALUATING COMBO RETRIEVERS ON JSON EXPENSE DATASET")
     print("=" * 60)
 
     # Define k values to evaluate
     k_values = [1, 3]
+    max_k = max(k_values)  # Optimize: run with max k and slice results
 
     # Initialize a DataFrame to store the results
     results_df = pd.DataFrame(columns=[
@@ -170,43 +162,36 @@ if __name__ == '__main__':
         'Average MRR', 'Average Hit Rate', 'Average nDCG', 'Average Confusion Rate'
     ])
 
-    # Iterate through each retriever and evaluate
-    for name, config in retriever_configs.items():
-        print(f'\nEvaluating {name} Retriever on JSON dataset')
+    # Iterate through each combo retriever and evaluate
+    for name, config in combo_retriever_configs.items():
+        print(f'\nEvaluating {name} Combo Retriever on JSON dataset')
         print("-" * 40)
 
+        # Initialize retriever with max k value for optimization
+        if name == 'Dense+BM25':
+            retriever = DenseBM25Retriever(rule_space_data, max_k, num_queries=config['num_queries'])
+        elif name == 'Dense+Text2SQL':
+            retriever = DenseText2SQLRetriever(rule_space_data, max_k, num_queries=config['num_queries'])
+        elif name == 'Dense+Text2SQL+BM25':
+            retriever = DenseText2SQLBM25Retriever(rule_space_data, max_k, num_queries=config['num_queries'])
+
+        # Store results for all k values to avoid recomputation
+        all_retrieved_results = {}
+
+        # Evaluate each expense and cache results
+        for index, row in data.iterrows():
+            rule = row['Rule']
+            query = row['query']
+            json_query = row['json_query']
+            distractor_rules = row['Distractor Rules']
+
+            # Use natural language query for combo retrievers
+            retrieved = retriever.retrieve(query)
+            all_retrieved_results[f"{index}_{query}"] = retrieved
+
+        # Now evaluate for each k value using the cached results
         for k in k_values:
             print(f'\nEvaluating at k={k}')
-
-            # Initialize retriever with correct size for this k value
-            # Use the full rule space (64 rules) for retrieval, not just the JSON data
-            if name == 'Random':
-                retriever = RandomRetriever(rule_space_data, k)
-            elif name == 'Dense Retriever':
-                retriever = DenseRetriever(rule_space_data, k)
-            elif name == 'Text2SQL':
-                print('Text2SQL selected')
-                retriever = TextToSQLRetriever(rule_space_data, k)
-            elif name == 'Elasticsearch':
-                retriever = ElasticsearchRetriever(
-                    rule_space_data, k,
-                    rule_column='Rule',
-                    description_column='経費科目名称\n（クラウド経費に登録されている名称）',
-                    category_column='勘定科目',
-                    rule_id_column='Rule',
-                    es_host=config['es_host'],
-                    es_port=config['es_port'],
-                    index_name=config['index_name']
-                )
-            elif name == 'Protovec':
-                retriever = ProtovecRetriever(rule_space_data, k)
-            else:
-                retriever = BM25Retriever(
-                    rule_space_data, k,
-                    version=config['version'],
-                    k1=config['k1'],
-                    b=config['b']
-                )
 
             # Initialize lists to store metrics
             recall_list = []
@@ -217,26 +202,21 @@ if __name__ == '__main__':
             confusion_list = []
             f1_list = []
 
-            # Evaluate each expense
+            # Evaluate each expense using cached results
             for index, row in data.iterrows():
                 rule = row['Rule']
                 query = row['query']
                 json_query = row['json_query']
                 distractor_rules = row['Distractor Rules']
 
-                # Use appropriate query for each retriever
-                if name == 'Protovec':
-                    # Use JSON query for protovec retriever
-                    retrieved = retriever.retrieve(json_query)
-                else:
-                    # Use natural language query for other retrievers
-                    retrieved = retriever.retrieve(query)
+                # Get cached results and slice to current k
+                retrieved = all_retrieved_results[f"{index}_{query}"][:k]
 
                 # Calculate metrics
                 recall = recall_at_k(retrieved, [rule], k)
                 precision = precision_at_k(retrieved, [rule], k)
                 mrr = mean_reciprocal_rank_at_k(retrieved, [rule], k)
-                hit_rate_value = hit_rate(retrieved, [rule])
+                hit_rate_value = hit_rate(retrieved, [rule], k)
                 ndcg_value = ndcg_at_k(retrieved, [rule], k)
                 confusion = confusion_rate(retrieved, [rule], distractor_rules)
                 f1 = f1_score(recall, precision)
@@ -334,13 +314,13 @@ if __name__ == '__main__':
     ]]
 
     # Save the comparison table as a markdown file
-    output_file = 'approaches/comparison_table_ja.md'
+    output_file = 'approaches/comparison_table_combo_ja.md'
     results_df.to_markdown(output_file, index=False)
 
     # Call the function to add explanation of the composite score
     write_composite_score_explanation(output_file)
 
-    print(f"\nThe Japanese dataset comparison table has been saved as "
+    print(f"\nThe combo retriever Japanese dataset comparison table has been saved as "
           f"'{output_file}'")
     print(f"Dataset summary: {len(data)} expenses, "
           f"{len(ground_truth_df['rule_id'].unique())} unique rules")

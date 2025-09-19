@@ -18,6 +18,7 @@ AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4.1-mini
 
 ## Approaches
 
+### Individual Retrievers
 • **BM25Okapi**: Classic BM25 algorithm for text similarity matching
 • **BM25L**: BM25 variant with length normalization improvements
 • **BM25Plus**: BM25 variant with better term frequency handling
@@ -25,8 +26,13 @@ AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4.1-mini
 • **Protovec**: Prototype network using sentence transformers for rule classification
 • **ButlerAI**: AI-powered classification using external API service (disabled due to idev instability)
 • **Random**: Baseline random retrieval for comparison
-• **Dense**: Dense vector embeddings (not implemented)
-• **RAG**: Retrieval-Augmented Generation (not implemented)
+• **Dense**: Dense vector embeddings using sentence transformers
+• **Text2SQL**: Retrieval-Augmented Generation using SQL generation for structured reasoning
+
+### Combination Retrievers
+• **Dense+BM25**: Combines semantic understanding (Dense) with keyword matching (BM25) using reciprocal rerank fusion
+• **Dense+Text2SQL**: Combines semantic understanding (Dense) with structured reasoning (Text2SQL) using reciprocal rerank fusion
+• **Dense+Text2SQL+BM25**: Combines all three approaches (Dense, Text2SQL, BM25) using reciprocal rerank fusion for maximum coverage
 
 ## Datasets
 
@@ -56,6 +62,15 @@ make run-en-synth
 
 # Japanese real data only  
 make run-ja
+
+# Combo retrievers on English synthetic data
+make run-combo-en-synth
+
+# Combo retrievers on Japanese real data
+make run-combo-ja
+
+# All combo retriever evaluations
+make run-combo-all
 ```
 
 ### Elasticsearch Management
@@ -94,5 +109,10 @@ For detailed setup instructions, see `ELASTICSEARCH_SETUP.md`.
 
 ## Results
 
+### Individual Retriever Results
 - English synthetic results: `approaches/comparison_table_en_synth.md`
 - Japanese real data results: `approaches/comparison_table_ja.md`
+
+### Combination Retriever Results
+- Combo retrievers on English synthetic data: `approaches/comparison_table_combo_en_synth.md`
+- Combo retrievers on Japanese real data: `approaches/comparison_table_combo_ja.md`
